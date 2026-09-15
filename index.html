@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Numérico | Símbolos Dinámicos</title>
+
+    <!-- Enlace dual añadido para la edición independiente del CSS y Spring Boot -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<header>
+    <div class="logo-title">Portal Numérico</div>
+    <input type="text" class="search-box" id="buscador" placeholder="Buscar..." onkeyup="filtrarContenido()">
+    <ul class="nav-links">
+        <li><a href="javascript:void(0);" onclick="cambiarSeccion('resolver', this)" class="active-link">Resolver</a></li>
+        <li><a href="javascript:void(0);" onclick="cambiarSeccion('teoria', this)">Teoría / Apuntes</a></li>
+        <li><a href="javascript:void(0);" onclick="cambiarSeccion('redes', this)">Redes</a></li>
+    </ul>
+</header>
+
+<div class="main-container">
+
+    <!-- RESOLVER -->
+    <div id="seccion-resolver" class="container section-block active">
+        <h1>Método de Bisección</h1>
+        <div class="subtitle">Análisis de Procedimiento y Raíces</div>
+
+        <form id="form-biseccion" onsubmit="ejecutarBiseccion(event)">
+            <div class="form-group">
+                <label for="funcion">Función f(x)</label>
+                <input type="text" id="funcion" name="funcion" placeholder="Ej. x*x*x - x - 2" required>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="a">Intervalo (a)</label>
+                    <input type="number" step="any" id="a" name="a" placeholder="Ej. 1" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="b">Intervalo (b)</label>
+                    <input type="number" step="any" id="b" name="b" placeholder="Ej. 2" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="criterio">Criterio de Paro</label>
+                <select id="criterio" name="criterio" onchange="mostrarCampoCriterio()">
+                    <option value="tolerancia">Tolerancia</option>
+                    <option value="error">Porcentaje de Error Aproximado (Ea %)</option>
+                    <option value="iteraciones">Número Exacto de Iteraciones</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="grupo-valor-criterio">
+                <label id="label-criterio" for="valorCriterio">Valor de Tolerancia</label>
+                <input type="number" step="any" id="valorCriterio" name="valorCriterio" placeholder="Ej. 0.001" required>
+            </div>
+
+            <button type="submit">Calcular Procedimiento</button>
+        </form>
+
+        <div id="error-box" style="margin-top: 20px; color: #ff4d4d; text-align: center; display: none;">
+            <p id="error-text"></p>
+        </div>
+
+        <div id="resultado-container" style="margin-top: 20px; display: none;">
+            <h3>Tabla de Procedimiento</h3>
+            <table class="procedure-table">
+                <thead>
+                <tr>
+                    <th>Iter</th>
+                    <th>a</th>
+                    <th>b</th>
+                    <th>x_m</th>
+                    <th>f(x_m)</th>
+                    <th>Ea (%)</th>
+                </tr>
+                </thead>
+                <tbody id="tabla-cuerpo">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TEORÍA / APUNTES -->
+    <div id="seccion-teoria" class="container section-block">
+        <h1>Apuntes de Equipo</h1>
+        <div class="subtitle">Subido y editado por colaboradores</div>
+
+        <div class="apuntes-index-bar">
+            <span style="font-size: 0.75rem; color: var(--text-white); text-transform: uppercase; font-weight: bold; align-self: center;">Índice:</span>
+            <a href="#tema-biseccion">1. Bisección</a>
+            <a href="#tema-bolzano">2. Teorema de Bolzano</a>
+        </div>
+
+        <form id="form-apunte" style="margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="margin-bottom: 10px; color: var(--text-white);">+ Agregar nuevo apunte</h4>
+            <div class="form-group">
+                <input type="text" name="titulo" placeholder="Título del tema (ej. Teorema de Bolzano)" required>
+            </div>
+            <div class="form-group">
+                <textarea name="contenido" rows="3" placeholder="Escribe la teoría, fórmulas o notas..." required></textarea>
+            </div>
+            <button type="submit" style="background: transparent; border: 1px solid var(--text-white); color: var(--text-white);">Publicar Apunte</button>
+        </form>
+
+        <div id="lista-apuntes">
+            <div id="apuntes-remotos"></div>
+            <div class="apunte-card" id="tema-biseccion">
+                <h4>Método de Bisección - Definición</h4>
+                <p>Se fundamenta en el teorema de Bolzano. Si una función es continua en [a,b] y f(a)f(b) < 0, existe al menos una raíz.</p>
+            </div>
+            <div class="apunte-card" id="tema-bolzano">
+                <h4>Teorema de Bolzano</h4>
+                <p>Sea f una función continua en un intervalo cerrado [a, b]. Si f(a) y f(b) tienen signos opuestos, entonces existe al menos un valor c en (a, b) tal que f(c) = 0.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- REDES -->
+    <div id="seccion-redes" class="container section-block">
+        <h1>Redes Sociales</h1>
+        <div class="subtitle">Contacto del equipo</div>
+        <p>Repositorio oficial del proyecto de Métodos Numéricos.</p>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+    function cambiarSeccion(seccion, elemento) {
+        document.querySelectorAll('.section-block').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active-link'));
+
+        document.getElementById('seccion-' + seccion).classList.add('active');
+        if(elemento) elemento.classList.add('active-link');
+
+        regenerateSymbols();
+    }
+
+    function mostrarCampoCriterio() {
+        const criterio = document.getElementById('criterio').value;
+        const label = document.getElementById('label-criterio');
+        const input = document.getElementById('valorCriterio');
+
+        if (criterio === 'tolerancia') {
+            label.innerText = "Valor de Tolerancia";
+            input.placeholder = "0.0001";
+        } else if (criterio === 'error') {
+            label.innerText = "Porcentaje de Error Máximo Permitido (%)";
+            input.placeholder = "1.0 o 0.5";
+        } else if (criterio === 'iteraciones') {
+            label.innerText = "Número Exacto de Iteraciones";
+            input.placeholder = "10 o 15";
+        }
+    }
+
+    function filtrarContenido() {
+        const q = document.getElementById('buscador').value.toLowerCase().trim();
+        document.querySelectorAll('.apunte-card').forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    // --- LÓGICA DE BISECCIÓN JS CLIENT-SIDE ---
+    function evaluarFuncion(expr, x) {
+        try {
+            let e = String(expr).trim().toLowerCase();
+            e = e.replace(/π/g, 'Math.PI')
+                 .replace(/\bpi\b/g, 'Math.PI')
+                 .replace(/\be\b/g, 'Math.E')
+                 .replace(/sqrt\s*\(/g, 'Math.sqrt(')
+                 .replace(/sin\s*\(/g, 'Math.sin(')
+                 .replace(/cos\s*\(/g, 'Math.cos(')
+                 .replace(/tan\s*\(/g, 'Math.tan(')
+                 .replace(/log\s*\(/g, 'Math.log10(')
+                 .replace(/ln\s*\(/g, 'Math.log(')
+                 .replace(/abs\s*\(/g, 'Math.abs(')
+                 .replace(/exp\s*\(/g, 'Math.exp(')
+                 .replace(/\^/g, '**')
+                 .replace(/\bx\b/g, `(${x})`)
+                 .replace(/(\d|\))\s*(?=\()/g, '$1*')
+                 .replace(/(\d|\))\s+(?=\()/g, '$1*')
+                 .replace(/(\d|\))\s+(?=Math\.)/g, '$1*');
+            // Allow only characters/tokens used by mathematical expressions.
+            if (!/^[0-9+\-*/%().,\sA-Za-z_]+$/.test(e)) return NaN;
+            if (/\b(?:constructor|prototype|window|document|globalThis|Function|eval|fetch|localStorage|sessionStorage|import)\b/.test(e)) return NaN;
+            return Function('"use strict"; return (' + e + ')')();
+        } catch (err) { return NaN; }
+    }
+
+    function ejecutarBiseccion(event) {
+        event.preventDefault();
+
+        const expr = document.getElementById('funcion').value;
+        let a = parseFloat(document.getElementById('a').value);
+        let b = parseFloat(document.getElementById('b').value);
+        const criterio = document.getElementById('criterio').value;
+        const valorCriterio = parseFloat(document.getElementById('valorCriterio').value);
+
+        const errorBox = document.getElementById('error-box');
+        const errorText = document.getElementById('error-text');
+        const resContainer = document.getElementById('resultado-container');
+        const tbody = document.getElementById('tabla-cuerpo');
+
+        errorBox.style.display = 'none';
+        resContainer.style.display = 'none';
+        tbody.innerHTML = '';
+
+        if (!Number.isFinite(a) || !Number.isFinite(b) || a >= b) {
+            errorText.innerText = 'Error: El intervalo debe cumplir a < b y contener números válidos.';
+            errorBox.style.display = 'block'; return;
+        }
+        if (!Number.isFinite(valorCriterio) || valorCriterio <= 0) {
+            errorText.innerText = 'Error: El criterio de paro debe ser mayor que 0.';
+            errorBox.style.display = 'block'; return;
+        }
+
+        let fa = evaluarFuncion(expr, a);
+        let fb = evaluarFuncion(expr, b);
+        if (!Number.isFinite(fa) || !Number.isFinite(fb)) {
+            errorText.innerText = 'Error: Revisa la sintaxis de tu función f(x).';
+            errorBox.style.display = 'block'; return;
+        }
+        if (fa === 0 || fb === 0) {
+            const root = fa === 0 ? a : b;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>0</td><td>${a}</td><td>${b}</td><td>${root.toFixed(4)}</td><td>0.0000</td><td>--</td>`;
+            tbody.appendChild(tr); resContainer.style.display='block'; return;
+        }
+        if (fa * fb > 0) {
+            errorText.innerText = 'Error: f(a) y f(b) deben tener signos opuestos (Teorema de Bolzano).';
+            errorBox.style.display = 'block'; return;
+        }
+
+        let x_m_anterior = null;
+        const maxIter = criterio === 'iteraciones' ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
+        let n = 1;
+        while (n <= maxIter) {
+            const x_m = (a + b) / 2;
+            const fx_m = evaluarFuncion(expr, x_m);
+            if (!Number.isFinite(fx_m)) {
+                errorText.innerText = 'Error: La función produjo un valor no válido durante el cálculo.';
+                errorBox.style.display = 'block'; return;
+            }
+            const ea = x_m_anterior === null ? null : Math.abs((x_m - x_m_anterior) / x_m) * 100;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${n}</td><td>${a.toFixed(4)}</td><td>${b.toFixed(4)}</td><td>${x_m.toFixed(4)}</td><td>${fx_m.toFixed(4)}</td><td>${ea === null ? '--' : ea.toFixed(4) + '%'}</td>`;
+            tbody.appendChild(tr);
+
+            if (criterio === 'iteraciones' && n >= maxIter) break;
+            if (criterio === 'tolerancia' && Math.abs(fx_m) <= valorCriterio) break;
+            if (criterio === 'error' && ea !== null && ea <= valorCriterio) break;
+
+            if (fa * fx_m < 0) { b = x_m; fb = fx_m; }
+            else { a = x_m; fa = fx_m; }
+            x_m_anterior = x_m;
+            n++;
+        }
+        resContainer.style.display = 'block';
+    }
+
+    // --- APUNTES COMPARTIDOS (Supabase) ---
+    // Las credenciales se colocan en supabase-config.js, que no debe contener claves secretas.
+    async function cargarApuntesRemotos() {
+        if (!window.supabaseClient) return;
+        const { data, error } = await window.supabaseClient
+            .from('apuntes')
+            .select('id,titulo,contenido,created_at')
+            .order('created_at', { ascending: false });
+        if (error) { console.error('No se pudieron cargar los apuntes:', error); return; }
+        const cont = document.getElementById('apuntes-remotos');
+        cont.innerHTML = '';
+        data.forEach(apunte => {
+            const card = document.createElement('div');
+            card.className = 'apunte-card apunte-remoto';
+            card.dataset.id = apunte.id;
+            const fecha = new Date(apunte.created_at).toLocaleString('es-MX');
+            card.innerHTML = `<h4></h4><p></p><small style="color:var(--text-muted);display:block;margin-top:8px">Publicado: ${fecha}</small>`;
+            card.querySelector('h4').textContent = apunte.titulo;
+            card.querySelector('p').textContent = apunte.contenido;
+            cont.appendChild(card);
+        });
+        filtrarContenido();
+    }
+
+    async function publicarApunte(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const titulo = form.titulo.value.trim();
+        const contenido = form.contenido.value.trim();
+        if (!titulo || !contenido) return;
+        if (!window.supabaseClient) {
+            alert('La base de datos compartida todavía no está configurada.');
+            return;
+        }
+        const boton = form.querySelector('button');
+        boton.disabled = true;
+        boton.textContent = 'Publicando...';
+        const { error } = await window.supabaseClient.from('apuntes').insert({titulo, contenido});
+        boton.disabled = false;
+        boton.textContent = 'Publicar Apunte';
+        if (error) { console.error(error); alert('No se pudo publicar el apunte. Revisa la configuración de la base de datos.'); return; }
+        form.reset();
+        await cargarApuntesRemotos();
+    }
+
+    document.getElementById('form-apunte')?.addEventListener('submit', publicarApunte);
+
+    // --- ANIMACIÓN DE PARTÍCULAS, ESTRELLAS Y SÍMBOLOS FLOTANTES ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let symbolParticles = [];
+    let backgroundStars = [];
+
+    const symbolsList = ['+', '-', '×', '÷', '∑', '∫', 'π', '√', 'lim', 'f(x)', 'Δ'];
+    const colors = ['#ffffff', '#00f0ff', '#bd00ff', '#ff007b', '#7000ff'];
+
+    let mouse = { x: null, y: null, radius: 130 };
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseout', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initBackgroundStars();
+        initSymbolParticles();
+    }
+    window.addEventListener('resize', resize);
+
+    class Star {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.4;
+            this.vy = (Math.random() - 0.5) * 0.4;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.alpha = Math.random() * 0.4 + 0.1;
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+            if (mouse.x !== null) {
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < mouse.radius) {
+                    let angle = Math.atan2(dy, dx);
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x -= Math.cos(angle) * force * 4;
+                    this.y -= Math.sin(angle) * force * 4;
+                }
+            }
+        }
+
+        draw() {
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initBackgroundStars() {
+        backgroundStars = [];
+        const count = (canvas.width * canvas.height) / 10000;
+        for (let i = 0; i < count; i++) {
+            backgroundStars.push(new Star());
+        }
+    }
+
+    function getSymbolPoints(symbolText) {
+        const offScreen = document.createElement('canvas');
+        const offCtx = offScreen.getContext('2d');
+        offScreen.width = 120;
+        offScreen.height = 120;
+
+        offCtx.font = 'bold 65px sans-serif';
+        offCtx.fillStyle = '#ffffff';
+        offCtx.textAlign = 'center';
+        offCtx.textBaseline = 'middle';
+        offCtx.fillText(symbolText, 60, 60);
+
+        const imgData = offCtx.getImageData(0, 0, 120, 120);
+        const points = [];
+        const step = 3;
+
+        for (let y = 0; y < 120; y += step) {
+            for (let x = 0; x < 120; x += step) {
+                const index = (y * 120 + x) * 4;
+                if (imgData.data[index + 3] > 128) {
+                    points.push({ x: x - 60, y: y - 60 });
+                }
+            }
+        }
+        return points;
+    }
+
+    class SymbolParticle {
+        constructor(baseX, baseY, relX, relY, color, symbolGroup) {
+            this.baseX = baseX;
+            this.baseY = baseY;
+            this.relX = relX;
+            this.relY = relY;
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = 0;
+            this.vy = 0;
+            this.size = Math.random() * 1.5 + 0.7;
+            this.color = color;
+            this.friction = 0.86;
+            this.spring = 0.04;
+            this.group = symbolGroup;
+        }
+
+        update(globalTime) {
+            let floatOffsetX = Math.cos(globalTime * 0.0015 + this.group.offsetSeed) * 15;
+            let floatOffsetY = Math.sin(globalTime * 0.002 + this.group.offsetSeed) * 15;
+
+            let targetX = this.baseX + this.relX + floatOffsetX;
+            let targetY = this.baseY + this.relY + floatOffsetY;
+
+            let dx = targetX - this.x;
+            let dy = targetY - this.y;
+
+            this.vx = (this.vx + dx * this.spring) * this.friction;
+            this.vy = (this.vy + dy * this.spring) * this.friction;
+
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (mouse.x !== null) {
+                let mdx = mouse.x - this.x;
+                let mdy = mouse.y - this.y;
+                let dist = Math.hypot(mdx, mdy);
+                if (dist < mouse.radius) {
+                    let angle = Math.atan2(mdy, mdx);
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x -= Math.cos(angle) * force * 16;
+                    this.y -= Math.sin(angle) * force * 16;
+                }
+            }
+        }
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initSymbolParticles() {
+        symbolParticles = [];
+        const totalSymbols = 14;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        for (let i = 0; i < totalSymbols; i++) {
+            const randomSymbol = symbolsList[Math.floor(Math.random() * symbolsList.length)];
+            const symbolColor = colors[Math.floor(Math.random() * colors.length)];
+
+            const angle = (i / totalSymbols) * Math.PI * 2 + (Math.random() * 0.3);
+            const distance = 360 + Math.random() * 220;
+
+            const baseX = centerX + Math.cos(angle) * distance;
+            const baseY = centerY + Math.sin(angle) * (distance * 0.75);
+
+            const symbolGroup = { offsetSeed: Math.random() * 100 };
+            const points = getSymbolPoints(randomSymbol);
+
+            points.forEach(pt => {
+                symbolParticles.push(new SymbolParticle(baseX, baseY, pt.x, pt.y, symbolColor, symbolGroup));
+            });
+        }
+    }
+
+    function regenerateSymbols() {
+        initSymbolParticles();
+    }
+
+    function animate(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < backgroundStars.length; i++) {
+            backgroundStars[i].update();
+            backgroundStars[i].draw();
+
+            for (let j = i + 1; j < backgroundStars.length; j++) {
+                let dist = Math.hypot(backgroundStars[i].x - backgroundStars[j].x, backgroundStars[i].y - backgroundStars[j].y);
+                if (dist < 85) {
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.08 * (1 - dist / 85)})`;
+                    ctx.lineWidth = 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(backgroundStars[i].x, backgroundStars[i].y);
+                    ctx.lineTo(backgroundStars[j].x, backgroundStars[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        symbolParticles.forEach(p => {
+            p.update(timestamp);
+            p.draw();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    resize();
+    requestAnimationFrame(animate);
+    cargarApuntesRemotos();
+</script>
+</body>
+</html>
