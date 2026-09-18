@@ -73,8 +73,7 @@ async function cargarApuntesRemotos() {
                     const objeto = document.createElement('object');
                     objeto.data = url;
                     objeto.type = 'application/pdf';
-                    objeto.width = '100%';
-                    objeto.height = '500';
+                    objeto.className = 'visor-pdf';
                     objeto.style.cssText = 'border-radius: 4px; background: #222;';
                     // Fallback si el navegador no soporta el visor integrado
                     const aviso = document.createElement('p');
@@ -93,8 +92,8 @@ async function cargarApuntesRemotos() {
                     try {
                         const response = await fetch(url);
                         const text = await response.text();
-                        // Traducir Markdown a HTML (sin scripts)
-                        const limpio = marked.parse(text).replace(/<script[\s\S]*?<\/script>/gi, '');
+                        // Traducir Markdown a HTML y sanitizar contra XSS
+                        const limpio = DOMPurify.sanitize(marked.parse(text));
                         visor.innerHTML = limpio;
                         // Pasar las matematicas por KaTeX
                         if (typeof renderizarMath === 'function') {
@@ -209,9 +208,36 @@ async function publicarApunte(event) {
     await cargarApuntesRemotos();
 }
 
+// --- RENDERIZADO KATEX ---
+
+// Renderiza formulas LaTeX con KaTeX en cualquier parte del texto
+function renderizarMath(elemento) {
+    let html = elemento.innerHTML;
+
+    // Funcion auxiliar para revertir los caracteres seguros a matematicos
+    const decodificarMath = (texto) => {
+        return texto.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    };
+
+    // Renderizar display math (formulas centradas entre $$ ... $$)
+    html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+        try { return katex.renderToString(decodificarMath(math), { displayMode: true, throwOnError: false }); }
+        catch (e) { return match; }
+    });
+
+    // Renderizar inline math (formulas en linea entre $ ... $)
+    html = html.replace(/\$([\s\S]*?)\$/g, (match, math) => {
+        try { return katex.renderToString(decodificarMath(math), { displayMode: false, throwOnError: false }); }
+        catch (e) { return match; }
+    });
+
+    elemento.innerHTML = html;
+}
+
 // Exponer globalmente para usar en index.html
 window.cargarApuntesRemotos = cargarApuntesRemotos;
 window.publicarApunte = publicarApunte;
+window.renderizarMath = renderizarMath;
 
 // --- FILTRAR CONTENIDO (compatibilidad) ---
 

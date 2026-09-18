@@ -1,6 +1,6 @@
 # Portal Numérico - versión GitHub Pages
 
-Esta versión es estática: no necesita ejecutar Spring Boot ni tener tu laptop encendida. GitHub Pages sirve `index.html`, `styles.css` y JavaScript.
+Esta versión es estática: no necesita ejecutar Spring Boot ni tener tu laptop encendida. GitHub Pages sirve `index.html`, `calculadora.html`, `apuntes.html`, `css/` y `js/`.
 
 ## 1. Base de datos compartida
 
@@ -8,10 +8,10 @@ La página está preparada para Supabase (PostgreSQL). Supabase se conecta desde
 
 1. Crea un proyecto en Supabase.
 2. Abre SQL Editor.
-3. Ejecuta `supabase.sql`.
+3. Ejecuta `sql/supabase.sql` (crea la tabla `apuntes` y el bucket `archivos_apuntes`).
 4. Ve a Project Settings / API y copia la URL del proyecto y la Publishable/Anon key.
-5. Abre `supabase-config.js` y reemplaza los valores de ejemplo.
-6. Sube `index.html`, `styles.css`, `supabase-config.js` y `supabase.sql` a GitHub.
+5. Abre `js/supabase-config.js` y reemplaza los valores de ejemplo.
+6. Sube todo el proyecto a GitHub (`index.html` es la pagina raiz).
 
 ## 2. GitHub Pages
 
@@ -19,12 +19,13 @@ En el repositorio: Settings -> Pages -> Deploy from a branch -> `main` -> `/ (ro
 
 ## 3. Qué funciona sin servidor
 
-- Resolución de bisección en el navegador.
+- Resolución de bisección en el navegador (`calculadora.html`).
 - Tabla de iteraciones.
-- Navegación Resolver / Teoría / Redes.
+- Apuntes colaborativos con formulas KaTeX y adjuntos PDF/Markdown (`apuntes.html`).
 - Buscador de apuntes.
 - Fondo animado.
 - Apuntes compartidos mediante Supabase.
+- Diseno responsive para celular.
 
 ## 4. Seguridad
 
