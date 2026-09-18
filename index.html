@@ -2,16 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal Numérico | Bienvenido</title>
 
-    <!-- mathjs UMD para navegadores (expone global math) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-
-    <!-- KaTEX para renderizado de fórmulas matemáticas -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-
-    <!-- Enlace dual añadido para la edición independiente del CSS y Spring Boot -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -26,7 +19,7 @@
 
     <div class="container" style="text-align: center; max-width: 800px;">
 
-        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #00f0ff, #bd00ff, #ff007b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        <h1 class="landing-title">
             Portal Numérico
         </h1>
         
@@ -34,17 +27,17 @@
             Plataforma educativa enfocada a la materia de <strong>Métodos Numéricos</strong>. Aquí encontrarás calculadoras interactivas, apuntes colaborativos y scripts para resolver ejercicios con distintos métodos numéricos.
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 2rem; text-align: left;">
+        <div class="landing-grid">
 
             <div class="apunte-card" style="padding: 25px; transition: transform 0.3s, box-shadow 0.3s;">
                 <h3 style="color: #00f0ff; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">🔢</span> Calculadoras
                 </h3>
                 <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
-                    Resuelve ejercicios paso a paso con el <strong>Método de Bisección</strong>. Ingresa tu función, define intervalos (o deja que el sistema los busque automáticamente) y obtén la tabla completa de iteraciones con criterios de paro configurables.
+                    Resuelve ejercicios paso a paso. Ingresa tu función, define intervalos (o deja que el sistema los busque automáticamente) y obtén la tabla completa de iteraciones con criterios de paro configurables.
                 </p>
-                <a href="app.html" style="display: inline-block; padding: 10px 20px; background: var(--text-white); color: var(--bg-black); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.3s;">
-                    Ir a la Calculadora →
+                <a href="calculadora.html" style="display: inline-block; padding: 10px 20px; background: var(--text-white); color: var(--bg-black); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.3s;">
+                    Calculadora →
                 </a>
             </div>
 
@@ -53,9 +46,9 @@
                     <span style="font-size: 1.5rem;">📚</span> Apuntes Colaborativos
                 </h3>
                 <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
-                    Accede a la sección de <strong>Apuntes</strong> donde el equipo sube definiciones, teoremas (como Bolzano), fórmulas y notas de clase. Organizado por temas con índice de navegación rápida.
+                    Accede a la sección de <strong>Apuntes</strong> donde el equipo sube definiciones, teoremas, fórmulas y notas de clase. Organizado por temas con índice de navegación rápida.
                 </p>
-                <a href="app.html#seccion-teoria" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
+                <a href="apuntes.html" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
                     Ver Apuntes →
                 </a>
             </div>
@@ -67,8 +60,8 @@
                 <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
                     Contacto del equipo y repositorio oficial del proyecto de Metodos Numericos. Revisa el codigo, reporta detalles y sigue las actualizaciones.
                 </p>
-                <a href="https://github.com/Luis000-creator/portal_numerico.git" target="_blank" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
-                    Ver en GitHub →
+                <a href="redes.html" target="_blank" rel="noopener" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
+                    Ver Redes →
                 </a>
             </div>
 
@@ -76,7 +69,7 @@
 
         <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem;">
             <p>Desarrollado como proyecto académico para Métodos Numéricos</p>
-            <p style="margin-top: 0.5rem;">Repositorio: <a href="https://github.com/Luis000-creator/portal_numerico.git" style="color: #00f0ff;" target="_blank">GitHub</a></p>
+            <p style="margin-top: 0.5rem;">Repositorio: <a href="https://github.com/Luis000-creator/portal_numerico.git" style="color: #00f0ff;" target="_blank" rel="noopener">GitHub</a></p>
         </div>
 
     </div>

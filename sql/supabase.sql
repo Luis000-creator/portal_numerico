@@ -57,6 +57,49 @@ with check (true);
 
 
 -- =========================================================
+-- 3. COLUMNA PARA ARCHIVO ADJUNTO (PDF / Markdown)
+-- =========================================================
+
+alter table public.apuntes
+add column if not exists archivo_url text;
+
+
+-- =========================================================
+-- 4. BUCKET DE STORAGE PARA ARCHIVOS DE APUNTES
+-- Bucket publico: los archivos se sirven por URL publica.
+-- =========================================================
+
+insert into storage.buckets (id, name, public)
+values ('archivos_apuntes', 'archivos_apuntes', true)
+on conflict (id) do nothing;
+
+
+-- =========================================================
+-- POLITICAS DE STORAGE
+-- Todos los visitantes pueden leer y subir archivos,
+-- igual que con los apuntes (portal colaborativo de clase).
+-- =========================================================
+
+drop policy if exists "Archivos publicos"
+on storage.objects;
+
+create policy "Archivos publicos"
+on storage.objects
+for select
+to anon, authenticated
+using (bucket_id = 'archivos_apuntes');
+
+drop policy if exists "Subir archivos"
+on storage.objects;
+
+create policy "Subir archivos"
+on storage.objects
+for insert
+to anon, authenticated
+with check (bucket_id = 'archivos_apuntes');
+
+
+-- =========================================================
 -- IMPORTANTE
 --
 -- NO damos permisos UPDATE ni DELETE públicamente.

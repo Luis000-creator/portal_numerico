@@ -1,24 +1,9 @@
 // ============================================================================
 // Portal Numérico - Bisección Module
 // ============================================================================
-// Contiene: evaluador de expresiones, lógica de método de bisección,
-// renderizado KaTEX y utilidades de navegación entre secciones
+// Contiene: evaluador de expresiones con mathjs y logica del metodo
+// de biseccion para calculadora.html
 // ============================================================================
-
-// --- CONFIGURACIÓN GLOBAL DE NAVEGACIÓN ---
-
-function cambiarSeccion(seccion, elemento) {
-    document.querySelectorAll('.section-block').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active-link'));
-
-    const target = document.getElementById('seccion-' + seccion);
-    if (target) target.classList.add('active');
-    if (elemento) elemento.classList.add('active-link');
-
-    if (typeof particleAnimation !== 'undefined' && particleAnimation) {
-        particleAnimation.regenerateSymbols();
-    }
-}
 
 function mostrarCampoCriterio() {
     const criterio = document.getElementById('criterio');
@@ -39,26 +24,16 @@ function mostrarCampoCriterio() {
     }
 }
 
-function filtrarContenido() {
-    const q = document.getElementById('buscador').value.toLowerCase().trim();
-    document.querySelectorAll('.apunte-card').forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
-}
-
 // Exponer globalmente
-window.cambiarSeccion = cambiarSeccion;
 window.mostrarCampoCriterio = mostrarCampoCriterio;
-window.filtrarContenido = filtrarContenido;
 
 // --- EVALUADOR DE EXPRESIONES MATEMÁTICAS ---
 
-// Usamos mathjs para evaluación segura en lugar de Function() + regexs frágiles
-// Carga esta librería desde index.html: <script src="https://cdn.jsdelivr.net/npm/mathjs@11.7.0/lib/es5/index.js"></script>
+// Usamos mathjs (CDN UMD en calculadora.html) para evaluacion segura.
+// mathjs maneja el simbolo '^', constantes y funciones de forma nativa.
 
 function evaluarFuncion(expr, x) {
     try {
-        // mathjs maneja el simbolo '^' de forma nativa
         const result = math.evaluate(expr, { x });
         return Number.isFinite(result) ? result : NaN;
     } catch (err) { return NaN; }
@@ -76,35 +51,9 @@ function buscarIntervaloAuto(expr) {
     return [0, 2];
 }
 
-// Exponer globalmente para uso en index.html
+// Exponer globalmente
 window.evaluarFuncion = evaluarFuncion;
 window.buscarIntervaloAuto = buscarIntervaloAuto;
-
-// --- RENDERIZADO KATEX ---
-
-// Renderiza formulas LaTeX con KaTeX en cualquier parte del texto
-function renderizarMath(elemento) {
-    let html = elemento.innerHTML;
-
-    // Funcion auxiliar para revertir los caracteres seguros a matematicos
-    const decodificarMath = (texto) => {
-        return texto.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-    };
-
-    // Renderizar display math (formulas centradas entre $$ ... $$)
-    html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
-        try { return katex.renderToString(decodificarMath(math), { displayMode: true, throwOnError: false }); }
-        catch (e) { return match; }
-    });
-
-    // Renderizar inline math (formulas en linea entre $ ... $)
-    html = html.replace(/\$([\s\S]*?)\$/g, (match, math) => {
-        try { return katex.renderToString(decodificarMath(math), { displayMode: false, throwOnError: false }); }
-        catch (e) { return match; }
-    });
-
-    elemento.innerHTML = html;
-}
 
 // --- LÓGICA DE BISECCIÓN CLIENT-SIDE ---
 
@@ -178,18 +127,3 @@ function ejecutarBiseccion(event) {
     }
     resContainer.style.display = 'block';
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Revisar si hay un hash en la URL (ej. #seccion-teoria)
-    const hash = window.location.hash;
-    if (hash) {
-        // Extraemos el nombre (ej. 'teoria')
-        const seccion = hash.replace('#seccion-', '');
-        // Buscamos el enlace en el menu de navegacion para ponerlo activo
-        const link = document.querySelector(`.nav-links a[onclick*="${seccion}"]`);
-
-        if (link || document.getElementById('seccion-' + seccion)) {
-            cambiarSeccion(seccion, link);
-        }
-    }
-});

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal Numérico | Calculadora Bisección</title>
+
+    <!-- mathjs UMD para navegadores (expone global math) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<header>
+    <div class="logo-title">Portal Numérico</div>
+    <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="calculadora.html" class="active-link">Resolver</a></li>
+        <li><a href="apuntes.html">Teoría / Apuntes</a></li>
+    </ul>
+</header>
+
+<div class="main-container">
+
+    <div class="container">
+        <h1>Método de Bisección</h1>
+        <div class="subtitle">Análisis de Procedimiento y Raíces</div>
+
+        <form id="form-biseccion" onsubmit="ejecutarBiseccion(event)">
+            <div class="form-group">
+                <label for="funcion">Función f(x)</label>
+                <input type="text" id="funcion" name="funcion" placeholder="Ej. x*x*x - x - 2" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label for="a">Intervalo (a)</label>
+                    <input type="number" step="any" id="a" name="a" placeholder="Ej. 1" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="b">Intervalo (b)</label>
+                    <input type="number" step="any" id="b" name="b" placeholder="Ej. 2" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="criterio">Criterio de Paro</label>
+                <select id="criterio" name="criterio" onchange="mostrarCampoCriterio()">
+                    <option value="tolerancia">Tolerancia</option>
+                    <option value="error">Porcentaje de Error Aproximado (Ea %)</option>
+                    <option value="iteraciones">Número Exacto de Iteraciones</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="grupo-valor-criterio">
+                <label id="label-criterio" for="valorCriterio">Valor de Tolerancia</label>
+                <input type="number" step="any" id="valorCriterio" name="valorCriterio" placeholder="Ej. 0.001" required>
+            </div>
+
+            <button type="submit">Calcular Procedimiento</button>
+        </form>
+
+        <div id="error-box" style="margin-top: 20px; color: #ff4d4d; text-align: center; display: none;">
+            <p id="error-text"></p>
+        </div>
+
+        <div id="resultado-container" style="margin-top: 20px; display: none;">
+            <h3>Tabla de Procedimiento</h3>
+            <div class="table-scroll">
+                <table class="procedure-table">
+                    <thead>
+                    <tr>
+                        <th>Iter</th>
+                        <th>a</th>
+                        <th>b</th>
+                        <th>x_m</th>
+                        <th>f(x_m)</th>
+                        <th>Ea (%)</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="js/biseccion.js"></script>
+<script src="js/canvas-animation.js"></script>
+</body>
+</html>
