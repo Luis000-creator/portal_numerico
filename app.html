@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
+    <!-- Lector de Markdown para visor integrado -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <!-- Enlace dual añadido para la edición independiente del CSS y Spring Boot -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -110,7 +113,14 @@
                 <input type="text" name="titulo" placeholder="Título del tema (ej. Teorema de Bolzano)" required>
             </div>
             <div class="form-group">
-                <textarea name="contenido" rows="3" placeholder="Escribe la teoría, fórmulas o notas..." required></textarea>
+                <textarea name="contenido" rows="3" placeholder="Escribe la teoría o descripción (Opcional)..."></textarea>
+            </div>
+            <div class="form-group">
+                <label style="margin-bottom: 8px;">Adjuntar PDF o Markdown (Opcional)</label>
+                <label for="archivo" class="file-upload-label">
+                    <span id="file-name-display">📁 Haz clic para seleccionar un archivo...</span>
+                </label>
+                <input type="file" id="archivo" name="archivo" accept=".pdf,.md" style="display: none;">
             </div>
             <button type="submit" style="background: transparent; border: 1px solid var(--text-white); color: var(--text-white);">Publicar Apunte</button>
         </form>
