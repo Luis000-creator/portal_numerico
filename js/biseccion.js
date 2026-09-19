@@ -55,16 +55,49 @@ function buscarIntervaloAuto(expr) {
 window.evaluarFuncion = evaluarFuncion;
 window.buscarIntervaloAuto = buscarIntervaloAuto;
 
+// Helpers de UI para errores
+function mostrarError(mensaje) {
+    const errorBox = document.getElementById('error-box');
+    const errorText = document.getElementById('error-text');
+    if (errorBox && errorText) {
+        errorText.innerText = mensaje;
+        errorBox.style.display = 'block';
+    }
+}
+
 // --- LÓGICA DE BISECCIÓN CLIENT-SIDE ---
 
 function ejecutarBiseccion(event) {
     event.preventDefault();
 
     const expr = document.getElementById('funcion').value;
-    let a = parseFloat(document.getElementById('a').value);
-    let b = parseFloat(document.getElementById('b').value);
     const criterio = document.getElementById('criterio').value;
-    const valorCriterio = parseFloat(document.getElementById('valorCriterio').value);
+
+    // 1. Evaluación de Fracciones para la Tolerancia
+    let valorCriterio;
+    try {
+        valorCriterio = math.evaluate(document.getElementById('valorCriterio').value);
+        valorCriterio = Number(valorCriterio);
+    } catch (e) {
+        mostrarError('El valor del criterio debe ser un número o una fracción válida (ej. 1/16).');
+        return;
+    }
+
+    // 2. Lógica de Intervalo Automático
+    let a_str = document.getElementById('a').value.trim();
+    let b_str = document.getElementById('b').value.trim();
+    let a, b;
+
+    if (a_str === '' || b_str === '') {
+        const autoInt = buscarIntervaloAuto(expr);
+        a = autoInt[0];
+        b = autoInt[1];
+        document.getElementById('a').value = a;
+        document.getElementById('b').value = b;
+    } else {
+        a = parseFloat(a_str);
+        b = parseFloat(b_str);
+    }
 
     const errorBox = document.getElementById('error-box');
     const errorText = document.getElementById('error-text');
@@ -127,3 +160,28 @@ function ejecutarBiseccion(event) {
     }
     resContainer.style.display = 'block';
 }
+
+window.ejecutarBiseccion = ejecutarBiseccion;
+window.mostrarError = mostrarError;
+
+// --- PREVISUALIZACIÓN EN VIVO CON KATEX ---
+document.addEventListener('DOMContentLoaded', () => {
+    const inputFuncion = document.getElementById('funcion');
+    if (inputFuncion) {
+        inputFuncion.addEventListener('input', function(e) {
+            const expr = e.target.value;
+            const preview = document.getElementById('preview-fx');
+            if (!preview) return;
+            if (!expr) {
+                preview.innerHTML = '';
+                return;
+            }
+            try {
+                const latex = math.parse(expr).toTex();
+                katex.render(`f(x) = ${latex}`, preview, { displayMode: true, throwOnError: false });
+            } catch (err) {
+                // Ignorar errores silenciosamente mientras el usuario sigue escribiendo
+            }
+        });
+    }
+});

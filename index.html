@@ -1,84 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Portal Numérico | Bienvenido</title>
 
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
 
-<canvas id="particle-canvas"></canvas>
+  <body>
+    <canvas id="particle-canvas"></canvas>
 
-<header>
-    <div class="logo-title">Portal Numérico</div>
-</header>
+    <header>
+      <div class="logo-title">Portal Numérico</div>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active-link">Inicio</a></li>
+        <li><a href="pages/calculadora.html">Calculadora</a></li>
+        <li><a href="pages/apuntes.html">Apuntes</a></li>
+        <li><a href="pages/social.html">Conócenos</a></li>
+      </ul>
+    </header>
 
-<div class="main-container">
+    <div class="main-container">
+      <div class="container container--landing">
+        <h1 class="landing-title">Portal Numérico</h1>
 
-    <div class="container" style="text-align: center; max-width: 800px;">
-
-        <h1 class="landing-title">
-            Portal Numérico
-        </h1>
-        
-        <div class="subtitle" style="font-size: 1.1rem; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Plataforma educativa enfocada a la materia de <strong>Métodos Numéricos</strong>. Aquí encontrarás calculadoras interactivas, apuntes colaborativos y scripts para resolver ejercicios con distintos métodos numéricos.
+        <div class="subtitle subtitle--landing">
+          Plataforma educativa enfocada a la materia de <strong>Métodos Numéricos</strong>. Aquí
+          encontrarás calculadoras interactivas y apuntes colaborativos para resolver ejercicios con
+          distintos métodos numéricos.
         </div>
 
-        <div class="landing-grid">
+        <div class="cards-grid">
+          <div class="apunte-card card-landing card-landing--cyan">
+            <h3 class="card-title card-title--cyan">
+              <i class="fa-solid fa-calculator" aria-hidden="true"></i> Calculadoras
+            </h3>
+            <p class="card-desc">
+              Ingresa tu función y obtén la tabla de iteraciones paso a paso, con intervalos
+              automáticos y criterios de paro configurables.
+            </p>
+            <a href="pages/calculadora.html" class="btn-outline">
+              Calculadora <i class="fa-solid fa-arrow-right btn-icon"></i>
+            </a>
+          </div>
 
-            <div class="apunte-card" style="padding: 25px; transition: transform 0.3s, box-shadow 0.3s;">
-                <h3 style="color: #00f0ff; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">🔢</span> Calculadoras
-                </h3>
-                <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
-                    Resuelve ejercicios paso a paso. Ingresa tu función, define intervalos (o deja que el sistema los busque automáticamente) y obtén la tabla completa de iteraciones con criterios de paro configurables.
-                </p>
-                <a href="calculadora.html" style="display: inline-block; padding: 10px 20px; background: var(--text-white); color: var(--bg-black); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.3s;">
-                    Calculadora →
-                </a>
-            </div>
+          <div class="apunte-card card-landing card-landing--violet">
+            <h3 class="card-title card-title--violet">
+              <i class="fa-solid fa-book-open" aria-hidden="true"></i> Apuntes
+            </h3>
+            <p class="card-desc">
+              Accede a la sección de <strong>Apuntes</strong> donde el equipo sube definiciones,
+              teoremas, fórmulas y notas de clase. Organizado por temas con índice de navegación
+              rápida.
+            </p>
+            <a href="pages/apuntes.html" class="btn-outline">
+              Ver Apuntes <i class="fa-solid fa-arrow-right btn-icon"></i>
+            </a>
+          </div>
 
-            <div class="apunte-card" style="padding: 25px; transition: transform 0.3s, box-shadow 0.3s;">
-                <h3 style="color: #bd00ff; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">📚</span> Apuntes Colaborativos
-                </h3>
-                <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
-                    Accede a la sección de <strong>Apuntes</strong> donde el equipo sube definiciones, teoremas, fórmulas y notas de clase. Organizado por temas con índice de navegación rápida.
-                </p>
-                <a href="apuntes.html" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
-                    Ver Apuntes →
-                </a>
-            </div>
-
-            <div class="apunte-card" style="padding: 25px; transition: transform 0.3s, box-shadow 0.3s;">
-                <h3 style="color: #ff007b; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">🌐</span> Redes
-                </h3>
-                <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
-                    Contacto del equipo y repositorio oficial del proyecto de Metodos Numericos. Revisa el codigo, reporta detalles y sigue las actualizaciones.
-                </p>
-                <a href="redes.html" target="_blank" rel="noopener" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--text-white); color: var(--text-white); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;">
-                    Ver Redes →
-                </a>
-            </div>
-
+          <div class="apunte-card card-landing card-landing--magenta">
+            <h3 class="card-title card-title--magenta">
+              <i class="fa-solid fa-users" aria-hidden="true"></i> Conócenos
+            </h3>
+            <p class="card-desc">
+              Conoce la misión y visión detrás del proyecto, explora nuestras redes sociales
+              oficiales y descubre a los integrantes del equipo encargado del proyecto.
+            </p>
+            <a href="pages/social.html" class="btn-outline">
+              Ver MÁS <i class="fa-solid fa-arrow-right btn-icon"></i>
+            </a>
+          </div>
         </div>
 
-        <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem;">
-            <p>Desarrollado como proyecto académico para Métodos Numéricos</p>
-            <p style="margin-top: 0.5rem;">Repositorio: <a href="https://github.com/Luis000-creator/portal_numerico.git" style="color: #00f0ff;" target="_blank" rel="noopener">GitHub</a></p>
+        <div class="footer-landing">
+          <p>Desarrollado como proyecto académico para Métodos Numéricos</p>
         </div>
-
+      </div>
     </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/canvas-animation.js"></script>
-
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/canvas-animation.js"></script>
+  </body>
 </html>
