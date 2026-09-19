@@ -65,23 +65,65 @@ function mostrarError(mensaje) {
     }
 }
 
-// --- LÓGICA DE BISECCIÓN CLIENT-SIDE ---
+// --- HELPERS COMPARTIDOS ENTRE MÉTODOS ---
 
-function ejecutarBiseccion(event) {
-    event.preventDefault();
-
-    const expr = document.getElementById('funcion').value;
+// Lee el criterio de paro y su valor (acepta fracciones como 1/16).
+// Muestra error y retorna null si el valor no es valido.
+function leerCriterio() {
     const criterio = document.getElementById('criterio').value;
-
-    // 1. Evaluación de Fracciones para la Tolerancia
-    let valorCriterio;
+    let valor;
     try {
-        valorCriterio = math.evaluate(document.getElementById('valorCriterio').value);
-        valorCriterio = Number(valorCriterio);
+        valor = math.evaluate(document.getElementById('valorCriterio').value);
+        valor = Number(valor);
     } catch (e) {
         mostrarError('El valor del criterio debe ser un número o una fracción válida (ej. 1/16).');
-        return;
+        return null;
     }
+    if (!Number.isFinite(valor) || valor <= 0) {
+        mostrarError('Error: El criterio de paro debe ser mayor que 0.');
+        return null;
+    }
+    return { criterio, valor };
+}
+
+// Limpia errores y tabla previa antes de un calculo
+function limpiarTabla() {
+    const errorBox = document.getElementById('error-box');
+    const resContainer = document.getElementById('resultado-container');
+    const tbody = document.getElementById('tabla-cuerpo');
+    if (errorBox) errorBox.style.display = 'none';
+    if (resContainer) resContainer.style.display = 'none';
+    if (tbody) tbody.innerHTML = '';
+}
+
+// Conecta un input de funcion con su previsualizacion KaTeX en vivo
+function cablearPreview(inputId, previewId, prefijo) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    if (!input || !preview) return;
+    input.addEventListener('input', function(e) {
+        const expr = e.target.value;
+        if (!expr) {
+            preview.innerHTML = '';
+            return;
+        }
+        try {
+            const latex = math.parse(expr).toTex();
+            katex.render(`${prefijo} = ${latex}`, preview, { displayMode: true, throwOnError: false });
+        } catch (err) {
+            // Ignorar errores silenciosamente mientras el usuario sigue escribiendo
+        }
+    });
+}
+
+// --- LÓGICA DE BISECCIÓN CLIENT-SIDE ---
+
+function calcularBiseccion() {
+    const expr = document.getElementById('funcion').value;
+
+    const crit = leerCriterio();
+    if (!crit) return;
+    const { criterio, valor: valorCriterio } = crit;
 
     // 2. Lógica de Intervalo Automático
     let a_str = document.getElementById('a').value.trim();
@@ -99,29 +141,19 @@ function ejecutarBiseccion(event) {
         b = parseFloat(b_str);
     }
 
-    const errorBox = document.getElementById('error-box');
-    const errorText = document.getElementById('error-text');
+    limpiarTabla();
     const resContainer = document.getElementById('resultado-container');
     const tbody = document.getElementById('tabla-cuerpo');
 
-    errorBox.style.display = 'none';
-    resContainer.style.display = 'none';
-    tbody.innerHTML = '';
-
     if (!Number.isFinite(a) || !Number.isFinite(b) || a >= b) {
-        errorText.innerText = 'Error: El intervalo debe cumplir a < b y contener números válidos.';
-        errorBox.style.display = 'block'; return;
+        mostrarError('Error: El intervalo debe cumplir a < b y contener números válidos.');
+        return;
     }
-    if (!Number.isFinite(valorCriterio) || valorCriterio <= 0) {
-        errorText.innerText = 'Error: El criterio de paro debe ser mayor que 0.';
-        errorBox.style.display = 'block'; return;
-    }
-
     let fa = evaluarFuncion(expr, a);
     let fb = evaluarFuncion(expr, b);
     if (!Number.isFinite(fa) || !Number.isFinite(fb)) {
-        errorText.innerText = 'Error: Revisa la sintaxis de tu función f(x).';
-        errorBox.style.display = 'block'; return;
+        mostrarError('Error: Revisa la sintaxis de tu función f(x).');
+        return;
     }
     if (fa === 0 || fb === 0) {
         const root = fa === 0 ? a : b;
@@ -130,8 +162,8 @@ function ejecutarBiseccion(event) {
         tbody.appendChild(tr); resContainer.style.display='block'; return;
     }
     if (fa * fb > 0) {
-        errorText.innerText = 'Error: f(a) y f(b) deben tener signos opuestos (Teorema de Bolzano).';
-        errorBox.style.display = 'block'; return;
+        mostrarError('Error: f(a) y f(b) deben tener signos opuestos (Teorema de Bolzano).');
+        return;
     }
 
     let x_m_anterior = null;
@@ -141,8 +173,8 @@ function ejecutarBiseccion(event) {
         const x_m = (a + b) / 2;
         const fx_m = evaluarFuncion(expr, x_m);
         if (!Number.isFinite(fx_m)) {
-            errorText.innerText = 'Error: La función produjo un valor no válido durante el cálculo.';
-            errorBox.style.display = 'block'; return;
+            mostrarError('Error: La función produjo un valor no válido durante el cálculo.');
+            return;
         }
         const ea = x_m_anterior === null ? null : Math.abs((x_m - x_m_anterior) / x_m) * 100;
         const tr = document.createElement('tr');
@@ -161,27 +193,13 @@ function ejecutarBiseccion(event) {
     resContainer.style.display = 'block';
 }
 
-window.ejecutarBiseccion = ejecutarBiseccion;
+window.calcularBiseccion = calcularBiseccion;
 window.mostrarError = mostrarError;
+window.leerCriterio = leerCriterio;
+window.limpiarTabla = limpiarTabla;
+window.cablearPreview = cablearPreview;
 
 // --- PREVISUALIZACIÓN EN VIVO CON KATEX ---
 document.addEventListener('DOMContentLoaded', () => {
-    const inputFuncion = document.getElementById('funcion');
-    if (inputFuncion) {
-        inputFuncion.addEventListener('input', function(e) {
-            const expr = e.target.value;
-            const preview = document.getElementById('preview-fx');
-            if (!preview) return;
-            if (!expr) {
-                preview.innerHTML = '';
-                return;
-            }
-            try {
-                const latex = math.parse(expr).toTex();
-                katex.render(`f(x) = ${latex}`, preview, { displayMode: true, throwOnError: false });
-            } catch (err) {
-                // Ignorar errores silenciosamente mientras el usuario sigue escribiendo
-            }
-        });
-    }
+    cablearPreview('funcion', 'preview-fx', 'f(x)');
 });
