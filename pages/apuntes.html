@@ -15,7 +15,8 @@
     <!-- Sanitizador HTML para el visor de Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
@@ -25,9 +26,10 @@
     <div class="logo-title">Portal Numérico</div>
     <input type="text" class="search-box" id="buscador" placeholder="Buscar..." onkeyup="filtrarContenido()">
     <ul class="nav-links">
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="calculadora.html">Resolver</a></li>
-        <li><a href="apuntes.html" class="active-link">Teoría / Apuntes</a></li>
+        <li><a href="../index.html">Inicio</a></li>
+        <li><a href="calculadora.html">Calculadora</a></li>
+        <li><a href="apuntes.html" class="active-link">Apuntes</a></li>
+        <li><a href="social.html">Conócenos</a></li>
     </ul>
 </header>
 
@@ -37,14 +39,8 @@
         <h1>Apuntes de Equipo</h1>
         <div class="subtitle">Subido y editado por colaboradores</div>
 
-        <div class="apuntes-index-bar">
-            <span style="font-size: 0.75rem; color: var(--text-white); text-transform: uppercase; font-weight: bold; align-self: center;">Índice:</span>
-            <a href="#tema-biseccion">1. Bisección</a>
-            <a href="#tema-bolzano">2. Teorema de Bolzano</a>
-        </div>
-
-        <form id="form-apunte" style="margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-            <h4 style="margin-bottom: 10px; color: var(--text-white);">+ Agregar nuevo apunte</h4>
+        <form id="form-apunte" class="form-apunte">
+            <h4><i class="fa-solid fa-plus icon-left"></i>Agregar nuevo apunte</h4>
             <div class="form-group">
                 <input type="text" name="titulo" placeholder="Título del tema (ej. Teorema de Bolzano)" required>
             </div>
@@ -52,33 +48,31 @@
                 <textarea name="contenido" rows="3" placeholder="Escribe la teoría o descripción (Opcional)..."></textarea>
             </div>
             <div class="form-group">
-                <label style="margin-bottom: 8px;">Adjuntar PDF o Markdown (Opcional)</label>
+                <label>Adjuntar PDF o Markdown (Opcional)</label>
                 <label for="archivo" class="file-upload-label">
-                    <span id="file-name-display">📁 Haz clic para seleccionar un archivo...</span>
+                    <span id="file-name-display"><i class="fa-solid fa-file-arrow-up"></i> Haz clic para seleccionar un archivo...</span>
                 </label>
                 <input type="file" id="archivo" name="archivo" accept=".pdf,.md" style="display: none;">
             </div>
-            <button type="submit" style="background: transparent; border: 1px solid var(--text-white); color: var(--text-white);">Publicar Apunte</button>
+            <button type="submit" class="btn-outline" style="width: 100%;">Publicar Apunte</button>
         </form>
 
         <div id="lista-apuntes">
             <div id="apuntes-remotos"></div>
-            <div class="apunte-card" id="tema-biseccion">
-                <h4>Método de Bisección - Definición</h4>
-                <p>Se fundamenta en el teorema de Bolzano. Si una función es continua en [a,b] y f(a)f(b) < 0, existe al menos una raíz.</p>
-            </div>
-            <div class="apunte-card" id="tema-bolzano">
-                <h4>Teorema de Bolzano</h4>
-                <p>Sea f una función continua en un intervalo cerrado [a, b]. Si f(a) y f(b) tienen signos opuestos, entonces existe al menos un valor c en (a, b) tal que f(c) = 0.</p>
-            </div>
+            <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js).
+                 Se eliminaron los ejemplos hardcodeados para evitar duplicados y
+                 mantener el índice generado por contenido real. -->
+            <p id="apuntes-vacio" class="apuntes-vacio" style="display:none;">
+                <i class="fa-regular fa-folder-open icon-left-sm"></i> Aún no hay apuntes publicados. ¡Sé el primero en compartir uno!
+            </p>
         </div>
     </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/apuntes.js"></script>
-<script src="js/canvas-animation.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/apuntes.js"></script>
+<script src="../js/canvas-animation.js"></script>
 </body>
 </html>

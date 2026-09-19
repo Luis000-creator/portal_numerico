@@ -15,13 +15,20 @@ async function cargarApuntesRemotos() {
     if (error) { console.error('No se pudieron cargar los apuntes:', error); return; }
     const cont = document.getElementById('apuntes-remotos');
     cont.innerHTML = '';
+    const vacioMsg = document.getElementById('apuntes-vacio');
+    if (vacioMsg) vacioMsg.style.display = data.length === 0 ? 'block' : 'none';
     data.forEach(apunte => {
         const card = document.createElement('div');
-        card.className = 'apunte-card apunte-remoto';
+        card.className = 'apunte-card card apunte-remoto';
         card.dataset.id = apunte.id;
         const fecha = new Date(apunte.created_at).toLocaleString('es-MX');
-        card.innerHTML = `<h4></h4><p></p><small style="color:var(--text-muted);display:block;margin-top:8px">Publicado: ${fecha}</small>`;
-        card.querySelector('h4').textContent = apunte.titulo;
+        const esPdf = apunte.archivo_url && apunte.archivo_url.toLowerCase().endsWith('.pdf');
+        const esMd = apunte.archivo_url && apunte.archivo_url.toLowerCase().endsWith('.md');
+        const fileIcon = esPdf ? '<i class="fa-regular fa-file-pdf" style="margin-right:6px; color:#ff6b6b;"></i>'
+                       : esMd ? '<i class="fa-regular fa-file-lines" style="margin-right:6px; color:#00f0ff;"></i>'
+                       : '<i class="fa-solid fa-file" style="margin-right:6px; color:var(--text-muted);"></i>';
+        card.innerHTML = `<h4>${fileIcon}<span></span></h4><p></p><small style="color:var(--text-muted);display:block;margin-top:8px"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>Publicado: ${fecha}</small>`;
+        card.querySelector('h4 span').textContent = apunte.titulo;
         card.querySelector('p').textContent = apunte.contenido;
         // Renderizar KaTEX en el contenido del apunte
         const parrafo = card.querySelector('p');
@@ -31,20 +38,20 @@ async function cargarApuntesRemotos() {
             const btnContainer = document.createElement('div');
             btnContainer.style.cssText = 'margin-top: 12px; display: flex; gap: 10px; align-items: center;';
 
-            // Boton para visualizar en la pagina
+            // Boton para visualizar en la pagina (glifo Font Awesome, no emoji)
             const btnVer = document.createElement('button');
             btnVer.type = 'button';
-            btnVer.textContent = 'Ver documento';
+            btnVer.innerHTML = '<i class="fa-regular fa-eye" style="margin-right:6px;"></i> Ver documento';
             btnVer.style.cssText = 'background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-white); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: background 0.3s; width: auto; margin-top: 0;';
             btnVer.onmouseover = () => btnVer.style.background = 'rgba(255,255,255,0.15)';
             btnVer.onmouseout = () => btnVer.style.background = 'rgba(255,255,255,0.08)';
 
-            // Enlace de descarga directa
+            // Enlace de descarga directa (glifo)
             const enlace = document.createElement('a');
             enlace.href = apunte.archivo_url;
             enlace.target = '_blank';
             enlace.rel = 'noopener';
-            enlace.textContent = 'Descargar original';
+            enlace.innerHTML = '<i class="fa-solid fa-download" style="margin-right:4px;"></i> Descargar original';
             enlace.style.cssText = 'color: #00f0ff; font-size: 0.8rem; text-decoration: none;';
 
             // Contenedor oscuro que servira como pantalla del visor
@@ -56,13 +63,13 @@ async function cargarApuntesRemotos() {
                 // Si esta abierto, cerrarlo
                 if (visor.style.display === 'block') {
                     visor.style.display = 'none';
-                    btnVer.textContent = 'Ver documento';
+                    btnVer.innerHTML = '<i class="fa-regular fa-eye" style="margin-right:6px;"></i> Ver documento';
                     return;
                 }
 
                 // Abrir visor con estado de carga
                 visor.style.display = 'block';
-                btnVer.textContent = 'Ocultar documento';
+                btnVer.innerHTML = '<i class="fa-regular fa-eye-slash" style="margin-right:6px;"></i> Ocultar documento';
                 visor.textContent = 'Cargando documento...';
 
                 const url = apunte.archivo_url;
@@ -203,7 +210,7 @@ async function publicarApunte(event) {
     form.reset();
     const displaySpan = document.getElementById('file-name-display');
     if (displaySpan) {
-        displaySpan.textContent = '📁 Haz clic para seleccionar un archivo...';
+        displaySpan.innerHTML = '<i class="fa-solid fa-file-arrow-up"></i> Haz clic para seleccionar un archivo...';
     }
     await cargarApuntesRemotos();
 }
@@ -243,7 +250,7 @@ window.renderizarMath = renderizarMath;
 
 function filtrarContenido() {
     const q = document.getElementById('buscador').value.toLowerCase().trim();
-    document.querySelectorAll('.apunte-card').forEach(card => {
+    document.querySelectorAll('.apunte-card, .card').forEach(card => {
         card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
 }
@@ -270,15 +277,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const tituloInput = document.querySelector('input[name="titulo"]');
 
             if (file) {
-                // Actualiza el texto visual del boton
-                displaySpan.textContent = `📄 ${file.name}`;
+                // Actualiza el texto visual del boton (icono + nombre)
+                const icon = file.name.toLowerCase().endsWith('.pdf')
+                    ? '<i class="fa-regular fa-file-pdf" style="margin-right:6px; color:#ff4d4d;"></i>'
+                    : '<i class="fa-regular fa-file-lines" style="margin-right:6px; color:#00f0ff;"></i>';
+                displaySpan.innerHTML = `${icon} ${file.name}`;
 
                 // Si el titulo esta vacio, autocompletar sin la extension (.md o .pdf)
                 if (tituloInput && tituloInput.value.trim() === '') {
                     tituloInput.value = file.name.replace(/\.[^/.]+$/, "");
                 }
             } else {
-                displaySpan.textContent = '📁 Haz clic para seleccionar un archivo...';
+                displaySpan.innerHTML = '<i class="fa-solid fa-file-arrow-up"></i> Haz clic para seleccionar un archivo...';
             }
         });
     }

@@ -5,23 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal Numérico | Calculadora Bisección</title>
 
+    <!-- Re-importar KaTeX para la previsualización de la fórmula -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
     <!-- mathjs UMD para navegadores (expone global math) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
 <canvas id="particle-canvas"></canvas>
 
-<header>
-    <div class="logo-title">Portal Numérico</div>
-    <ul class="nav-links">
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="calculadora.html" class="active-link">Resolver</a></li>
-        <li><a href="apuntes.html">Teoría / Apuntes</a></li>
-    </ul>
-</header>
+    <header>
+        <div class="logo-title">Portal Numérico</div>
+        <ul class="nav-links">
+            <li><a href="../index.html">Inicio</a></li>
+            <li><a href="calculadora.html" class="active-link">Calculadora</a></li>
+            <li><a href="apuntes.html">Apuntes</a></li>
+            <li><a href="social.html">Conócenos</a></li>
+        </ul>
+    </header>
 
 <div class="main-container">
 
@@ -32,17 +38,18 @@
         <form id="form-biseccion" onsubmit="ejecutarBiseccion(event)">
             <div class="form-group">
                 <label for="funcion">Función f(x)</label>
-                <input type="text" id="funcion" name="funcion" placeholder="Ej. x*x*x - x - 2" required>
+                <input type="text" id="funcion" name="funcion" placeholder="Ej. x^3 - x - 2" required>
+                <div id="preview-fx" class="preview-fx"></div>
             </div>
 
             <div class="form-row">
-                <div class="form-group" style="flex: 1;">
-                    <label for="a">Intervalo (a)</label>
-                    <input type="number" step="any" id="a" name="a" placeholder="Ej. 1" required>
+                <div class="form-group form-group--flex1">
+                    <label for="a">Intervalo (a) - Deja en blanco para Auto</label>
+                    <input type="number" step="any" id="a" name="a" placeholder="Auto">
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="b">Intervalo (b)</label>
-                    <input type="number" step="any" id="b" name="b" placeholder="Ej. 2" required>
+                <div class="form-group form-group--flex1">
+                    <label for="b">Intervalo (b) - Deja en blanco para Auto</label>
+                    <input type="number" step="any" id="b" name="b" placeholder="Auto">
                 </div>
             </div>
 
@@ -57,17 +64,17 @@
 
             <div class="form-group" id="grupo-valor-criterio">
                 <label id="label-criterio" for="valorCriterio">Valor de Tolerancia</label>
-                <input type="number" step="any" id="valorCriterio" name="valorCriterio" placeholder="Ej. 0.001" required>
+                <input type="text" id="valorCriterio" name="valorCriterio" placeholder="Ej. 0.001 o 1/16" required>
             </div>
 
             <button type="submit">Calcular Procedimiento</button>
         </form>
 
-        <div id="error-box" style="margin-top: 20px; color: #ff4d4d; text-align: center; display: none;">
+        <div id="error-box" class="error-box" style="display: none;">
             <p id="error-text"></p>
         </div>
 
-        <div id="resultado-container" style="margin-top: 20px; display: none;">
+        <div id="resultado-container" class="result-container" style="display: none;">
             <h3>Tabla de Procedimiento</h3>
             <div class="table-scroll">
                 <table class="procedure-table">
@@ -90,7 +97,7 @@
 
 </div>
 
-<script src="js/biseccion.js"></script>
-<script src="js/canvas-animation.js"></script>
+<script src="../js/biseccion.js"></script>
+<script src="../js/canvas-animation.js"></script>
 </body>
 </html>
