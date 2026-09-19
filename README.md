@@ -7,14 +7,17 @@ Proyecto academico para la materia de Metodos Numericos. Plataforma web estatica
 ```
 portal_numerico/
 ├── index.html              # Landing page (bienvenida, pagina raiz)
-├── calculadora.html        # Calculadora del metodo de biseccion
-├── apuntes.html            # Apuntes colaborativos con visor PDF/Markdown
+├── pages/
+│   ├── calculadora.html    # Calculadora: biseccion y punto fijo
+│   ├── apuntes.html        # Apuntes colaborativos con visor PDF/Markdown
+│   └── social.html         # Redes y contacto del equipo
 ├── README-GITHUB-PAGES.md  # Guia de despliegue en GitHub Pages
 ├── css/
 │   └── styles.css          # Estilos del sitio (tema oscuro + responsive)
 ├── js/
 │   ├── supabase-config.js  # Conexion con Supabase (clave publica)
-│   ├── biseccion.js        # Evaluador mathjs y metodo de biseccion
+│   ├── biseccion.js        # Evaluador mathjs, biseccion y helpers compartidos
+│   ├── punto-fijo.js       # Selector de metodo e iteracion de punto fijo
 │   ├── apuntes.js          # Apuntes en Supabase, KaTeX y visor integrado
 │   └── canvas-animation.js # Animacion de estrellas y simbolos
 └── sql/

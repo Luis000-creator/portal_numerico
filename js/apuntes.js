@@ -277,11 +277,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const tituloInput = document.querySelector('input[name="titulo"]');
 
             if (file) {
-                // Actualiza el texto visual del boton (icono + nombre)
-                const icon = file.name.toLowerCase().endsWith('.pdf')
-                    ? '<i class="fa-regular fa-file-pdf" style="margin-right:6px; color:#ff4d4d;"></i>'
-                    : '<i class="fa-regular fa-file-lines" style="margin-right:6px; color:#00f0ff;"></i>';
-                displaySpan.innerHTML = `${icon} ${file.name}`;
+                // Actualiza el texto visual del boton (icono por DOM + nombre por texto, sin innerHTML)
+                const esPdf = file.name.toLowerCase().endsWith('.pdf');
+                displaySpan.textContent = '';
+                const icon = document.createElement('i');
+                icon.className = esPdf ? 'fa-regular fa-file-pdf' : 'fa-regular fa-file-lines';
+                icon.style.cssText = `margin-right:6px; color:${esPdf ? '#ff4d4d' : '#00f0ff'};`;
+                displaySpan.appendChild(icon);
+                displaySpan.appendChild(document.createTextNode(` ${file.name}`));
 
                 // Si el titulo esta vacio, autocompletar sin la extension (.md o .pdf)
                 if (tituloInput && tituloInput.value.trim() === '') {
