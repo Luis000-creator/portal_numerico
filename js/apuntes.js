@@ -21,6 +21,7 @@ async function cargarApuntesRemotos() {
         const card = document.createElement('div');
         card.className = 'apunte-card card apunte-remoto';
         card.dataset.id = apunte.id;
+        card.id = `apunte-${apunte.id}`;
         const fecha = new Date(apunte.created_at).toLocaleString('es-MX');
         const esPdf = apunte.archivo_url && apunte.archivo_url.toLowerCase().endsWith('.pdf');
         const esMd = apunte.archivo_url && apunte.archivo_url.toLowerCase().endsWith('.md');
@@ -120,6 +121,39 @@ async function cargarApuntesRemotos() {
         cont.appendChild(card);
     });
     filtrarContenido();
+    generarIndice();
+}
+
+// --- ÍNDICE DINÁMICO DE APUNTES ---
+
+// Genera los enlaces del índice a partir de las tarjetas visibles en el DOM.
+// Se reconstruye en cada carga para reflejar altas y bajas.
+function generarIndice() {
+    const barra = document.getElementById('indice-apuntes');
+    if (!barra) return;
+    // Conservar la etiqueta "Índice:" y eliminar enlaces previos
+    barra.querySelectorAll('a').forEach(a => a.remove());
+
+    const tarjetas = document.querySelectorAll('#lista-apuntes .apunte-card');
+    barra.style.display = tarjetas.length === 0 ? 'none' : '';
+
+    tarjetas.forEach((card, i) => {
+        if (!card.id) return;
+        const titulo = card.querySelector('h4') ? card.querySelector('h4').innerText.trim() : `Apunte ${i + 1}`;
+        const enlace = document.createElement('a');
+        enlace.href = `#${card.id}`;
+        enlace.textContent = `${i + 1}. ${titulo}`;
+        enlace.title = titulo;
+        // Al saltar limpiar el buscador para que la tarjeta destino sea visible
+        enlace.addEventListener('click', () => {
+            const buscador = document.getElementById('buscador');
+            if (buscador && buscador.value !== '') {
+                buscador.value = '';
+                filtrarContenido();
+            }
+        });
+        barra.appendChild(enlace);
+    });
 }
 
 // --- PUBLICAR NUEVO APUNTE ---
