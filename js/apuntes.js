@@ -120,8 +120,8 @@ async function cargarApuntesRemotos() {
         }
         cont.appendChild(card);
     });
-    filtrarContenido();
     generarIndice();
+    filtrarContenido();
 }
 
 // --- ÍNDICE DINÁMICO DE APUNTES ---
@@ -283,10 +283,33 @@ window.renderizarMath = renderizarMath;
 // --- FILTRAR CONTENIDO (compatibilidad) ---
 
 function filtrarContenido() {
-    const q = document.getElementById('buscador').value.toLowerCase().trim();
-    document.querySelectorAll('.apunte-card, .card').forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+    const input = document.getElementById('buscador');
+    const qRaw = input ? input.value : '';
+    const q = qRaw.toLowerCase().trim();
+    const cards = document.querySelectorAll('#lista-apuntes .apunte-card, #lista-apuntes .card');
+    let visibles = 0;
+    cards.forEach(card => {
+        const ok = card.innerText.toLowerCase().includes(q);
+        card.style.display = ok ? '' : 'none';
+        if (ok) visibles++;
     });
+
+    const sin = document.getElementById('apuntes-sin-resultados');
+    const vacio = document.getElementById('apuntes-vacio');
+    const term = document.getElementById('termino-busqueda');
+    const indice = document.getElementById('indice-apuntes');
+    const hayDatos = cards.length > 0;
+
+    if (hayDatos && q !== '' && visibles === 0) {
+        if (sin) sin.style.display = 'block';
+        if (term) term.textContent = qRaw.trim();
+        if (vacio) vacio.style.display = 'none';
+        if (indice) indice.style.display = 'none';
+    } else {
+        if (sin) sin.style.display = 'none';
+        if (vacio) vacio.style.display = hayDatos ? 'none' : 'block';
+        if (indice) indice.style.display = hayDatos && visibles > 0 ? '' : 'none';
+    }
 }
 
 // Exponer globalmente

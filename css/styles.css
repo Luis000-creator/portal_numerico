@@ -532,6 +532,17 @@ button:hover {
   border-radius: var(--radius-sm);
 }
 
+.apuntes-vacio--busqueda {
+  border-color: rgba(255, 0, 123, 0.35);
+  background: rgba(255, 0, 123, 0.06);
+}
+
+#termino-busqueda {
+  color: var(--text-white);
+  font-weight: 700;
+  word-break: break-word;
+}
+
 /* 05 PAGES — SOCIAL / CONÓCENOS */
 .conocenos-title {
   color: #00f0ff;

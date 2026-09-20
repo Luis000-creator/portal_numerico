@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Numérico | 404 No Encontrado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Reseteo básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050510;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* 1. FONDO CON PARALLAX POR CURSOR */
+        .bg-layer {
+            position: fixed;
+            top: -5%; left: -5%;
+            width: 110%; height: 110%;
+            background-image: url('img/bgWoMiku.png'), url('../img/bgWoMiku.png'), url('/portal_numerico/img/bgWoMiku.png'), url('/portal_numerico/img/bgWMiku.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            will-change: transform;
+            transition: transform 0.15s ease-out;
+        }
+
+        /* Contenedor principal de los textos de error */
+        .content {
+            position: absolute;
+            top: 25%;
+            left: 10%;
+            max-width: 500px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Textos principales */
+        .typing-text {
+            color: #00f0ff;
+            font-size: 1.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid #00f0ff;
+            width: 0;
+            animation: typing 2s steps(20, end) forwards, blink 0.75s step-end infinite;
+        }
+
+        .subtitle {
+            color: #00f0ff;
+            font-size: 1.5rem;
+            margin-top: 5px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2s;
+        }
+
+        .glitch {
+            position: relative;
+            font-size: 8rem;
+            font-weight: bold;
+            color: white;
+            line-height: 1;
+            margin: 10px 0;
+            text-shadow: 0.05em 0 0 #00f0ff, -0.05em -0.025em 0 #ff007b;
+            animation: glitch-skew 3s infinite linear alternate-reverse;
+        }
+
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; background: transparent;
+        }
+        .glitch::before {
+            left: 2px; text-shadow: -2px 0 #ff007b; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px; text-shadow: -2px 0 #00f0ff; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        .description {
+            color: #d0d0d0;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2.5s;
+        }
+
+        .btn-home {
+            display: inline-block;
+            padding: 12px 30px;
+            border: 2px solid #00f0ff;
+            border-radius: 30px;
+            color: #00f0ff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 3s;
+        }
+
+        .btn-home:hover {
+            background-color: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            text-shadow: 0 0 5px #00f0ff;
+            transform: scale(1.05);
+        }
+
+        /* 3. BARRA INFERIOR (FOOTER FIRMA) */
+        .bottom-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 40px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 3.5s;
+        }
+        
+        .bottom-bar span.cyan { color: #00f0ff; }
+        
+        .bottom-bar .line {
+            display: inline-block;
+            width: 250px;
+            height: 1px;
+            background: linear-gradient(90deg, #00f0ff, transparent);
+        }
+
+        /* --- KEYFRAMES --- */
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes typing { from { width: 0; } to { width: 140px; } }
+        @keyframes blink { from, to { border-color: transparent; } 50% { border-color: #00f0ff; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); transform: skew(0.65deg); }
+            20% { clip: rect(85px, 9999px, 11px, 0); transform: skew(0.95deg); }
+            40% { clip: rect(25px, 9999px, 98px, 0); transform: skew(0.15deg); }
+            60% { clip: rect(62px, 9999px, 43px, 0); transform: skew(0.85deg); }
+            80% { clip: rect(4px, 9999px, 76px, 0); transform: skew(0.25deg); }
+            100% { clip: rect(33px, 9999px, 14px, 0); transform: skew(0.75deg); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); transform: skew(0.15deg); }
+            20% { clip: rect(3px, 9999px, 5px, 0); transform: skew(0.85deg); }
+            40% { clip: rect(45px, 9999px, 83px, 0); transform: skew(0.25deg); }
+            60% { clip: rect(12px, 9999px, 24px, 0); transform: skew(0.75deg); }
+            80% { clip: rect(88px, 9999px, 56px, 0); transform: skew(0.35deg); }
+            100% { clip: rect(22px, 9999px, 34px, 0); transform: skew(0.95deg); }
+        }
+
+        /* Responsividad */
+        @media (max-width: 768px) {
+            .content { left: 5%; top: 15%; right: 5%; text-align: center; }
+            .typing-text { margin: 0 auto; }
+            .glitch { font-size: 6rem; }
+            .bottom-bar { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-layer" id="bgLayer"></div>
+
+    <div class="content">
+        <div class="typing-text">Miku dice...</div>
+        <div class="subtitle">¡La página que buscas no está aquí!</div>
+        <h1 class="glitch" data-text="404">404</h1>
+        <p class="description">Parece que esta página se perdió en el universo digital...</p>
+        <a href="/portal_numerico/index.html" class="btn-home">Volver al inicio ➔</a>
+    </div>
+
+    <div class="bottom-bar">
+        <span class="cyan">Hatsune Miku</span> <span class="cyan">/</span> 404 Not Found <span class="cyan">////</span> <span class="line"></span>
+    </div>
+
+    <script>
+        // Parallax del fondo según el cursor — efecto "flote" / respiración
+        (function() {
+            const bg = document.getElementById('bgLayer');
+            if (!bg) return;
+            let raf = null;
+            let targetX = 0, targetY = 0;
+            let currentX = 0, currentY = 0;
+
+            function onMove(e) {
+                const x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 a 1
+                const y = (e.clientY / window.innerHeight - 0.5) * 2;
+                targetX = x * 18; // desplazamiento máximo px
+                targetY = y * 12;
+            }
+
+            function onTouch(e) {
+                if (!e.touches[0]) return;
+                onMove(e.touches[0]);
+            }
+
+            function animate() {
+                // interpolación suave
+                currentX += (targetX - currentX) * 0.08;
+                currentY += (targetY - currentY) * 0.08;
+                bg.style.transform = `translate(${currentX}px, ${currentY}px) scale(1.03)`;
+                raf = requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('mousemove', onMove, { passive: true });
+            window.addEventListener('touchmove', onTouch, { passive: true });
+            window.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+            animate();
+
+            // Respetar usuarios con reduce-motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                bg.style.transition = 'none';
+            }
+        })();
+    </script>
+
+</body>
+</html>
