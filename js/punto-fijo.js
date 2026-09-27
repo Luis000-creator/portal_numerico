@@ -22,6 +22,12 @@ function alternarMetodoUI() {
     if (divBiseccion) divBiseccion.style.display = esBiseccion ? '' : 'none';
     if (divPuntoFijo) divPuntoFijo.style.display = esBiseccion ? 'none' : '';
 
+    // Mostrar/ocultar contenedores de ejemplos según el método
+    const ejBiseccion = document.getElementById('ejemplos-biseccion');
+    const ejPuntoFijo = document.getElementById('ejemplos-puntofijo');
+    if (ejBiseccion) ejBiseccion.style.display = esBiseccion ? 'block' : 'none';
+    if (ejPuntoFijo) ejPuntoFijo.style.display = esBiseccion ? 'none' : 'block';
+
     // Los campos ocultos no deben bloquear el submit de HTML5
     const campoFx = document.getElementById('funcion');
     const campoGx = document.getElementById('funcion-gx');
@@ -91,6 +97,8 @@ function calcularPuntoFijo() {
     avisarConvergencia(exprG, x_actual);
 
     let x_anterior = null;
+    let g_last = NaN, x_last = NaN, ea_last = null;
+    let criterioAlcanzado = false;
     const maxIter = criterio === 'iteraciones' ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
     let n = 1;
 
@@ -111,13 +119,17 @@ function calcularPuntoFijo() {
         }
 
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${n}</td><td>${x_actual.toFixed(6)}</td><td>${g_x.toFixed(6)}</td><td>${ea === null ? '--' : ea.toFixed(4) + '%'}</td>`;
+        tr.innerHTML = `<td data-label="Iter (n)">${n}</td><td data-label="x">${x_actual.toFixed(6)}</td><td data-label="g(x)">${g_x.toFixed(6)}</td><td data-label="Ea (%)">${ea === null ? '--' : ea.toFixed(4) + '%'}</td>`;
         tbody.appendChild(tr);
 
+        g_last = g_x;
+        x_last = x_actual;
+        ea_last = ea;
+
         // Criterios de paro
-        if (criterio === 'iteraciones' && n >= maxIter) break;
-        if (criterio === 'tolerancia' && Math.abs(g_x - x_actual) <= valorCriterio) break;
-        if (criterio === 'error' && ea !== null && ea <= valorCriterio) break;
+        if (criterio === 'iteraciones' && n >= maxIter) { criterioAlcanzado = true; break; }
+        if (criterio === 'tolerancia' && Math.abs(g_x - x_actual) <= valorCriterio) { criterioAlcanzado = true; break; }
+        if (criterio === 'error' && ea !== null && ea <= valorCriterio) { criterioAlcanzado = true; break; }
 
         // Divergencia: el valor se aleja demasiado de la solucion
         if (Math.abs(g_x) > 1e6) {
@@ -131,6 +143,11 @@ function calcularPuntoFijo() {
         n++;
     }
     resContainer.style.display = 'block';
+    const residuo = (Number.isFinite(g_last) && Number.isFinite(x_last)) ? Math.abs(g_last - x_last) : NaN;
+    mostrarResumen(g_last, residuo, n, criterio, valorCriterio, ea_last, criterioAlcanzado, {
+        fx: '|g(x) - x| Final',
+        tolerancia: `|g(x) - x| ≤ ${Number(valorCriterio).toFixed(6)}`
+    });
 }
 
 window.alternarMetodoUI = alternarMetodoUI;
@@ -144,3 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
         alternarMetodoUI();
     }
 });
+
+// --- CARGAR EJEMPLOS DE BISECCIÓN ---
+function cargarEjemploBiseccion(expr) {
+    const input = document.getElementById('funcion');
+    if (input) {
+        input.value = expr;
+        input.dispatchEvent(new Event('input'));
+    }
+}
+
+window.cargarEjemploBiseccion = cargarEjemploBiseccion;
+
+// --- CARGAR EJEMPLOS DE PUNTO FIJO ---
+function cargarEjemploPuntoFijo(expr, x0) {
+    const inputGx = document.getElementById('funcion-gx');
+    const inputX0 = document.getElementById('x0');
+    if (inputGx) {
+        inputGx.value = expr;
+        inputGx.dispatchEvent(new Event('input'));
+    }
+    if (inputX0) {
+        inputX0.value = x0;
+    }
+}
+
+window.cargarEjemploPuntoFijo = cargarEjemploPuntoFijo;

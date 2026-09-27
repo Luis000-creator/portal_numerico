@@ -4,11 +4,13 @@
 
 /* 01 TOKENS */
 :root {
-  --bg-black: #000000;
-  --card-bg: rgba(10, 10, 10, 0.88);
-  --border-color: rgba(255, 255, 255, 0.12);
-  --text-white: #ffffff;
-  --text-muted: #888888;
+  --bg-black: #07090e;
+  --card-bg: rgba(17, 24, 39, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-white: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent-cyan: #22d3ee;
+  --accent-indigo: #818cf8;
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 12px;
@@ -16,7 +18,7 @@
   --gap-grid: 25px;
   --gap-grid-sm: 20px;
   --shadow-card: 0 25px 50px rgba(0, 0, 0, 0.9);
-  --shadow-neon: 0 0 15px rgba(255, 255, 255, 0.05);
+  --shadow-neon: 0 0 15px rgba(34, 211, 238, 0.08);
   --shadow-card-hover: 0 10px 20px rgba(0, 0, 0, 0.5), var(--shadow-neon);
 }
 
@@ -131,14 +133,14 @@ header {
 }
 
 .container {
-  background: var(--card-bg);
-  backdrop-filter: blur(25px);
-  border: 1px solid var(--border-color);
+  background: rgba(11, 15, 25, 0.9) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.15) !important;
   border-radius: 16px;
   padding: 40px;
   width: 100%;
   max-width: 650px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(34, 211, 238, 0.05) !important;
   max-height: 85vh;
   overflow-y: auto;
 }
@@ -194,7 +196,7 @@ object.visor-pdf {
 
 /* 04 COMPONENTS */
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 label {
@@ -218,16 +220,16 @@ textarea {
 }
 
 /* Modern glow para text/number/select (deduplica bloque anterior) */
-input[type="text"],
-input[type="number"],
+input[type="text"], 
+input[type="number"], 
 select {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 14px;
-  border-radius: var(--radius-md);
-  font-family: "Segoe UI", monospace;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 41, 59, 0.65) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  color: #f8fafc !important;
+  border-radius: 8px !important;
+  padding: 12px 14px !important;
+  font-family: 'Segoe UI', monospace;
+  transition: all 0.3s ease !important;
 }
 
 textarea {
@@ -250,14 +252,13 @@ textarea:focus {
   outline: none;
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
+input[type="text"]:focus, 
+input[type="number"]:focus, 
 select:focus {
-  border-color: #00f0ff;
-  box-shadow:
-    0 0 10px rgba(0, 240, 255, 0.2),
-    inset 0 2px 4px rgba(0, 0, 0, 0.5);
-  transform: translateY(-1px);
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  outline: none;
 }
 
 /* Ocultar spinners number */
@@ -292,6 +293,28 @@ button {
 button:hover {
   opacity: 0.85;
   transform: translateY(-1px);
+}
+
+/* Botón principal (Calcular procedimiento) con Degradado Neón */
+button[type="submit"] {
+  background: #ffffff !important;
+  color: #0a0a0a !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 14px !important;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(255, 255, 255, 0.45) !important;
+  opacity: 1 !important;
 }
 
 .procedure-table {
@@ -364,30 +387,73 @@ button:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* DEPRECATED: .apuntes-index-bar ya no usado tras eliminar índice hardcodeado en pages/apuntes.html */
+/* =========================================
+   ESTILIZACIÓN DEL ÍNDICE DE APUNTES (GRID)
+   ========================================= */
 .apuntes-index-bar {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  padding: 10px 15px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 20px;
-  display: flex;
-  gap: 15px;
-  overflow-x: auto;
-  white-space: nowrap;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid var(--border-color);
+    padding: 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
+/* Título superior del índice */
+.apuntes-index-title {
+    font-size: 0.75rem;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+/* Cuadrícula responsiva de 3 columnas */
+.apuntes-index-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* Adaptabilidad para pantallas medianas (Tablets: 2 columnas) */
+@media (max-width: 768px) {
+    .apuntes-index-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Adaptabilidad para celulares (1 columna) */
+@media (max-width: 480px) {
+    .apuntes-index-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilo de cada píldora del índice */
 .apuntes-index-bar a {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-  transition: color 0.3s;
-  cursor: pointer;
+    background: rgba(34, 211, 238, 0.05);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    color: var(--text-white);
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-family: 'Segoe UI', monospace;
+    transition: all 0.2s ease;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .apuntes-index-bar a:hover {
-  color: var(--text-white);
+    background: rgba(34, 211, 238, 0.15);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    transform: translateY(-1px);
 }
 
 /* 05 PAGES — LANDING */
@@ -493,7 +559,7 @@ button:hover {
 .preview-fx {
   min-height: 40px;
   margin-top: 10px;
-  color: #00f0ff;
+  color: var(--accent-cyan);
   text-align: center;
 }
 
@@ -503,8 +569,364 @@ button:hover {
   text-align: center;
 }
 
+.info-box {
+  margin-top: 15px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.info-box--info {
+  background: rgba(0, 240, 255, 0.08);
+  border-left: 3px solid #00f0ff;
+  color: #00f0ff;
+}
+
+.info-box--exito {
+  background: rgba(0, 255, 120, 0.08);
+  border-left: 3px solid #00ff78;
+  color: #00ff78;
+}
+
 .result-container {
+  margin-top: 30px;
+}
+
+.result-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+  margin-bottom: 20px;
+  border-radius: 1px;
+}
+
+.result-title {
+  margin-bottom: 15px;
+  color: var(--text-white);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.result-title::before {
+  content: '';
+  width: 3px;
+  height: 20px;
+  background: #00f0ff;
+  border-radius: 2px;
+  box-shadow: 0 0 10px #00f0ff;
+}
+
+.resumen-container {
   margin-top: 20px;
+  padding: 20px;
+  background: rgba(34, 211, 238, 0.03);
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.05);
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.resumen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.resumen-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.resumen-card:hover::before {
+  opacity: 1;
+}
+
+.resumen-card--raiz {
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.resumen-card--criterio {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 0, 123, 0.03);
+  border-left: 2px solid #ff007b;
+}
+
+.resumen-icon {
+  font-size: 1.2rem;
+  color: var(--accent-cyan);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resumen-card--criterio .resumen-icon {
+  margin-bottom: 0;
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+/* =========================================
+   DASHBOARD DE RESULTADOS MULTICOLOR
+   Identidad por tarjeta: cian, magenta, violeta, esmeralda
+   ========================================= */
+/* Tarjeta 1: Raíz Aproximada (morado) */
+.resumen-card:nth-child(1) { border-top: 3px solid #a855f7; }
+.resumen-card:nth-child(1) i { color: #a855f7; }
+/* Tarjeta 2: f(x) Final (Rosa / Magenta Neón) */
+.resumen-card:nth-child(2) { border-top: 3px solid #f43f5e; }
+.resumen-card:nth-child(2) i { color: #f43f5e; }
+/* Tarjeta 3: Iteraciones (Índigo / Violeta Espacial) */
+.resumen-card:nth-child(3) { border-top: 3px solid #818cf8; }
+.resumen-card:nth-child(3) i { color: #818cf8; }
+/* Tarjeta 4: Ea Final (Esmeralda / Verde Éxito) */
+.resumen-card:nth-child(4) { border-top: 3px solid #34d399; }
+.resumen-card:nth-child(4) i { color: #34d399; }
+
+.resumen-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.resumen-value {
+  font-size: 0.9rem;
+  color: var(--text-white);
+  font-weight: 700;
+  font-family: "Segoe UI", monospace;
+  white-space: nowrap;
+}
+
+.resumen-value--small {
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* =========================================
+   BOTÓN MINIMALISTA DE PORTAPAPELES (ARRIBA DERECHA)
+   ========================================= */
+.btn-icon-clipboard {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: #22d3ee;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+  margin-top: 0 !important;
+}
+
+.btn-icon-clipboard:hover {
+  background: rgba(34, 211, 238, 0.2);
+  border-color: #22d3ee;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(34, 211, 238, 0.3);
+  color: #ffffff;
+}
+
+/* =========================================
+   BOTÓN DE EXPORTAR A EXCEL (ABAJO DERECHA)
+   ========================================= */
+.btn-export {
+  background: rgba(52, 211, 153, 0.08) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  color: #34d399 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto !important;
+  margin-top: 0 !important;
+}
+
+.btn-export:hover {
+  background: rgba(52, 211, 153, 0.2) !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.preview-fx--invalid {
+  color: #ff884d;
+  font-size: 0.85rem;
+}
+
+.preview-fx--valid {
+  color: #00ff78;
+  font-size: 0.85rem;
+}
+
+/* =========================================
+   1. EJEMPLOS RÁPIDOS CENTRADOS Y ARMONIOSOS
+   ========================================= */
+.examples-container {
+    margin: 10px 0 20px 0;
+    padding: 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    text-align: center;
+}
+
+.examples-label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center !important;
+}
+
+/* Píldoras de ejemplo estilizadas */
+form button.btn-chip,
+button.btn-chip {
+    width: max-content !important;
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(34, 211, 238, 0.08) !important;
+    border: 1px solid rgba(34, 211, 238, 0.3) !important;
+    color: #38bdf8 !important;
+    padding: 6px 14px !important;
+    border-radius: 20px !important;
+    font-size: 0.78rem !important;
+    font-family: 'Segoe UI', monospace !important;
+    cursor: pointer !important;
+    margin-top: 0 !important;
+    transition: all 0.25s ease !important;
+}
+
+button.btn-chip:hover {
+    background: rgba(34, 211, 238, 0.2) !important;
+    border-color: #22d3ee !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.25) !important;
+    color: #ffffff !important;
+}
+
+/* Vista móvil de tabla tipo tarjeta cyberpunk */
+@media (max-width: 600px) {
+  .procedure-table {
+    display: block;
+  }
+
+  .procedure-table thead {
+    display: none;
+  }
+
+  .procedure-table,
+  .procedure-table tbody,
+  .procedure-table tr,
+  .procedure-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .procedure-table tbody tr {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .procedure-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.85rem;
+    font-family: 'Segoe UI', monospace;
+    color: #f3f4f6;
+  }
+
+  .procedure-table tbody td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 10px;
+    min-width: 70px;
+  }
+
+  .procedure-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  /* Primera fila (Iteración) como título de la tarjeta */
+  .procedure-table tbody td:nth-child(1) {
+    font-weight: 700;
+    color: #a855f7;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.25);
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 }
 
 .form-group--flex1 {
@@ -828,6 +1250,10 @@ button:hover {
     flex-direction: column;
   }
 
+  .resumen-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   object.visor-pdf {
     height: 350px;
   }
@@ -879,7 +1305,7 @@ select {
     -moz-appearance: none !important;
 
     /* Combina el SVG (URL-codificado) con el fondo negro transparente */
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 12px center, rgba(0, 0, 0, 0.4) !important;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2322d3ee'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 12px center, rgba(0, 0, 0, 0.4) !important;
 
     padding-right: 40px !important;
     cursor: pointer;
@@ -893,5 +1319,5 @@ select option {
 }
 
 select:hover, select:focus {
-    border-color: #00f0ff !important;
+    border-color: var(--accent-cyan) !important;
 }

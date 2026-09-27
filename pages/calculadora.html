@@ -50,6 +50,18 @@
                 <input type="text" id="funcion" name="funcion" placeholder="Ej. x^3 - x - 2" maxlength="200" required>
                 <div id="preview-fx" class="preview-fx"></div>
             </div>
+            
+            <!-- Ejemplos para Bisección -->
+            <div id="ejemplos-biseccion" class="examples-container">
+                <span class="examples-label">Ejemplos rápidos:</span>
+                <div class="chip-group">
+                    <button type="button" class="btn-chip" onclick="cargarEjemploBiseccion('x^3 - x - 2')">x³ - x - 2</button>
+                    <button type="button" class="btn-chip" onclick="cargarEjemploBiseccion('x^2 - x - 1')">x² - x - 1</button>
+                    <button type="button" class="btn-chip" onclick="cargarEjemploBiseccion('sin(x)')">sin(x)</button>
+                    <button type="button" class="btn-chip" onclick="cargarEjemploBiseccion('e^x - 2')">eˣ - 2</button>
+                    <button type="button" class="btn-chip" onclick="cargarEjemploBiseccion('x^2 - 4')">x² - 4</button>
+                </div>
+            </div>
 
             <div class="form-row">
                 <div class="form-group form-group--flex1">
@@ -69,6 +81,18 @@
                     <input type="text" id="funcion-gx" name="funcion-gx" placeholder="Ej. (2*x^2 - x + 3)^(1/3)" maxlength="200">
                     <div id="preview-gx" class="preview-fx"></div>
                 </div>
+
+                <!-- EJEMPLOS RÁPIDOS DE PUNTO FIJO (Ubicados antes de X₀) -->
+                <div id="ejemplos-puntofijo" class="examples-container">
+                    <span class="examples-label">Ejemplos de g(x) (Convergencia):</span>
+                    <div class="chip-group">
+                        <button type="button" class="btn-chip" onclick="cargarEjemploPuntoFijo('(2*x^2 - x + 3)^(1/3)', 1)">(2x² - x + 3)¹/³</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploPuntoFijo('(x + 3)^(1/2)', 1)">(x + 3)½</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploPuntoFijo('cos(x)', 0.5)">cos(x)</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploPuntoFijo('sqrt(x + 2)', 1)">√(x + 2)</button>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="x0">Valor Inicial (X₀)</label>
                     <input type="number" step="any" id="x0" name="x0" placeholder="Ej. 1">
@@ -96,8 +120,19 @@
             <p id="error-text"></p>
         </div>
 
+        <div id="info-box" class="info-box" style="display: none;">
+            <p id="info-text"></p>
+        </div>
+
         <div id="resultado-container" class="result-container" style="display: none;">
-            <h3>Tabla de Procedimiento</h3>
+            <div class="result-divider"></div>
+            <div id="resumen-container" class="resumen-container" style="display: none;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0;">
+                <h3 class="result-title" style="text-align: left; margin: 0;"><i class="fa-solid fa-table-list" style="margin-right: 6px;"></i>Tabla de Procedimiento</h3>
+                <button type="button" id="btn-copy-icon" class="btn-icon-clipboard" onclick="copiarTablaClipboard()" title="Copiar tabla al portapapeles" style="display: none;">
+                    <i class="fa-regular fa-clipboard"></i>
+                </button>
+            </div>
             <div class="table-scroll">
                 <table class="procedure-table">
                     <thead id="tabla-cabecera">
@@ -113,6 +148,12 @@
                     <tbody id="tabla-cuerpo">
                     </tbody>
                 </table>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                <button type="button" id="btn-export-csv" class="btn-export" onclick="exportarTablaCSV()" style="display: none;">
+                    <i class="fa-brands fa-file-excel"></i> Exportar a Excel (CSV)
+                </button>
             </div>
         </div>
     </div>
