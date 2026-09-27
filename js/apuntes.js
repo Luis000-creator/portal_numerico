@@ -11,7 +11,7 @@ async function cargarApuntesRemotos() {
     const { data, error } = await window.supabaseClient
         .from('apuntes')
         .select('id,titulo,contenido,archivo_url,created_at')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
     if (error) { console.error('No se pudieron cargar los apuntes:', error); return; }
     const cont = document.getElementById('apuntes-remotos');
     cont.innerHTML = '';
@@ -130,9 +130,11 @@ async function cargarApuntesRemotos() {
 // Se reconstruye en cada carga para reflejar altas y bajas.
 function generarIndice() {
     const barra = document.getElementById('indice-apuntes');
-    if (!barra) return;
-    // Conservar la etiqueta "Índice:" y eliminar enlaces previos
-    barra.querySelectorAll('a').forEach(a => a.remove());
+    const grid = document.getElementById('indice-grid');
+    if (!barra || !grid) return;
+
+    // Limpiar grid previo
+    grid.innerHTML = '';
 
     const tarjetas = document.querySelectorAll('#lista-apuntes .apunte-card');
     barra.style.display = tarjetas.length === 0 ? 'none' : '';
@@ -142,8 +144,9 @@ function generarIndice() {
         const titulo = card.querySelector('h4') ? card.querySelector('h4').innerText.trim() : `Apunte ${i + 1}`;
         const enlace = document.createElement('a');
         enlace.href = `#${card.id}`;
-        enlace.textContent = `${i + 1}. ${titulo}`;
-        enlace.title = titulo;
+        const tituloLimpio = titulo.replace(/_/g, ' ');
+        enlace.textContent = `${i + 1}. ${tituloLimpio}`;
+        enlace.title = tituloLimpio;
         // Al saltar limpiar el buscador para que la tarjeta destino sea visible
         enlace.addEventListener('click', () => {
             const buscador = document.getElementById('buscador');
@@ -152,7 +155,7 @@ function generarIndice() {
                 filtrarContenido();
             }
         });
-        barra.appendChild(enlace);
+        grid.appendChild(enlace);
     });
 }
 
