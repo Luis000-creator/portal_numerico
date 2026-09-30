@@ -106,6 +106,24 @@
                     <input type="text" id="funcion-newton" name="funcion-newton" placeholder="Ej. x^3 - x - 1" maxlength="200" required>
                     <div id="preview-fx-newton" class="preview-fx"></div>
                 </div>
+
+                <div class="form-group">
+                    <label>Derivada f'(x) — calculada automáticamente</label>
+                    <div id="preview-fpx-newton" class="preview-fx" aria-live="polite"></div>
+                </div>
+
+                <!-- EJEMPLOS RÁPIDOS DE NEWTON-RAPHSON -->
+                <div id="ejemplos-newton" class="examples-container">
+                    <span class="examples-label">Ejemplos f(x) (Raíz simple):</span>
+                    <div class="chip-group">
+                        <button type="button" class="btn-chip" onclick="cargarEjemploNewton('x^3 - x - 1', 1)">x³ - x - 1</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploNewton('x^2 - 2', 1.5)">x² - 2</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploNewton('sin(x)', 3)">sin(x)</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploNewton('e^x - 2', 1)">eˣ - 2</button>
+                        <button type="button" class="btn-chip" onclick="cargarEjemploNewton('x^3 - 2*x - 5', 2)">x³ - 2x - 5</button>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="x0-newton">Valor Inicial (X₀)</label>
                     <input type="number" step="any" id="x0-newton" name="x0-newton" placeholder="Ej. 1" required>

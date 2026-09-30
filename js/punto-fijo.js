@@ -30,8 +30,10 @@ function alternarMetodoUI() {
     // Mostrar/ocultar contenedores de ejemplos según el método
     const ejBiseccion = document.getElementById('ejemplos-biseccion');
     const ejPuntoFijo = document.getElementById('ejemplos-puntofijo');
+    const ejNewton = document.getElementById('ejemplos-newton');
     if (ejBiseccion) ejBiseccion.style.display = esBiseccion ? 'block' : 'none';
-    if (ejPuntoFijo) ejPuntoFijo.style.display = esBiseccion ? 'none' : 'block';
+    if (ejPuntoFijo) ejPuntoFijo.style.display = esPuntoFijo ? 'block' : 'none';
+    if (ejNewton) ejNewton.style.display = esNewton ? 'block' : 'none';
 
     // Los campos ocultos no deben bloquear el submit de HTML5
     const campoFx = document.getElementById('funcion');
