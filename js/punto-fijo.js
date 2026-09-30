@@ -7,20 +7,25 @@
 
 const CABECERA_BISECCION = '<tr><th>Iter</th><th>a</th><th>b</th><th>x_m</th><th>f(x_m)</th><th>Ea (%)</th></tr>';
 const CABECERA_PUNTOFIJO = '<tr><th>Iter (n)</th><th>x</th><th>g(x)</th><th>Ea (%)</th></tr>';
+const CABECERA_NEWTON = '<tr><th>Iter (n)</th><th>xₙ</th><th>f(xₙ)</th><th>f\'(xₙ)</th><th>xₙ₊₁</th><th>Ea (%)</th></tr>';
 
 // Muestra u oculta los campos segun el metodo elegido
 function alternarMetodoUI() {
     const metodo = document.getElementById('metodo-selector').value;
     const divBiseccion = document.getElementById('inputs-biseccion');
     const divPuntoFijo = document.getElementById('inputs-puntofijo');
+    const divNewton = document.getElementById('inputs-newton');
     const cabecera = document.getElementById('tabla-cabecera');
     const titulo = document.getElementById('titulo-metodo');
     const subtitulo = document.getElementById('subtitulo-metodo');
 
     const esBiseccion = metodo === 'biseccion';
+    const esPuntoFijo = metodo === 'puntofijo';
+    const esNewton = metodo === 'newton';
 
     if (divBiseccion) divBiseccion.style.display = esBiseccion ? '' : 'none';
-    if (divPuntoFijo) divPuntoFijo.style.display = esBiseccion ? 'none' : '';
+    if (divPuntoFijo) divPuntoFijo.style.display = esPuntoFijo ? '' : 'none';
+    if (divNewton) divNewton.style.display = esNewton ? '' : 'none';
 
     // Mostrar/ocultar contenedores de ejemplos según el método
     const ejBiseccion = document.getElementById('ejemplos-biseccion');
@@ -32,14 +37,31 @@ function alternarMetodoUI() {
     const campoFx = document.getElementById('funcion');
     const campoGx = document.getElementById('funcion-gx');
     const campoX0 = document.getElementById('x0');
+    const campoFxNewton = document.getElementById('funcion-newton');
+    const campoX0Newton = document.getElementById('x0-newton');
+    
     if (campoFx) { campoFx.required = esBiseccion; campoFx.disabled = !esBiseccion; }
-    if (campoGx) { campoGx.required = !esBiseccion; campoGx.disabled = esBiseccion; }
-    if (campoX0) { campoX0.required = !esBiseccion; campoX0.disabled = esBiseccion; }
+    if (campoGx) { campoGx.required = esPuntoFijo; campoGx.disabled = !esPuntoFijo; }
+    if (campoX0) { campoX0.required = esPuntoFijo; campoX0.disabled = !esPuntoFijo; }
+    if (campoFxNewton) { campoFxNewton.required = esNewton; campoFxNewton.disabled = !esNewton; }
+    if (campoX0Newton) { campoX0Newton.required = esNewton; campoX0Newton.disabled = !esNewton; }
 
-    if (cabecera) cabecera.innerHTML = esBiseccion ? CABECERA_BISECCION : CABECERA_PUNTOFIJO;
+    if (cabecera) {
+        if (esBiseccion) cabecera.innerHTML = CABECERA_BISECCION;
+        else if (esPuntoFijo) cabecera.innerHTML = CABECERA_PUNTOFIJO;
+        else if (esNewton) cabecera.innerHTML = CABECERA_NEWTON;
+    }
 
-    if (titulo) titulo.innerText = esBiseccion ? 'Método de Bisección' : 'Iteración de Punto Fijo';
-    if (subtitulo) subtitulo.innerText = esBiseccion ? 'Análisis de Procedimiento y Raíces' : 'Convergencia hacia x = g(x)';
+    if (titulo) {
+        if (esBiseccion) titulo.innerText = 'Método de Bisección';
+        else if (esPuntoFijo) titulo.innerText = 'Iteración de Punto Fijo';
+        else if (esNewton) titulo.innerText = 'Método de Newton-Raphson';
+    }
+    if (subtitulo) {
+        if (esBiseccion) subtitulo.innerText = 'Análisis de Procedimiento y Raíces';
+        else if (esPuntoFijo) subtitulo.innerText = 'Convergencia hacia x = g(x)';
+        else if (esNewton) subtitulo.innerText = 'Aproximación sucesiva xₙ₊₁ = xₙ - f(xₙ)/f\'(xₙ)';
+    }
 
     limpiarTabla();
 }
@@ -53,6 +75,8 @@ function ejecutarCalculo(event) {
         calcularBiseccion();
     } else if (metodo === 'puntofijo') {
         calcularPuntoFijo();
+    } else if (metodo === 'newton') {
+        calcularNewton();
     }
 }
 
