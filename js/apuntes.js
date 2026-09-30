@@ -120,43 +120,7 @@ async function cargarApuntesRemotos() {
         }
         cont.appendChild(card);
     });
-    generarIndice();
     filtrarContenido();
-}
-
-// --- ÍNDICE DINÁMICO DE APUNTES ---
-
-// Genera los enlaces del índice a partir de las tarjetas visibles en el DOM.
-// Se reconstruye en cada carga para reflejar altas y bajas.
-function generarIndice() {
-    const barra = document.getElementById('indice-apuntes');
-    const grid = document.getElementById('indice-grid');
-    if (!barra || !grid) return;
-
-    // Limpiar grid previo
-    grid.innerHTML = '';
-
-    const tarjetas = document.querySelectorAll('#lista-apuntes .apunte-card');
-    barra.style.display = tarjetas.length === 0 ? 'none' : '';
-
-    tarjetas.forEach((card, i) => {
-        if (!card.id) return;
-        const titulo = card.querySelector('h4') ? card.querySelector('h4').innerText.trim() : `Apunte ${i + 1}`;
-        const enlace = document.createElement('a');
-        enlace.href = `#${card.id}`;
-        const tituloLimpio = titulo.replace(/_/g, ' ');
-        enlace.textContent = `${i + 1}. ${tituloLimpio}`;
-        enlace.title = tituloLimpio;
-        // Al saltar limpiar el buscador para que la tarjeta destino sea visible
-        enlace.addEventListener('click', () => {
-            const buscador = document.getElementById('buscador');
-            if (buscador && buscador.value !== '') {
-                buscador.value = '';
-                filtrarContenido();
-            }
-        });
-        grid.appendChild(enlace);
-    });
 }
 
 // --- PUBLICAR NUEVO APUNTE ---
@@ -300,18 +264,15 @@ function filtrarContenido() {
     const sin = document.getElementById('apuntes-sin-resultados');
     const vacio = document.getElementById('apuntes-vacio');
     const term = document.getElementById('termino-busqueda');
-    const indice = document.getElementById('indice-apuntes');
     const hayDatos = cards.length > 0;
 
     if (hayDatos && q !== '' && visibles === 0) {
         if (sin) sin.style.display = 'block';
         if (term) term.textContent = qRaw.trim();
         if (vacio) vacio.style.display = 'none';
-        if (indice) indice.style.display = 'none';
     } else {
         if (sin) sin.style.display = 'none';
         if (vacio) vacio.style.display = hayDatos ? 'none' : 'block';
-        if (indice) indice.style.display = hayDatos && visibles > 0 ? '' : 'none';
     }
 }
 

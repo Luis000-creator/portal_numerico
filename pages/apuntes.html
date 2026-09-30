@@ -39,11 +39,6 @@
         <h1>Apuntes de Equipo</h1>
         <div class="subtitle">Subido y editado por colaboradores</div>
 
-        <div class="apuntes-index-bar" id="indice-apuntes" style="display: none;">
-            <span class="apuntes-index-title">Índice:</span>
-            <div class="apuntes-index-grid" id="indice-grid"></div>
-        </div>
-
         <form id="form-apunte" class="form-apunte">
             <h4><i class="fa-solid fa-plus icon-left"></i>Agregar nuevo apunte</h4>
             <div class="form-group">
@@ -64,9 +59,7 @@
 
         <div id="lista-apuntes">
             <div id="apuntes-remotos"></div>
-            <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js).
-                 Se eliminaron los ejemplos hardcodeados para evitar duplicados y
-                 mantener el índice generado por contenido real. -->
+            <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js). -->
             <p id="apuntes-vacio" class="apuntes-vacio" style="display:none;">
                 <i class="fa-regular fa-folder-open icon-left-sm"></i> Aún no hay apuntes publicados. ¡Sé el primero en compartir uno!
             </p>
