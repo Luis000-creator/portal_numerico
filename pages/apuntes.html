@@ -1,79 +1,187 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portal Numérico | Teoría / Apuntes</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Itera | Teoría / Apuntes</title>
+    <meta
+      name="description"
+      content="Apuntes colaborativos de métodos numéricos en Itera: teoría, teoremas y fórmulas del equipo Los Siete Métodos."
+    />
+    <link rel="canonical" href="https://luis000-creator.github.io/portal_numerico/pages/apuntes.html" />
+    <meta name="theme-color" content="#07090e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content="Itera" />
+    <meta property="og:title" content="Itera | Apuntes de Métodos Numéricos" />
+    <meta
+      property="og:description"
+      content="Teoría, teoremas y fórmulas de métodos numéricos con visor integrado."
+    />
+    <meta property="og:url" content="https://luis000-creator.github.io/portal_numerico/pages/apuntes.html" />
+    <meta property="og:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Itera | Apuntes de Métodos Numéricos" />
+    <meta
+      name="twitter:description"
+      content="Teoría, teoremas y fórmulas de métodos numéricos con visor integrado."
+    />
+    <meta name="twitter:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Itera: calculadoras interactivas y apuntes de métodos numéricos" />
+    <meta name="twitter:image:alt" content="Itera: calculadoras interactivas y apuntes de métodos numéricos" />
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <!-- KaTEX para renderizado de fórmulas matemáticas -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+      crossorigin="anonymous"
+      media="print"
+      onload="this.media='all'"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+      integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
+      crossorigin="anonymous"
+      defer
+    ></script>
 
     <!-- Lector de Markdown para visor integrado -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"
+      integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+"
+      crossorigin="anonymous"
+      defer
+    ></script>
 
     <!-- Sanitizador HTML para el visor de Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"
+      integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a"
+      crossorigin="anonymous"
+      defer
+    ></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/styles.css">
-</head>
-<body>
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI"
+      crossorigin="anonymous"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
 
-<canvas id="particle-canvas"></canvas>
+  <body>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
-<header>
-    <div class="logo-title">Portal Numérico</div>
-    <input type="text" class="search-box" id="buscador" placeholder="Buscar..." onkeyup="filtrarContenido()">
-    <ul class="nav-links">
+    <header>
+      <div class="logo-title">Itera</div>
+      <label class="visually-hidden" for="buscador">Buscar apuntes</label>
+      <input
+        type="text"
+        class="search-box"
+        id="buscador"
+        placeholder="Buscar..."
+        aria-label="Buscar apuntes"
+        onkeyup="filtrarContenido()"
+      />
+      <ul class="nav-links">
         <li><a href="../index.html">Inicio</a></li>
         <li><a href="calculadora.html">Calculadora</a></li>
         <li><a href="apuntes.html" class="active-link">Apuntes</a></li>
         <li><a href="social.html">Conócenos</a></li>
-    </ul>
-</header>
+      </ul>
+    </header>
 
-<div class="main-container">
-
-    <div class="container">
+    <div class="main-container">
+      <div class="container">
         <h1>Apuntes de Equipo</h1>
         <div class="subtitle">Subido y editado por colaboradores</div>
 
         <form id="form-apunte" class="form-apunte">
-            <h4><i class="fa-solid fa-plus icon-left"></i>Agregar nuevo apunte</h4>
-            <div class="form-group">
-                <input type="text" name="titulo" placeholder="Título del tema (ej. Teorema de Bolzano)" maxlength="200" required>
-            </div>
-            <div class="form-group">
-                <textarea name="contenido" rows="3" placeholder="Escribe la teoría o descripción (Opcional)..." maxlength="20000"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Adjuntar PDF o Markdown (Opcional)</label>
-                <label for="archivo" class="file-upload-label">
-                    <span id="file-name-display"><i class="fa-solid fa-file-arrow-up"></i> Haz clic para seleccionar un archivo...</span>
-                </label>
-                <input type="file" id="archivo" name="archivo" accept=".pdf,.md" style="display: none;">
-            </div>
-            <button type="submit" class="btn-outline" style="width: 100%;">Publicar Apunte</button>
+          <h2 class="form-apunte-title"><i class="fa-solid fa-plus icon-left"></i>Agregar nuevo apunte</h2>
+          <div class="form-group">
+            <input
+              type="text"
+              name="titulo"
+              placeholder="Título del tema (ej. Teorema de Bolzano)"
+              maxlength="200"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <textarea
+              name="contenido"
+              rows="3"
+              placeholder="Escribe la teoría o descripción (Opcional)..."
+              maxlength="20000"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Adjuntar PDF o Markdown (Opcional)</label>
+            <label for="archivo" class="file-upload-label">
+              <span id="file-name-display"
+                ><i class="fa-solid fa-file-arrow-up"></i> Haz clic para seleccionar un
+                archivo...</span
+              >
+            </label>
+            <input
+              type="file"
+              id="archivo"
+              name="archivo"
+              accept=".pdf,.md"
+              style="display: none"
+            />
+          </div>
+          <button type="submit" class="btn-outline" style="width: 100%">Publicar Apunte</button>
         </form>
 
         <div id="lista-apuntes">
-            <div id="apuntes-remotos"></div>
-            <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js). -->
-            <p id="apuntes-vacio" class="apuntes-vacio" style="display:none;">
-                <i class="fa-regular fa-folder-open icon-left-sm"></i> Aún no hay apuntes publicados. ¡Sé el primero en compartir uno!
-            </p>
-            <p id="apuntes-sin-resultados" class="apuntes-vacio apuntes-vacio--busqueda" style="display:none;" role="status" aria-live="polite">
-                <i class="fa-solid fa-magnifying-glass icon-left-sm"></i> No se encontraron apuntes para "<span id="termino-busqueda"></span>".
-            </p>
+          <div id="apuntes-remotos"></div>
+          <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js). -->
+          <p id="apuntes-vacio" class="apuntes-vacio" style="display: none">
+            <i class="fa-regular fa-folder-open icon-left-sm"></i> Aún no hay apuntes publicados.
+            ¡Sé el primero en compartir uno!
+          </p>
+          <p
+            id="apuntes-sin-resultados"
+            class="apuntes-vacio apuntes-vacio--busqueda"
+            style="display: none"
+            role="status"
+            aria-live="polite"
+          >
+            <i class="fa-solid fa-magnifying-glass icon-left-sm"></i> No se encontraron apuntes para
+            "<span id="termino-busqueda"></span>".
+          </p>
         </div>
+      </div>
     </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha384-iLddHTLokph6Omwoyid4XKxHaWa6w41BnoEj0q5oOrzmYPpHIKt1wyjReA7s//pP" crossorigin="anonymous"></script>
-<script src="../js/supabase-config.js"></script>
-<script src="../js/apuntes.js"></script>
-<script src="../js/canvas-animation.js"></script>
-</body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"
+      integrity="sha384-iLddHTLokph6Omwoyid4XKxHaWa6w41BnoEj0q5oOrzmYPpHIKt1wyjReA7s//pP"
+      crossorigin="anonymous"
+      defer
+    ></script>
+    <script src="../js/supabase-config.js" defer></script>
+    <script src="../js/apuntes.js" defer></script>
+    <script src="../js/canvas-animation.js" defer></script>
+  </body>
 </html>

@@ -1,5 +1,5 @@
 // ============================================================================
-// Portal Numérico - Bisección Module
+// Itera - Bisección Module
 // ============================================================================
 // Contiene: evaluador de expresiones con mathjs y logica del metodo
 // de biseccion para calculadora.html
@@ -52,6 +52,7 @@ window.ocultarInfo = ocultarInfo;
 
 function evaluarFuncion(expr, x) {
     try {
+        if (typeof math === 'undefined' || !math.evaluate) return NaN;
         const result = math.evaluate(expr, { x });
         return Number.isFinite(result) ? result : NaN;
     } catch (err) { return NaN; }
@@ -135,6 +136,10 @@ function leerCriterio() {
     const criterio = document.getElementById('criterio').value;
     let valor;
     try {
+        if (typeof math === 'undefined' || !math.evaluate) {
+            mostrarError('La librería matemática aún se está cargando. Intenta de nuevo en un momento.');
+            return null;
+        }
         valor = math.evaluate(document.getElementById('valorCriterio').value);
         valor = Number(valor);
     } catch (e) {
@@ -167,6 +172,11 @@ function cablearPreview(inputId, previewId, prefijo) {
     input.addEventListener('input', function(e) {
         const expr = e.target.value.trim();
         if (!expr) {
+            preview.innerHTML = '';
+            preview.className = 'preview-fx';
+            return;
+        }
+        if (typeof math === 'undefined' || typeof katex === 'undefined') {
             preview.innerHTML = '';
             preview.className = 'preview-fx';
             return;

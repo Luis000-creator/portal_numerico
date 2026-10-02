@@ -1,5 +1,5 @@
 // ============================================================================
-// Portal Numérico - Punto Fijo Module
+// Itera - Punto Fijo Module
 // ============================================================================
 // Contiene: selector de metodo, router de calculo y logica del metodo
 // de iteracion de punto fijo para calculadora.html
@@ -84,6 +84,7 @@ function ejecutarCalculo(event) {
 
 // Aviso no bloqueante si |g'(x0)| >= 1 (posible divergencia)
 function avisarConvergencia(exprG, x0) {
+    if (typeof math === 'undefined' || !math.derivative) return true;
     try {
         const derivada = math.derivative(exprG, 'x').evaluate({ x: x0 });
         if (Number.isFinite(derivada) && Math.abs(derivada) >= 1) {

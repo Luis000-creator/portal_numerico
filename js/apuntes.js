@@ -1,5 +1,5 @@
 // ============================================================================
-// Portal Numérico - Apuntes Module
+// Itera - Apuntes Module
 // ============================================================================
 // Contiene: funciones para cargar, publicar y buscar apuntes en Supabase
 // ============================================================================
@@ -28,8 +28,8 @@ async function cargarApuntesRemotos() {
         const fileIcon = esPdf ? '<i class="fa-regular fa-file-pdf" style="margin-right:6px; color:#ff6b6b;"></i>'
                        : esMd ? '<i class="fa-regular fa-file-lines" style="margin-right:6px; color:#00f0ff;"></i>'
                        : '<i class="fa-solid fa-file" style="margin-right:6px; color:var(--text-muted);"></i>';
-        card.innerHTML = `<h4>${fileIcon}<span></span></h4><p></p><small style="color:var(--text-muted);display:block;margin-top:8px"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>Publicado: ${fecha}</small>`;
-        card.querySelector('h4 span').textContent = apunte.titulo;
+        card.innerHTML = `<h3>${fileIcon}<span></span></h3><p></p><small style="color:var(--text-muted);display:block;margin-top:8px"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>Publicado: ${fecha}</small>`;
+        card.querySelector('h3 span').textContent = apunte.titulo;
         card.querySelector('p').textContent = apunte.contenido;
         // Renderizar KaTEX en el contenido del apunte
         const parrafo = card.querySelector('p');
@@ -81,6 +81,8 @@ async function cargarApuntesRemotos() {
                     const objeto = document.createElement('object');
                     objeto.data = url;
                     objeto.type = 'application/pdf';
+                    objeto.title = `Documento PDF: ${apunte.titulo}`;
+                    objeto.setAttribute('aria-label', `Visor del documento PDF: ${apunte.titulo}`);
                     objeto.className = 'visor-pdf';
                     objeto.style.cssText = 'border-radius: 4px; background: #222;';
                     // Fallback si el navegador no soporta el visor integrado
@@ -98,14 +100,18 @@ async function cargarApuntesRemotos() {
                     visor.appendChild(objeto);
                 } else if (url.toLowerCase().endsWith('.md')) {
                     try {
-                        const response = await fetch(url);
-                        const text = await response.text();
-                        // Traducir Markdown a HTML y sanitizar contra XSS
-                        const limpio = DOMPurify.sanitize(marked.parse(text));
-                        visor.innerHTML = limpio;
-                        // Pasar las matematicas por KaTeX
-                        if (typeof renderizarMath === 'function') {
-                            renderizarMath(visor);
+                        if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                            visor.textContent = 'El visor Markdown aún se está cargando. Intenta de nuevo.';
+                        } else {
+                            const response = await fetch(url);
+                            const text = await response.text();
+                            // Traducir Markdown a HTML y sanitizar contra XSS
+                            const limpio = DOMPurify.sanitize(marked.parse(text));
+                            visor.innerHTML = limpio;
+                            // Pasar las matematicas por KaTeX
+                            if (typeof renderizarMath === 'function') {
+                                renderizarMath(visor);
+                            }
                         }
                     } catch (e) {
                         visor.textContent = 'Error al cargar el archivo Markdown.';
@@ -220,6 +226,7 @@ async function publicarApunte(event) {
 
 // Renderiza formulas LaTeX con KaTeX en cualquier parte del texto
 function renderizarMath(elemento) {
+    if (typeof katex === 'undefined') return;
     let html = elemento.innerHTML;
 
     // Funcion auxiliar para revertir los caracteres seguros a matematicos

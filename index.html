@@ -3,22 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Portal Numérico | Bienvenido</title>
+    <title>Itera | Bienvenido</title>
+    <meta
+      name="description"
+      content="Itera: calculadoras interactivas de bisección, punto fijo y Newton-Raphson más apuntes colaborativos de métodos numéricos."
+    />
+    <link rel="canonical" href="https://luis000-creator.github.io/portal_numerico/" />
+    <meta name="theme-color" content="#07090e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content="Itera" />
+    <meta property="og:title" content="Itera | Métodos Numéricos" />
+    <meta
+      property="og:description"
+      content="Calculadoras interactivas y apuntes colaborativos de métodos numéricos."
+    />
+    <meta property="og:url" content="https://luis000-creator.github.io/portal_numerico/" />
+    <meta
+      property="og:image"
+      content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Itera | Métodos Numéricos" />
+    <meta
+      name="twitter:description"
+      content="Calculadoras interactivas y apuntes colaborativos de métodos numéricos."
+    />
+    <meta
+      name="twitter:image"
+      content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta
+      property="og:image:alt"
+      content="Itera: calculadoras interactivas y apuntes de métodos numéricos"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Itera: calculadoras interactivas y apuntes de métodos numéricos"
+    />
 
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
       integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI"
       crossorigin="anonymous"
+      media="print"
+      onload="this.media = 'all'"
     />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
   <body>
-    <canvas id="particle-canvas"></canvas>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
     <header>
-      <div class="logo-title">Portal Numérico</div>
+      <div class="logo-title">Itera</div>
       <ul class="nav-links">
         <li><a href="index.html" class="active-link">Inicio</a></li>
         <li><a href="pages/calculadora.html">Calculadora</a></li>
@@ -29,7 +77,7 @@
 
     <div class="main-container">
       <div class="container container--landing">
-        <h1 class="landing-title">Portal Numérico</h1>
+        <h1 class="landing-title">Itera</h1>
 
         <div class="subtitle subtitle--landing">
           Plataforma educativa enfocada a la materia de <strong>Métodos Numéricos</strong>. Aquí
@@ -39,9 +87,9 @@
 
         <div class="cards-grid">
           <div class="apunte-card card-landing card-landing--cyan">
-            <h3 class="card-title card-title--cyan">
+            <h2 class="card-title card-title--cyan">
               <i class="fa-solid fa-calculator" aria-hidden="true"></i> Calculadoras
-            </h3>
+            </h2>
             <p class="card-desc">
               Ingresa tu función y obtén la tabla de iteraciones paso a paso, con intervalos
               automáticos y criterios de paro configurables.
@@ -52,9 +100,9 @@
           </div>
 
           <div class="apunte-card card-landing card-landing--violet">
-            <h3 class="card-title card-title--violet">
+            <h2 class="card-title card-title--violet">
               <i class="fa-solid fa-book-open" aria-hidden="true"></i> Apuntes
-            </h3>
+            </h2>
             <p class="card-desc">
               Accede a la sección de <strong>Apuntes</strong> donde el equipo sube definiciones,
               teoremas, fórmulas y notas de clase. Organizado por temas con índice de navegación
@@ -66,9 +114,9 @@
           </div>
 
           <div class="apunte-card card-landing card-landing--magenta">
-            <h3 class="card-title card-title--magenta">
+            <h2 class="card-title card-title--magenta">
               <i class="fa-solid fa-users" aria-hidden="true"></i> Conócenos
-            </h3>
+            </h2>
             <p class="card-desc">
               Conoce la misión y visión detrás del proyecto, explora nuestras redes sociales
               oficiales y descubre a los integrantes del equipo encargado del proyecto.
@@ -80,11 +128,14 @@
         </div>
 
         <div class="footer-landing">
-          <p>Desarrollado como proyecto académico para Métodos Numéricos</p>
+          <p>
+            Desarrollado como proyecto académico para Métodos Numéricos por el equipo Los Siete
+            Métodos
+          </p>
         </div>
       </div>
     </div>
 
-    <script src="js/canvas-animation.js"></script>
+    <script src="js/canvas-animation.js" defer></script>
   </body>
 </html>

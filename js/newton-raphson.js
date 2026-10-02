@@ -1,5 +1,5 @@
 // ============================================================================
-// Portal Numérico - Newton-Raphson Module
+// Itera - Newton-Raphson Module
 // ============================================================================
 // Contiene: lógica del método de Newton-Raphson para calculadora.html
 // Requiere: mathjs (CDN UMD en calculadora.html) y utilidades compartidas de biseccion.js
@@ -30,6 +30,10 @@ function calcularNewton() {
 
   // Compilar función y su derivada una sola vez para eficiencia
   let parsedF, parsedFPrime;
+  if (typeof math === 'undefined' || !math.parse || !math.derivative) {
+    mostrarError("La librería matemática aún se está cargando. Intenta de nuevo en un momento.");
+    return;
+  }
   try {
     parsedF = math.parse(exprF);
     parsedFPrime = math.derivative(parsedF, "x");
@@ -153,6 +157,11 @@ function actualizarPreviewDerivada(exprF, derivadaYaCalculada) {
   if (!preview) return;
   const expr = (exprF || "").trim();
   if (!expr) {
+    preview.innerHTML = "";
+    preview.className = "preview-fx";
+    return;
+  }
+  if (typeof math === 'undefined' || typeof katex === 'undefined') {
     preview.innerHTML = "";
     preview.className = "preview-fx";
     return;

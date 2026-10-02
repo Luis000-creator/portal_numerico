@@ -1,5 +1,5 @@
 // ============================================================================
-// Portal Numérico - Canvas Animation Module
+// Itera - Canvas Animation Module
 // ============================================================================
 // Gestiona: fondo de estrellas, partículas de símbolos, animación en tiempo real
 // ============================================================================
@@ -8,6 +8,15 @@
 const symbolsList = ['+', '-', '×', '÷', '∑', '∫', 'π', '√', 'lim', 'f(x)', 'Δ'];
 const colors = ['#ffffff', '#00f0ff', '#bd00ff', '#ff007b', '#7000ff'];
 let mouse = { x: null, y: null, radius: 130 };
+
+// No animar si el usuario prefiere movimiento reducido (ahorra CPU y mejora a11y)
+const REDUCED_MOTION = window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+// Móvil = menos partículas y sin líneas entre estrellas (O(n²) caro)
+const IS_SMALL_SCREEN = window.matchMedia
+    ? window.matchMedia('(max-width: 768px)').matches
+    : window.innerWidth < 768;
 
 window.addEventListener('mousemove', (e) => {
     mouse.x = e.clientX;
@@ -77,13 +86,16 @@ function getSymbolPoints(symbolText) {
 
     const imgData = offCtx.getImageData(0, 0, 120, 120);
     const points = [];
-    const step = 3;
+    // Paso 4 en vez de 3: ~44% menos partículas con forma aún reconocible
+    const step = IS_SMALL_SCREEN ? 5 : 4;
+    const MAX_POINTS = IS_SMALL_SCREEN ? 60 : 120;
 
     for (let y = 0; y < 120; y += step) {
         for (let x = 0; x < 120; x += step) {
             const index = (y * 120 + x) * 4;
             if (imgData.data[index + 3] > 128) {
                 points.push({ x: x - 60, y: y - 60 });
+                if (points.length >= MAX_POINTS) return points;
             }
         }
     }
@@ -154,13 +166,30 @@ class ParticleAnimation {
         this.symbolParticles = [];
         this.animationId = null;
         this.initialized = false;
+        this.lastFrame = 0;
+        this.resizeTimer = null;
+        this.visible = true;
     }
 
     init() {
         if (!this.canvas || this.initialized) return;
+        // Con reduced-motion: dibujar un frame estático y no animar
+        if (REDUCED_MOTION) {
+            this.resize();
+            this.drawStatic();
+            this.initialized = true;
+            return;
+        }
         this.resize();
         this.initialized = true;
         this.animate(0);
+    }
+
+    drawStatic() {
+        if (!this.ctx || !this.canvas) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.backgroundStars.forEach(s => s.draw(this.ctx));
+        this.symbolParticles.forEach(p => p.draw(this.ctx));
     }
 
     resize() {
@@ -173,27 +202,83 @@ class ParticleAnimation {
 
     initBackgroundStars() {
         this.backgroundStars = [];
-        const count = (this.canvas.width * this.canvas.height) / 10000;
+        // Densidad menor + tope absoluto (antes sin tope: O(n²) en animate)
+        const raw = (this.canvas.width * this.canvas.height) / 22000;
+        const count = Math.min(IS_SMALL_SCREEN ? 35 : 90, Math.floor(raw));
         for (let i = 0; i < count; i++) {
             this.backgroundStars.push(new Star(this.canvas));
         }
     }
 
+    // Zona central ocupada por el contenido: las partículas ahí quedan tapadas.
+    // Se calcula desde el .container visible + margen (símbolo ±60px + flotación ±15px).
+    getContentExclusion() {
+        const pad = 110;
+        const el = document.querySelector('.container');
+        if (el) {
+            const r = el.getBoundingClientRect();
+            // Si el contenedor no está en viewport (raro), caer al estimado centrado
+            if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight) {
+                return {
+                    left: r.left - pad,
+                    right: r.right + pad,
+                    top: r.top - pad,
+                    bottom: r.bottom + pad,
+                };
+            }
+        }
+        const w = Math.min(760, window.innerWidth * 0.72);
+        const h = Math.min(620, window.innerHeight * 0.72);
+        return {
+            left: window.innerWidth / 2 - w / 2 - pad,
+            right: window.innerWidth / 2 + w / 2 + pad,
+            top: window.innerHeight / 2 - h / 2 - pad,
+            bottom: window.innerHeight / 2 + h / 2 + pad,
+        };
+    }
+
     initSymbolParticles() {
         this.symbolParticles = [];
-        const totalSymbols = 14;
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
+        // 14 → 7 desktop / 4 móvil
+        const totalSymbols = IS_SMALL_SCREEN ? 4 : 7;
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        const margin = 80;
+        const exclusion = this.getContentExclusion();
+        const isExcluded = (x, y) =>
+            x > exclusion.left && x < exclusion.right && y > exclusion.top && y < exclusion.bottom;
 
         for (let i = 0; i < totalSymbols; i++) {
             const randomSymbol = symbolsList[Math.floor(Math.random() * symbolsList.length)];
             const symbolColor = colors[Math.floor(Math.random() * colors.length)];
 
-            const angle = (i / totalSymbols) * Math.PI * 2 + (Math.random() * 0.3);
-            const distance = 360 + Math.random() * 220;
-
-            const baseX = centerX + Math.cos(angle) * distance;
-            const baseY = centerY + Math.sin(angle) * (distance * 0.75);
+            // Muestreo por rechazo: buscar base fuera del contenido, en los márgenes visibles
+            let baseX = margin;
+            let baseY = margin;
+            let placed = false;
+            for (let attempt = 0; attempt < 25 && !placed; attempt++) {
+                const x = margin + Math.random() * Math.max(1, W - margin * 2);
+                // Evitar la franja vertical del header en el primer intento no es necesario;
+                // basta con huir del rectángulo de contenido
+                const y = margin + Math.random() * Math.max(1, H - margin * 2);
+                if (!isExcluded(x, y)) {
+                    baseX = x;
+                    baseY = y;
+                    placed = true;
+                }
+            }
+            if (!placed) {
+                // Fallback: esquinas alternadas (siempre visibles)
+                const corners = [
+                    [margin + 40, margin + 40],
+                    [W - margin - 40, margin + 40],
+                    [margin + 40, H - margin - 40],
+                    [W - margin - 40, H - margin - 40],
+                ];
+                const c = corners[i % corners.length];
+                baseX = Math.min(Math.max(c[0], margin), W - margin);
+                baseY = Math.min(Math.max(c[1], margin), H - margin);
+            }
 
             const symbolGroup = { offsetSeed: Math.random() * 100 };
             const points = getSymbolPoints(randomSymbol);
@@ -210,25 +295,41 @@ class ParticleAnimation {
 
     animate(timestamp) {
         if (!this.ctx || !this.canvas) return;
+        // Throttle a ~30fps: el ojo no nota más en un fondo decorativo
+        if (timestamp - this.lastFrame < 33) {
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+            return;
+        }
+        this.lastFrame = timestamp;
+        // Pausar trabajo si la pestaña no es visible
+        if (!this.visible || document.hidden) {
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+            return;
+        }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (let i = 0; i < this.backgroundStars.length; i++) {
             this.backgroundStars[i].update();
             this.backgroundStars[i].draw(this.ctx);
+        }
 
-            for (let j = i + 1; j < this.backgroundStars.length; j++) {
-                let dist = Math.hypot(
-                    this.backgroundStars[i].x - this.backgroundStars[j].x,
-                    this.backgroundStars[i].y - this.backgroundStars[j].y
-                );
-                if (dist < 85) {
-                    this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.08 * (1 - dist / 85)})`;
-                    this.ctx.lineWidth = 0.4;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(this.backgroundStars[i].x, this.backgroundStars[i].y);
-                    this.ctx.lineTo(this.backgroundStars[j].x, this.backgroundStars[j].y);
-                    this.ctx.stroke();
+        // Líneas entre estrellas solo en desktop (coste cuadrático)
+        if (!IS_SMALL_SCREEN) {
+            for (let i = 0; i < this.backgroundStars.length; i++) {
+                for (let j = i + 1; j < this.backgroundStars.length; j++) {
+                    let dist = Math.hypot(
+                        this.backgroundStars[i].x - this.backgroundStars[j].x,
+                        this.backgroundStars[i].y - this.backgroundStars[j].y
+                    );
+                    if (dist < 85) {
+                        this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.08 * (1 - dist / 85)})`;
+                        this.ctx.lineWidth = 0.4;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.backgroundStars[i].x, this.backgroundStars[i].y);
+                        this.ctx.lineTo(this.backgroundStars[j].x, this.backgroundStars[j].y);
+                        this.ctx.stroke();
+                    }
                 }
             }
         }
@@ -257,9 +358,27 @@ window.resize = () => particleAnimation.resize();
 window.regenerateSymbols = () => particleAnimation.regenerateSymbols();
 window.animate = (ts) => particleAnimation.animate(ts);
 
-// Inicializar al cargar
-document.addEventListener('DOMContentLoaded', () => {
+// Inicializar cuando el navegador esté libre (no bloquea FCP/LCP)
+function initWhenIdle() {
     particleAnimation.init();
+}
+if ('requestIdleCallback' in window) {
+    document.addEventListener('DOMContentLoaded', () => {
+        requestIdleCallback(initWhenIdle, { timeout: 1500 });
+    });
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initWhenIdle, 300);
+    });
+}
+
+// Debounce resize: antes reconstruía cientos de partículas por cada píxel
+window.addEventListener('resize', () => {
+    clearTimeout(particleAnimation.resizeTimer);
+    particleAnimation.resizeTimer = setTimeout(() => particleAnimation.resize(), 250);
 });
 
-window.addEventListener('resize', () => particleAnimation.resize());
+// Pausar cuando la pestaña se oculta (ahorra CPU/batería)
+document.addEventListener('visibilitychange', () => {
+    particleAnimation.visible = !document.hidden;
+});

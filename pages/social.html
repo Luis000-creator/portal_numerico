@@ -3,21 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Numérico | Conócenos</title>
+    <title>Itera | Conócenos</title>
+    <meta
+      name="description"
+      content="Conoce al equipo Los Siete Métodos detrás de Itera, su misión y redes oficiales del proyecto."
+    />
+    <link rel="canonical" href="https://luis000-creator.github.io/portal_numerico/pages/social.html" />
+    <meta name="theme-color" content="#07090e" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content="Itera" />
+    <meta property="og:title" content="Itera | Conócenos" />
+    <meta
+      property="og:description"
+      content="Misión, visión y equipo Los Siete Métodos detrás de Itera."
+    />
+    <meta property="og:url" content="https://luis000-creator.github.io/portal_numerico/pages/social.html" />
+    <meta property="og:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Itera | Conócenos" />
+    <meta
+      name="twitter:description"
+      content="Misión, visión y equipo Los Siete Métodos detrás de Itera."
+    />
+    <meta name="twitter:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Itera: calculadoras interactivas y apuntes de métodos numéricos" />
+    <meta name="twitter:image:alt" content="Itera: calculadoras interactivas y apuntes de métodos numéricos" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
       integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI"
       crossorigin="anonymous"
+      media="print"
+      onload="this.media = 'all'"
     />
     <link rel="stylesheet" href="../css/styles.css" />
   </head>
 
   <body>
-    <canvas id="particle-canvas"></canvas>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
     <header>
-      <div class="logo-title">PORTAL NUMÉRICO</div>
+      <div class="logo-title">ITERA</div>
       <ul class="nav-links">
         <li><a href="../index.html">Inicio</a></li>
         <li><a href="calculadora.html">Calculadora</a></li>
@@ -44,7 +80,7 @@
 
         <div class="mision-vision-grid">
           <div class="mision-card mision-card--mision">
-            <h3>[ Misión ]</h3>
+            <h2 class="mision-title">[ Misión ]</h2>
             <p>
               Promover, preservar y difundir los conocimientos adquiridos en la materia de Métodos
               Numéricos a través de un portal web de y para ingenieros contribuyendo a la formación
@@ -53,17 +89,17 @@
           </div>
 
           <div class="mision-card mision-card--vision">
-            <h3>[ Visión ]</h3>
+            <h2 class="mision-title">[ Visión ]</h2>
             <p>
-              Contribuir al crecimiento académico de lxs ingenierxs inculcando materiales didácticos
-              para el aprendizaje y compendios de información útiles para el estudio de la
-              ingeniería.
+              Contribuir al crecimiento académico de las ingenieras y los ingenieros inculcando
+              materiales didácticos para el aprendizaje y compendios de información útiles para el
+              estudio de la ingeniería.
             </p>
           </div>
         </div>
 
         <div class="equipo-section">
-          <h2 class="equipo-title">El Equipo: <span>LOS SEIS MÉTODOS</span></h2>
+          <h2 class="equipo-title">El Equipo: <span>LOS SIETE MÉTODOS</span></h2>
 
           <div class="badges-wrap">
             <span class="badge-equipo">Arriaga Franco Diego</span>
@@ -77,7 +113,7 @@
         </div>
 
         <div class="redes-section">
-          <h3>Contacto y Redes</h3>
+          <h2 class="redes-title">Contacto y Redes</h2>
           <div class="cards-grid redes-cards-grid">
             <a
               href="https://github.com/Luis000-creator/portal_numerico.git"
@@ -147,6 +183,6 @@
       </div>
     </div>
 
-    <script src="../js/canvas-animation.js"></script>
+    <script src="../js/canvas-animation.js" defer></script>
   </body>
 </html>
