@@ -68,9 +68,21 @@ function alternarMetodoUI() {
     limpiarTabla();
 }
 
-// Router: decide que algoritmo ejecutar segun el metodo activo
-function ejecutarCalculo(event) {
+// Router: decide que algoritmo ejecutar segun el metodo activo.
+// Espera al motor lazy (math/KaTeX) antes de calcular.
+async function ejecutarCalculo(event) {
     event.preventDefault();
+    if (window.Vendor && window.Vendor.ensureCalc) {
+        try {
+            await window.Vendor.ensureCalc();
+        } catch (e) {
+            mostrarError('No se pudo cargar el motor matemático. Revisa tu conexión e intenta de nuevo.');
+            return;
+        }
+    } else if (typeof math === 'undefined') {
+        mostrarError('El motor matemático aún se está cargando. Intenta de nuevo en un momento.');
+        return;
+    }
     const metodo = document.getElementById('metodo-selector').value;
 
     if (metodo === 'biseccion') {

@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Itera | Calculadora Bisección</title>
+    <link rel="icon" type="image/x-icon" href="../img/IteraFavicon.ico" />
+    <link rel="icon" type="image/webp" sizes="16x16" href="../img/IteraFavicon-16x16.webp" />
+    <link rel="icon" type="image/webp" sizes="32x32" href="../img/IteraFavicon-32x32.webp" />
+    <link rel="apple-touch-icon" href="../img/IteraFavicon-180.webp" />
+    <link rel="manifest" href="/portal_numerico/site.webmanifest" />
     <meta
       name="description"
       content="Calculadora de métodos numéricos en Itera: bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
@@ -19,14 +24,14 @@
       content="Bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
     />
     <meta property="og:url" content="https://luis000-creator.github.io/portal_numerico/pages/calculadora.html" />
-    <meta property="og:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta property="og:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Itera | Calculadora de Métodos Numéricos" />
     <meta
       name="twitter:description"
       content="Bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
     />
-    <meta name="twitter:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.png" />
+    <meta name="twitter:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
@@ -35,13 +40,9 @@
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-    <!-- Re-importar KaTeX para la previsualización de la fórmula -->
+    <!-- KaTeX CSS (no-bloqueante). El JS y mathjs se cargan bajo demanda vía vendor-loader.js -->
     <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous" media="print" onload="this.media='all'">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
-
-    <!-- mathjs minificado para navegadores (expone global math) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js" crossorigin="anonymous" defer></script>
 
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous" media="print" onload="this.media='all'">
@@ -223,6 +224,7 @@
 
 </div>
 
+<script src="../js/vendor-loader.js" defer></script>
 <script src="../js/biseccion.js" defer></script>
 <script src="../js/punto-fijo.js" defer></script>
 <script src="../js/newton-raphson.js" defer></script>

@@ -177,13 +177,20 @@ function actualizarPreviewDerivada(exprF, derivadaYaCalculada) {
   }
 }
 
-// Sincronizar previsualización KaTeX al cargar
+// Sincronizar previsualización KaTeX al interactuar (lazy: sin render en carga)
 document.addEventListener("DOMContentLoaded", () => {
   cablearPreview("funcion-newton", "preview-fx-newton", "f(x)");
   const inputFx = document.getElementById("funcion-newton");
   if (inputFx) {
-    inputFx.addEventListener("input", (e) => actualizarPreviewDerivada(e.target.value));
-    actualizarPreviewDerivada(inputFx.value);
+    inputFx.addEventListener("input", (e) => {
+      if (window.Vendor && window.Vendor.ensureCalc) {
+        window.Vendor.ensureCalc()
+          .then(() => actualizarPreviewDerivada(document.getElementById("funcion-newton")?.value || ""))
+          .catch(() => {});
+      } else {
+        actualizarPreviewDerivada(e.target.value);
+      }
+    });
   }
 });
 

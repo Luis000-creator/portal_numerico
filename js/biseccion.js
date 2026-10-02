@@ -164,13 +164,13 @@ function limpiarTabla() {
     ocultarInfo();
 }
 
-// Conecta un input de funcion con su previsualizacion KaTeX en vivo
+// Conecta un input de funcion con su previsualizacion KaTeX en vivo.
+// Carga math/KaTeX bajo demanda en el primer input (lazy-load anti-TBT).
 function cablearPreview(inputId, previewId, prefijo) {
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
     if (!input || !preview) return;
-    input.addEventListener('input', function(e) {
-        const expr = e.target.value.trim();
+    const render = (expr) => {
         if (!expr) {
             preview.innerHTML = '';
             preview.className = 'preview-fx';
@@ -188,6 +188,21 @@ function cablearPreview(inputId, previewId, prefijo) {
         } catch (err) {
             preview.innerHTML = `<span class="preview-fx--invalid">Expresión no reconocida aún. Sigue escribiendo...</span>`;
             preview.className = 'preview-fx preview-fx--invalid';
+        }
+    };
+    input.addEventListener('input', function(e) {
+        const expr = e.target.value.trim();
+        if (!expr) { render(''); return; }
+        if (typeof math !== 'undefined' && typeof katex !== 'undefined') {
+            render(expr);
+            return;
+        }
+        if (window.Vendor && window.Vendor.ensureCalc) {
+            window.Vendor.ensureCalc()
+                .then(() => render(document.getElementById(inputId)?.value.trim() || ''))
+                .catch(() => render(''));
+        } else {
+            render('');
         }
     });
 }
