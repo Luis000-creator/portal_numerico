@@ -962,6 +962,63 @@ button.btn-chip:hover {
   background: rgba(255, 0, 123, 0.06);
 }
 
+/* Skeletons de carga para la lista de apuntes */
+.apunte-skeleton {
+  pointer-events: none;
+  user-select: none;
+}
+
+.skeleton {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-top: 10px;
+}
+
+.skeleton-line--title {
+  height: 20px;
+  width: 60%;
+}
+
+.skeleton-line--full {
+  width: 100%;
+}
+
+.skeleton-line--mid {
+  width: 80%;
+}
+
+.skeleton-meta {
+  height: 12px;
+  width: 40%;
+  margin-top: 12px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
 #termino-busqueda {
   color: var(--text-white);
   font-weight: 700;

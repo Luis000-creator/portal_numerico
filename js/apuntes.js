@@ -6,15 +6,44 @@
 
 // --- CARGAR APUNTES DESDE SUPABASE ---
 
+// Muestra tarjetas esqueleto mientras se cargan los apuntes remotos
+function mostrarEsqueletosApuntes(cont, n = 3) {
+    if (!cont) return;
+    cont.setAttribute('aria-busy', 'true');
+    cont.innerHTML = '';
+    const aviso = document.createElement('p');
+    aviso.className = 'visually-hidden';
+    aviso.setAttribute('role', 'status');
+    aviso.textContent = 'Cargando apuntes…';
+    cont.appendChild(aviso);
+    for (let i = 0; i < n; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'apunte-card card apunte-skeleton';
+        sk.setAttribute('aria-hidden', 'true');
+        sk.innerHTML = '<div class="skeleton skeleton-line skeleton-line--title"></div>'
+            + '<div class="skeleton skeleton-line skeleton-line--full"></div>'
+            + '<div class="skeleton skeleton-line skeleton-line--mid"></div>'
+            + '<div class="skeleton skeleton-meta"></div>';
+        cont.appendChild(sk);
+    }
+}
+
 async function cargarApuntesRemotos() {
     if (!window.supabaseClient) return;
+    const cont = document.getElementById('apuntes-remotos');
+    mostrarEsqueletosApuntes(cont, 3);
     const { data, error } = await window.supabaseClient
         .from('apuntes')
         .select('id,titulo,contenido,archivo_url,created_at')
         .order('created_at', { ascending: true });
-    if (error) { console.error('No se pudieron cargar los apuntes:', error); return; }
-    const cont = document.getElementById('apuntes-remotos');
+    if (error) {
+        console.error('No se pudieron cargar los apuntes:', error);
+        if (cont) { cont.innerHTML = ''; cont.removeAttribute('aria-busy'); }
+        return;
+    }
+    if (!cont) return;
     cont.innerHTML = '';
+    cont.removeAttribute('aria-busy');
     const vacioMsg = document.getElementById('apuntes-vacio');
     if (vacioMsg) vacioMsg.style.display = data.length === 0 ? 'block' : 'none';
     data.forEach(apunte => {
@@ -251,6 +280,7 @@ function renderizarMath(elemento) {
 
 // Exponer globalmente para usar en index.html
 window.cargarApuntesRemotos = cargarApuntesRemotos;
+window.mostrarEsqueletosApuntes = mostrarEsqueletosApuntes;
 window.publicarApunte = publicarApunte;
 window.renderizarMath = renderizarMath;
 
