@@ -49,11 +49,24 @@ window.ocultarInfo = ocultarInfo;
 
 // Usamos mathjs (CDN UMD en calculadora.html) para evaluacion segura.
 // mathjs maneja el simbolo '^', constantes y funciones de forma nativa.
+//
+// Convención de logaritmos (mathjs usa ln por defecto):
+//   log(...) -> logaritmo base 10 | ln(...) -> logaritmo natural.
+// Se normaliza ANTES de evaluar, derivar o previsualizar.
+
+// Normaliza logaritmos de notación escolar a funciones mathjs.
+// 'log(' -> 'log10(' (base 10), 'ln(' -> 'log(' (natural en mathjs).
+function normalizarExpresion(expr) {
+    if (!expr) return expr;
+    return String(expr).replace(/(?<![A-Za-z0-9_.])(ln|log)(?=\s*\()/g, (m, fn) => (fn === 'ln' ? 'log' : 'log10'));
+}
+
+window.normalizarExpresion = normalizarExpresion;
 
 function evaluarFuncion(expr, x) {
     try {
         if (typeof math === 'undefined' || !math.evaluate) return NaN;
-        const result = math.evaluate(expr, { x });
+        const result = math.evaluate(normalizarExpresion(expr), { x });
         return Number.isFinite(result) ? result : NaN;
     } catch (err) { return NaN; }
 }
@@ -140,7 +153,7 @@ function leerCriterio() {
             mostrarError('La librería matemática aún se está cargando. Intenta de nuevo en un momento.');
             return null;
         }
-        valor = math.evaluate(document.getElementById('valorCriterio').value);
+        valor = math.evaluate(normalizarExpresion(document.getElementById('valorCriterio').value));
         valor = Number(valor);
     } catch (e) {
         mostrarError('El valor del criterio debe ser un número o una fracción válida (ej. 1/16).');
@@ -161,6 +174,8 @@ function limpiarTabla() {
     if (errorBox) errorBox.style.display = 'none';
     if (resContainer) resContainer.style.display = 'none';
     if (tbody) tbody.innerHTML = '';
+    const grafCont = document.getElementById('grafica-container');
+    if (grafCont) grafCont.style.display = 'none';
     ocultarInfo();
 }
 
@@ -182,7 +197,7 @@ function cablearPreview(inputId, previewId, prefijo) {
             return;
         }
         try {
-            const latex = math.parse(expr).toTex();
+            const latex = math.parse(normalizarExpresion(expr)).toTex();
             katex.render(`${prefijo} = ${latex}`, preview, { displayMode: true, throwOnError: false });
             preview.className = 'preview-fx preview-fx--valid';
         } catch (err) {
@@ -238,6 +253,7 @@ function calcularBiseccion() {
         a = parseFloat(a_str);
         b = parseFloat(b_str);
     }
+    const a0 = a, b0 = b; // bracket inicial para la gráfica
 
     limpiarTabla();
     ocultarInfo();
@@ -269,6 +285,7 @@ function calcularBiseccion() {
         tbody.appendChild(tr);
         resContainer.style.display = 'block';
         mostrarResumen(a, 0, 0, criterio, valorCriterio);
+        graficarResultado(expr, { a, b, raiz: a });
         return;
     }
     if (fb === 0) {
@@ -278,6 +295,7 @@ function calcularBiseccion() {
         tbody.appendChild(tr);
         resContainer.style.display = 'block';
         mostrarResumen(b, 0, 0, criterio, valorCriterio);
+        graficarResultado(expr, { a, b, raiz: b });
         return;
     }
 
@@ -329,6 +347,7 @@ function calcularBiseccion() {
 
     resContainer.style.display = 'block';
     mostrarResumen(x_final, fx_final, n, criterio, valorCriterio, ea_final, criterioAlcanzado);
+    graficarResultado(expr, { a: a0, b: b0, raiz: x_final });
 }
 
 // --- MOSTRAR RESUMEN FINAL DE LA RAÍZ ---
@@ -395,9 +414,109 @@ window.leerCriterio = leerCriterio;
 window.limpiarTabla = limpiarTabla;
 window.cablearPreview = cablearPreview;
 
+// --- TECLADO MATEMÁTICO (menú de inserción de expresiones) ---
+// Reemplaza a los "ejemplos rápidos": inserta funciones, constantes y
+// operadores en el cursor del input objetivo y dispara el preview en vivo.
+// Etiquetas bonitas (π, √, ×) que insertan sintaxis válida para mathjs.
+
+const TECLAS_MATEMATICAS = [
+    { etiqueta: 'log(', inserta: 'log(', titulo: 'Logaritmo base 10' },
+    { etiqueta: 'ln(', inserta: 'ln(', titulo: 'Logaritmo natural' },
+    { etiqueta: 'sin(', inserta: 'sin(', titulo: 'Seno' },
+    { etiqueta: 'cos(', inserta: 'cos(', titulo: 'Coseno' },
+    { etiqueta: 'tan(', inserta: 'tan(', titulo: 'Tangente' },
+    { etiqueta: '√(', inserta: 'sqrt(', titulo: 'Raíz cuadrada' },
+    { etiqueta: 'e', inserta: 'e', titulo: 'Constante de Euler (≈ 2.718)' },
+    { etiqueta: 'π', inserta: 'pi', titulo: 'Pi (≈ 3.1416)' },
+    { etiqueta: '^', inserta: '^', titulo: 'Potencia' },
+    { etiqueta: 'x', inserta: 'x', titulo: 'Variable x' },
+    { etiqueta: '(', inserta: '(', titulo: 'Abrir paréntesis' },
+    { etiqueta: ')', inserta: ')', titulo: 'Cerrar paréntesis' },
+    { etiqueta: '+', inserta: '+', titulo: 'Suma' },
+    { etiqueta: '−', inserta: '-', titulo: 'Resta' },
+    { etiqueta: '×', inserta: '*', titulo: 'Multiplicación' },
+    { etiqueta: '÷', inserta: '/', titulo: 'División' },
+    { etiqueta: '.', inserta: '.', titulo: 'Punto decimal' },
+    { etiqueta: '⌫', accion: 'borrar', titulo: 'Borrar carácter', aria: 'Borrar último carácter' },
+    { etiqueta: 'C', accion: 'limpiar', titulo: 'Limpiar campo', aria: 'Limpiar campo de función' },
+];
+
+// Inserta texto en la posición del cursor y avisa al preview en vivo
+function insertarEnInput(input, texto) {
+    if (!input) return;
+    const ini = input.selectionStart ?? input.value.length;
+    const fin = input.selectionEnd ?? input.value.length;
+    input.value = input.value.slice(0, ini) + texto + input.value.slice(fin);
+    const pos = ini + texto.length;
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+    try { input.setSelectionRange(pos, pos); } catch (e) { /* inputs no textuales */ }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// Borra la selección o el carácter previo al cursor
+function borrarEnInput(input) {
+    if (!input) return;
+    const ini = input.selectionStart ?? input.value.length;
+    const fin = input.selectionEnd ?? input.value.length;
+    let pos;
+    if (ini !== fin) {
+        input.value = input.value.slice(0, ini) + input.value.slice(fin);
+        pos = ini;
+    } else if (ini > 0) {
+        input.value = input.value.slice(0, ini - 1) + input.value.slice(ini);
+        pos = ini - 1;
+    } else {
+        return;
+    }
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+    try { input.setSelectionRange(pos, pos); } catch (e) { /* inputs no textuales */ }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// Construye los menús <div class="math-menu" data-target="id-input">
+function inicializarMenusMatematicos() {
+    document.querySelectorAll('.math-menu').forEach(cont => {
+        if (cont.dataset.menuListo) return;
+        const input = cont.dataset.target && document.getElementById(cont.dataset.target);
+        if (!input) return;
+        cont.dataset.menuListo = '1';
+        const etiqueta = document.createElement('span');
+        etiqueta.className = 'examples-label';
+        etiqueta.innerHTML = 'Insertar expresión: <small>(log = base 10 · ln = natural)</small>';
+        const grupo = document.createElement('div');
+        grupo.className = 'chip-group';
+        grupo.setAttribute('role', 'group');
+        grupo.setAttribute('aria-label', 'Teclado matemático');
+        TECLAS_MATEMATICAS.forEach(t => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn-chip';
+            b.textContent = t.etiqueta;
+            if (t.titulo) b.title = t.titulo;
+            b.setAttribute('aria-label', t.aria || t.titulo || ('Insertar ' + t.etiqueta));
+            b.addEventListener('click', () => {
+                if (t.accion === 'borrar') borrarEnInput(input);
+                else if (t.accion === 'limpiar') {
+                    input.value = '';
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+                } else insertarEnInput(input, t.inserta);
+            });
+            grupo.appendChild(b);
+        });
+        cont.appendChild(etiqueta);
+        cont.appendChild(grupo);
+    });
+}
+
+window.insertarEnInput = insertarEnInput;
+window.borrarEnInput = borrarEnInput;
+window.inicializarMenusMatematicos = inicializarMenusMatematicos;
+
 // --- PREVISUALIZACIÓN EN VIVO CON KATEX ---
 document.addEventListener('DOMContentLoaded', () => {
     cablearPreview('funcion', 'preview-fx', 'f(x)');
+    inicializarMenusMatematicos();
 });
 
 // --- COPIAR TABLA DE RESULTADOS (botón icono en cabecera) ---

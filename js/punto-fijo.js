@@ -27,14 +27,6 @@ function alternarMetodoUI() {
     if (divPuntoFijo) divPuntoFijo.style.display = esPuntoFijo ? '' : 'none';
     if (divNewton) divNewton.style.display = esNewton ? '' : 'none';
 
-    // Mostrar/ocultar contenedores de ejemplos según el método
-    const ejBiseccion = document.getElementById('ejemplos-biseccion');
-    const ejPuntoFijo = document.getElementById('ejemplos-puntofijo');
-    const ejNewton = document.getElementById('ejemplos-newton');
-    if (ejBiseccion) ejBiseccion.style.display = esBiseccion ? 'block' : 'none';
-    if (ejPuntoFijo) ejPuntoFijo.style.display = esPuntoFijo ? 'block' : 'none';
-    if (ejNewton) ejNewton.style.display = esNewton ? 'block' : 'none';
-
     // Los campos ocultos no deben bloquear el submit de HTML5
     const campoFx = document.getElementById('funcion');
     const campoGx = document.getElementById('funcion-gx');
@@ -98,7 +90,7 @@ async function ejecutarCalculo(event) {
 function avisarConvergencia(exprG, x0) {
     if (typeof math === 'undefined' || !math.derivative) return true;
     try {
-        const derivada = math.derivative(exprG, 'x').evaluate({ x: x0 });
+        const derivada = math.derivative(normalizarExpresion(exprG), 'x').evaluate({ x: x0 });
         if (Number.isFinite(derivada) && Math.abs(derivada) >= 1) {
             mostrarError(`Aviso: |g'(${x0})| = ${Math.abs(derivada).toFixed(4)} >= 1. El método puede diverger. Se continúa el cálculo.`);
             return false;
@@ -135,6 +127,7 @@ function calcularPuntoFijo() {
     // Pre-chequeo de convergencia (aviso no bloqueante, se continua iterando)
     avisarConvergencia(exprG, x_actual);
 
+    const xs = [];
     let x_anterior = null;
     let g_last = NaN, x_last = NaN, ea_last = null;
     let criterioAlcanzado = false;
@@ -144,6 +137,7 @@ function calcularPuntoFijo() {
     while (n <= maxIter) {
         // Evaluar g(x). Los complejos/infinitos llegan como NaN.
         const g_x = evaluarFuncion(exprG, x_actual);
+        xs.push(x_actual);
 
         // Control de divergencia (complejos, NaN o infinito)
         if (!Number.isFinite(g_x)) {
@@ -187,6 +181,7 @@ function calcularPuntoFijo() {
         fx: '|g(x) - x| Final',
         tolerancia: `|g(x) - x| ≤ ${Number(valorCriterio).toFixed(6)}`
     });
+    graficarResultado(exprG, { xs, raiz: g_last });
 }
 
 window.alternarMetodoUI = alternarMetodoUI;
@@ -200,29 +195,3 @@ document.addEventListener('DOMContentLoaded', () => {
         alternarMetodoUI();
     }
 });
-
-// --- CARGAR EJEMPLOS DE BISECCIÓN ---
-function cargarEjemploBiseccion(expr) {
-    const input = document.getElementById('funcion');
-    if (input) {
-        input.value = expr;
-        input.dispatchEvent(new Event('input'));
-    }
-}
-
-window.cargarEjemploBiseccion = cargarEjemploBiseccion;
-
-// --- CARGAR EJEMPLOS DE PUNTO FIJO ---
-function cargarEjemploPuntoFijo(expr, x0) {
-    const inputGx = document.getElementById('funcion-gx');
-    const inputX0 = document.getElementById('x0');
-    if (inputGx) {
-        inputGx.value = expr;
-        inputGx.dispatchEvent(new Event('input'));
-    }
-    if (inputX0) {
-        inputX0.value = x0;
-    }
-}
-
-window.cargarEjemploPuntoFijo = cargarEjemploPuntoFijo;

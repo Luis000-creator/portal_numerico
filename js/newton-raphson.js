@@ -8,7 +8,7 @@
 // --- ALGORITMO DE NEWTON-RAPHSON ---
 
 function calcularNewton() {
-  const exprF = document.getElementById("funcion-newton").value.trim();
+  const exprF = normalizarExpresion(document.getElementById("funcion-newton").value.trim());
   let x_actual = parseFloat(document.getElementById("x0-newton").value);
 
   const crit = leerCriterio();
@@ -60,6 +60,7 @@ function calcularNewton() {
 
   const maxIter =
     criterio === "iteraciones" ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
+  const xs = [x_actual];
   let n = 1;
   let x_anterior = null;
   let fx_last = NaN,
@@ -68,6 +69,7 @@ function calcularNewton() {
   let criterioAlcanzado = false;
 
   while (n <= maxIter) {
+    xs.push(x_actual);
     // Evaluar f(x) y f'(x)
     let fx, fpx;
     try {
@@ -148,6 +150,7 @@ function calcularNewton() {
     fx: "|f(x)| Final",
     tolerancia: `|f(x)| ≤ ${Number(valorCriterio).toFixed(6)}`,
   });
+  graficarResultado(exprF, { xs, raiz: x_last });
 }
 
 // Muestra la derivada f'(x) calculada con mathjs en el panel dedicado.
@@ -167,7 +170,7 @@ function actualizarPreviewDerivada(exprF, derivadaYaCalculada) {
     return;
   }
   try {
-    const d = derivadaYaCalculada || math.derivative(math.parse(expr), "x");
+    const d = derivadaYaCalculada || math.derivative(math.parse(normalizarExpresion(expr)), "x");
     const latex = d.toTex();
     katex.render(`f'(x) = ${latex}`, preview, { displayMode: true, throwOnError: false });
     preview.className = "preview-fx preview-fx--valid";
@@ -194,22 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// --- EJEMPLOS RÁPIDOS PARA NEWTON-RAPHSON ---
-function cargarEjemploNewton(expr, x0) {
-  const inputFx = document.getElementById("funcion-newton");
-  const inputX0 = document.getElementById("x0-newton");
-  if (inputFx) {
-    inputFx.value = expr;
-    inputFx.dispatchEvent(new Event("input"));
-    actualizarPreviewDerivada(expr);
-  }
-  if (inputX0) {
-    inputX0.value = x0;
-  }
-}
-
 window.actualizarPreviewDerivada = actualizarPreviewDerivada;
-window.cargarEjemploNewton = cargarEjemploNewton;
 
 // Exponer globalmente
 window.calcularNewton = calcularNewton;
