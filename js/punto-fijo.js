@@ -131,7 +131,9 @@ function calcularPuntoFijo() {
     let x_anterior = null;
     let g_last = NaN, x_last = NaN, ea_last = null;
     let criterioAlcanzado = false;
-    const maxIter = criterio === 'iteraciones' ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
+    const maxIterSolicitado = criterio === 'iteraciones' ? Math.max(1, Math.floor(valorCriterio)) : 100;
+    const maxIter = Math.min(100, maxIterSolicitado);
+    const truncadoPorLimite = maxIterSolicitado > maxIter;
     let n = 1;
 
     while (n <= maxIter) {
@@ -176,6 +178,11 @@ function calcularPuntoFijo() {
         n++;
     }
     resContainer.style.display = 'block';
+    if (truncadoPorLimite) {
+        agregarInfo(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`, 'info');
+    } else if (!criterioAlcanzado) {
+        agregarInfo(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`, 'info');
+    }
     const residuo = (Number.isFinite(g_last) && Number.isFinite(x_last)) ? Math.abs(g_last - x_last) : NaN;
     mostrarResumen(g_last, residuo, n, criterio, valorCriterio, ea_last, criterioAlcanzado, {
         fx: '|g(x) - x| Final',

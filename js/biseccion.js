@@ -42,8 +42,18 @@ function ocultarInfo() {
     if (box) box.style.display = 'none';
 }
 
+// Agrega un aviso al cuadro de info sin borrar los mensajes ya mostrados
+// (mostrarInfo reemplaza el contenido; aquí se acumulan).
+function agregarInfo(mensaje, tipo = 'info') {
+    const box = document.getElementById('info-box');
+    const text = document.getElementById('info-text');
+    const previo = (box && text && box.style.display === 'block') ? text.innerHTML + ' ' : '';
+    mostrarInfo(previo + mensaje, tipo);
+}
+
 window.mostrarInfo = mostrarInfo;
 window.ocultarInfo = ocultarInfo;
+window.agregarInfo = agregarInfo;
 
 // --- EVALUADOR DE EXPRESIONES MATEMÁTICAS ---
 
@@ -305,7 +315,11 @@ function calcularBiseccion() {
     }
 
     let x_m_anterior = null;
-    const maxIter = criterio === 'iteraciones' ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
+    // Límite de seguridad de 100 iteraciones. Se guarda lo que pidió el
+    // usuario para poder avisar si el cálculo quedó truncado (B3).
+    const maxIterSolicitado = criterio === 'iteraciones' ? Math.max(1, Math.floor(valorCriterio)) : 100;
+    const maxIter = Math.min(100, maxIterSolicitado);
+    const truncadoPorLimite = maxIterSolicitado > maxIter;
     let n = 1;
     let criterioAlcanzado = false;
 
@@ -316,10 +330,24 @@ function calcularBiseccion() {
             mostrarError('Error: La función produjo un valor no válido durante el cálculo.');
             return;
         }
-        const ea = x_m_anterior === null ? null : Math.abs((x_m - x_m_anterior) / x_m) * 100;
+        // Ea relativo: queda indefinido cuando x_m = 0 (división entre cero).
+        // Se marca como NaN para mostrar "N/A" en vez de "Infinity%" (B2).
+        const ea = x_m_anterior === null
+            ? null
+            : (x_m === 0 ? NaN : Math.abs((x_m - x_m_anterior) / x_m) * 100);
+        const eaTexto = ea === null ? '--' : (Number.isFinite(ea) ? ea.toFixed(4) + '%' : 'N/A');
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td data-label="Iter">${n}</td><td data-label="a">${a.toFixed(4)}</td><td data-label="b">${b.toFixed(4)}</td><td data-label="x_m">${x_m.toFixed(4)}</td><td data-label="f(x_m)">${fx_m.toFixed(4)}</td><td data-label="Ea (%)">${ea === null ? '--' : ea.toFixed(4) + '%'}</td>`;
+        tr.innerHTML = `<td data-label="Iter">${n}</td><td data-label="a">${a.toFixed(4)}</td><td data-label="b">${b.toFixed(4)}</td><td data-label="x_m">${x_m.toFixed(4)}</td><td data-label="f(x_m)">${fx_m.toFixed(4)}</td><td data-label="Ea (%)">${eaTexto}</td>`;
         tbody.appendChild(tr);
+
+        // Raíz exacta hallada: f(x_m) = 0.
+        // Hay que parar ANTES de actualizar el intervalo: si no, fa = 0 hace
+        // que "fa * fx_m" sea siempre 0 en las iteraciones siguientes y el
+        // algoritmo converge hacia b en vez de hacia la raíz (B1).
+        if (fx_m === 0) {
+            criterioAlcanzado = true;
+            break;
+        }
 
         // Criterios de paro (combinados: f(x_m) y cambio en x_m)
         let parar = false;
@@ -328,7 +356,7 @@ function calcularBiseccion() {
             if (Math.abs(fx_m) <= valorCriterio) parar = true;
             if (x_m_anterior !== null && Math.abs(x_m - x_m_anterior) <= valorCriterio) parar = true;
         }
-        if (criterio === 'error' && ea !== null && ea <= valorCriterio) parar = true;
+        if (criterio === 'error' && ea !== null && Number.isFinite(ea) && ea <= valorCriterio) parar = true;
 
         if (parar) {
             criterioAlcanzado = true;
@@ -343,7 +371,20 @@ function calcularBiseccion() {
 
     const x_final = (a + b) / 2;
     const fx_final = evaluarFuncion(expr, x_final);
-    const ea_final = x_m_anterior === null ? null : Math.abs((x_final - x_m_anterior) / x_final) * 100;
+    // Mismo guard que en el bucle: x_final = 0 deja el Ea indefinido (B2)
+    const ea_final = (x_m_anterior === null || x_final === 0)
+        ? null
+        : Math.abs((x_final - x_m_anterior) / x_final) * 100;
+
+    // Avisos si el cálculo quedó truncado por el límite de 100 iteraciones (B3)
+    const avisos = [];
+    if (truncadoPorLimite) {
+        avisos.push(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`);
+    }
+    if (!criterioAlcanzado) {
+        avisos.push(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`);
+    }
+    if (avisos.length) agregarInfo(avisos.join(' '), 'info');
 
     resContainer.style.display = 'block';
     mostrarResumen(x_final, fx_final, n, criterio, valorCriterio, ea_final, criterioAlcanzado);
@@ -358,7 +399,7 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
 
     const raizStr = Number.isFinite(x_raiz) ? x_raiz.toFixed(6) : 'N/A';
     const fxStr = Number.isFinite(fx_val) ? fx_val.toFixed(6) : 'N/A';
-    const eaStr = ea_final !== null ? ea_final.toFixed(4) + '%' : 'N/A';
+    const eaStr = (ea_final !== null && Number.isFinite(ea_final)) ? ea_final.toFixed(4) + '%' : 'N/A';
 
     const etiquetaFx = etiquetas.fx || 'f(x) Final';
     let textoCriterio = '';

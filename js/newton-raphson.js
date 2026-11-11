@@ -58,8 +58,10 @@ function calcularNewton() {
     return;
   }
 
-  const maxIter =
-    criterio === "iteraciones" ? Math.min(100, Math.max(1, Math.floor(valorCriterio))) : 100;
+  const maxIterSolicitado =
+    criterio === "iteraciones" ? Math.max(1, Math.floor(valorCriterio)) : 100;
+  const maxIter = Math.min(100, maxIterSolicitado);
+  const truncadoPorLimite = maxIterSolicitado > maxIter;
   const xs = [x_actual];
   let n = 1;
   let x_anterior = null;
@@ -134,6 +136,11 @@ function calcularNewton() {
   }
 
   resContainer.style.display = "block";
+  if (truncadoPorLimite) {
+    agregarInfo(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`, "info");
+  } else if (!criterioAlcanzado) {
+    agregarInfo(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`, "info");
+  }
 
   // Mostrar resumen final (usa la función global de biseccion.js)
   // Evaluar f(x) en la raíz aproximada final para el resumen
