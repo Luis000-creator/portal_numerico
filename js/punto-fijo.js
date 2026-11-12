@@ -133,6 +133,15 @@ function alternarMetodoUI() {
     const subtitulo = document.getElementById('subtitulo-metodo');
     if (subtitulo) subtitulo.innerText = cfg.subtitulo;
 
+    // 5) Botón "Graficar" (gráfica independiente del método): solo aparece en
+    //    los métodos cuyo primer campo es una función escrita a mano. Lagrange
+    //    trabaja con puntos, así que ahí no hay nada que graficar por su cuenta.
+    const btnGraf = document.getElementById('btn-graficar-libre');
+    if (btnGraf) {
+        const esFuncion = typeof (cfg.campos || [])[0] === 'string' && cfg.campos[0].indexOf('funcion') === 0;
+        btnGraf.style.display = esFuncion ? '' : 'none';
+    }
+
     limpiarTabla();
 }
 
@@ -239,13 +248,26 @@ function calcularPuntoFijo() {
     let n = 1;
 
     while (n <= maxIter) {
-        // Evaluar g(x). Los complejos/infinitos llegan como NaN.
-        const g_x = evaluarFuncion(exprG, x_actual);
+        // Evaluar g(x). Se distingue un infinito (divergencia) de un NaN o un
+        // throw (fuera de dominio / sintaxis), con el mismo criterio que
+        // Bisección: mensajeErrorEvaluacion reutilizado con el nombre g(x).
+        let g_x = NaN;
+        try {
+            const crudo = math.evaluate(normalizarExpresion(exprG), { x: x_actual });
+            // Complejos, booleanos o símbolos no son iterables: se tratan como NaN
+            if (typeof crudo === 'number') g_x = crudo;
+        } catch (e) {
+            g_x = NaN;
+        }
         xs.push(x_actual);
 
-        // Control de divergencia (complejos, NaN o infinito)
+        // Control de valores no válidos (dominio, complejos o infinitos)
         if (!Number.isFinite(g_x)) {
-            mostrarError(`Divergencia detectada en la iteración ${n}. La función produjo un valor no válido (ej. número complejo o infinito).`);
+            if (g_x === Infinity || g_x === -Infinity) {
+                mostrarError(`Divergencia: g(x) tiende a ${g_x > 0 ? '+∞' : '−∞'} en la iteración ${n}; la secuencia no acota.`);
+            } else {
+                mostrarError(mensajeErrorEvaluacion(exprG, `x = ${x_actual}`, 'g(x)'));
+            }
             break;
         }
 

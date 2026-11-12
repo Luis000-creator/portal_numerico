@@ -337,6 +337,97 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
 
 window.graficarResultado = graficarResultado;
 
+// --- GRÁFICA INDEPENDIENTE (botón "Graficar") ---
+// Dibuja la función del método activo SIN ejecutar el método: sirve para
+// explorar la curva antes de elegir intervalo, tolerancia o iteraciones.
+// Rango: a/b del método si son válidos; Taylor, [min(a,x)-2, max(a,x)+2];
+// Punto Fijo, la recta y = x sobre la gráfica; si no, [-10, 10].
+async function graficarLibre() {
+    const cfgs = window.CONFIG_METODOS || {};
+    const sel = document.getElementById('metodo-selector');
+    const metodo = sel ? sel.value : 'biseccion';
+    const cfg = cfgs[metodo] || cfgs.biseccion || { campos: [] };
+    const inputId = (cfg.campos || [])[0];
+    if (!inputId || inputId.indexOf('funcion') !== 0) {
+        mostrarError('Este método no trabaja con una función f(x): usa sus puntos o parámetros para graficar.');
+        return;
+    }
+
+    if (window.Vendor && window.Vendor.ensureCalc) {
+        try {
+            await window.Vendor.ensureCalc();
+        } catch (e) {
+            mostrarError('No se pudo cargar el motor matemático. Revisa tu conexión e intenta de nuevo.');
+            return;
+        }
+    }
+
+    const input = document.getElementById(inputId);
+    const expr = input && input.value ? String(input.value).trim() : '';
+    if (!expr) {
+        mostrarError('Error: Escribe una función para graficar.');
+        return;
+    }
+
+    // Validar con un punto de prueba: distingue sintaxis/dominio antes de dibujar
+    try {
+        if (typeof math === 'undefined' || !math.parse) {
+            mostrarError('El motor matemático aún se está cargando. Intenta de nuevo en un momento.');
+            return;
+        }
+        math.parse(normalizarExpresion(expr)).evaluate({ x: 1 });
+    } catch (e) {
+        mostrarError(mensajeErrorEvaluacion(expr, 'x = 1'));
+        return;
+    }
+
+    limpiarTabla();
+
+    const opts = { titulo: 'Gráfica de la función' };
+    const numero = (id) => {
+        const el = document.getElementById(id);
+        if (!el || String(el.value).trim() === '') return NaN;
+        const v = parseFloat(el.value);
+        return Number.isFinite(v) ? v : NaN;
+    };
+
+    if (metodo === 'biseccion' || metodo === 'simpson') {
+        const a = numero(metodo === 'biseccion' ? 'a' : 'a-simpson');
+        const b = numero(metodo === 'biseccion' ? 'b' : 'b-simpson');
+        if (Number.isFinite(a) && Number.isFinite(b) && a < b) {
+            opts.a = a;
+            opts.b = b;
+        }
+    } else if (metodo === 'taylor') {
+        const vals = [numero('a-taylor'), numero('x-taylor')].filter(Number.isFinite);
+        if (vals.length) opts.rango = [Math.min(...vals) - 2, Math.max(...vals) + 2];
+    } else if (metodo === 'puntofijo') {
+        opts.identidad = true;
+        opts.etiqueta = 'g(x)';
+        opts.titulo = 'g(x) y la recta y = x';
+    }
+
+    if (!opts.rango && !(Number.isFinite(opts.a) && Number.isFinite(opts.b))) {
+        opts.rango = [-10, 10];
+    }
+
+    graficarResultado(expr, opts);
+}
+
+window.graficarLibre = graficarLibre;
+
+// Botón "Graficar" junto al submit (calculadora.html)
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btn-graficar-libre');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+        const r = graficarLibre();
+        if (r && typeof r.catch === 'function') {
+            r.catch((e) => mostrarError('Error inesperado al graficar: ' + (e && e.message ? e.message : e)));
+        }
+    });
+});
+
 // Redibujar al rotar/redimensionar (con debounce)
 let grafResizeTimer = null;
 window.addEventListener('resize', () => {

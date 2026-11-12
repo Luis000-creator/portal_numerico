@@ -11,6 +11,12 @@ function mostrarEsqueletosApuntes(cont, n = 3) {
     if (!cont) return;
     cont.setAttribute('aria-busy', 'true');
     cont.innerHTML = '';
+    // Oculta los mensajes de "vacío" y "sin resultados" mientras carga: si no,
+    // se ven un instante sobre los skeletons antes de llegar la lista real.
+    const vacio = document.getElementById('apuntes-vacio');
+    const sin = document.getElementById('apuntes-sin-resultados');
+    if (vacio) vacio.style.display = 'none';
+    if (sin) sin.style.display = 'none';
     const aviso = document.createElement('p');
     aviso.className = 'visually-hidden';
     aviso.setAttribute('role', 'status');
@@ -188,6 +194,17 @@ async function publicarApunte(event) {
 
     if (!titulo) return;
 
+    // Límites sin login (mismo criterio que los CHECK de Supabase):
+    // el título no puede ser un enlace ni superar los 200 caracteres.
+    if (/https?:\/\/|www\./i.test(titulo)) {
+        alert('El título no puede contener enlaces (URLs).');
+        return;
+    }
+    if (titulo.length > 200) {
+        alert('El título no puede superar los 200 caracteres.');
+        return;
+    }
+
     // Evitar apunte fantasma (sin texto Y sin archivo)
     if (!contenido && !archivoInput) {
         alert('Debes escribir una descripción o subir un archivo adjunto.');
@@ -305,6 +322,19 @@ window.renderizarMath = renderizarMath;
 // --- FILTRAR CONTENIDO (compatibilidad) ---
 
 function filtrarContenido() {
+    // Mientras los apuntes remotos están cargando (skeletons) no se afirma
+    // nada: evita el parpadeo de "No se encontraron apuntes" / "Aún no hay
+    // apuntes" antes de tener datos reales. Al terminar la carga,
+    // cargarApuntesRemotos() vuelve a llamar a esta función con los datos.
+    const remotos = document.getElementById('apuntes-remotos');
+    if (remotos && remotos.getAttribute('aria-busy') === 'true') {
+        const sin0 = document.getElementById('apuntes-sin-resultados');
+        const vacio0 = document.getElementById('apuntes-vacio');
+        if (sin0) sin0.style.display = 'none';
+        if (vacio0) vacio0.style.display = 'none';
+        return;
+    }
+
     const input = document.getElementById('buscador');
     const qRaw = input ? input.value : '';
     const q = qRaw.toLowerCase().trim();

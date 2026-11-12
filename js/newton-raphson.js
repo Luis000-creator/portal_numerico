@@ -43,15 +43,26 @@ function calcularNewton() {
     return;
   }
 
-  // Verificación inicial: f'(x₀) ≠ 0
+  // Verificación inicial: f(x₀) en dominio y f'(x₀) ≠ 0
   let fPrimeX0;
   try {
     fPrimeX0 = parsedFPrime.evaluate({ x: x_actual });
   } catch (e) {
-    mostrarError("Error: No se pudo evaluar la derivada en X₀.");
-    return;
+    fPrimeX0 = NaN;
   }
   if (!Number.isFinite(fPrimeX0) || Math.abs(fPrimeX0) < 1e-14) {
+    // Si además f(x₀) no existe, el problema real es el dominio de f (p. ej.
+    // sqrt(x) con x₀ < 0), no la derivada: se usa el mensaje de dominio.
+    let fX0 = NaN;
+    try {
+      fX0 = parsedF.evaluate({ x: x_actual });
+    } catch (e) {
+      fX0 = NaN;
+    }
+    if (!Number.isFinite(fX0)) {
+      mostrarError(mensajeErrorEvaluacion(exprF, `x = ${x_actual}`, 'f(x)'));
+      return;
+    }
     mostrarError(
       `Error: La derivada f'(X₀) es cero o no está definida (${fPrimeX0}). El método falla.`,
     );
@@ -73,19 +84,31 @@ function calcularNewton() {
 
   while (n <= maxIter) {
     xs.push(x_actual);
-    // Evaluar f(x) y f'(x)
-    let fx, fpx;
+    // Evaluar f(x) y f'(x) por separado: un infinito es divergencia, un NaN
+    // o un throw es dominio/sintaxis (mensaje de Bisección reutilizado) y la
+    // derivada tiene su propio mensaje. Antes todo caía en un genérico.
+    let fx = NaN, fpx = NaN;
     try {
       fx = parsedF.evaluate({ x: x_actual });
+    } catch (e) {
+      fx = NaN;
+    }
+    try {
       fpx = parsedFPrime.evaluate({ x: x_actual });
     } catch (e) {
-      mostrarError(`Error al evaluar la función o su derivada en la iteración ${n}.`);
-      break;
+      fpx = NaN;
     }
 
-    // Control de valores no válidos
-    if (!Number.isFinite(fx) || !Number.isFinite(fpx)) {
-      mostrarError(`Valor no finito detectado en la iteración ${n}.`);
+    if (!Number.isFinite(fx)) {
+      if (fx === Infinity || fx === -Infinity) {
+        mostrarError(`Divergencia: f(x) tiende a ${fx > 0 ? '+∞' : '−∞'} en la iteración ${n}.`);
+      } else {
+        mostrarError(mensajeErrorEvaluacion(exprF, `x = ${x_actual}`, 'f(x)'));
+      }
+      break;
+    }
+    if (!Number.isFinite(fpx)) {
+      mostrarError(`Error: la derivada f'(x) no está definida en x = ${x_actual} (revisa el dominio de f(x)).`);
       break;
     }
     if (Math.abs(fpx) < 1e-14) {

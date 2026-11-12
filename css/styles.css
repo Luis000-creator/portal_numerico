@@ -369,6 +369,29 @@ button[type="submit"]:hover {
   opacity: 1 !important;
 }
 
+/* Fila de acciones del formulario: submit principal + Graficar secundario */
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions > button {
+  flex: 1;
+  width: auto;
+}
+
+/* Botón secundario "Graficar" (gráfica independiente del método activo) */
+button.btn-graficar {
+  background: transparent;
+  color: var(--text-white);
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+button.btn-graficar:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .procedure-table {
   width: 100%;
   margin-top: 20px;

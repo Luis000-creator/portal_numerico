@@ -99,11 +99,14 @@ function evaluarFuncion(expr, x) {
 
 // Busca automáticamente un intervalo [a, b] con cambio de signo.
 // Estrategia en 2 pasadas para no hacer ~20,000 evaluaciones:
-//   1) barrido grueso (paso 1) sobre [-100, 100] → candidatos;
-//   2) refinado fino (paso 1/16) solo sobre el mejor candidato.
+//   1) barrido grueso (paso 0.25, binario-exacto) sobre [-100, 100] → candidatos;
+//   2) refinado fino (paso 1/16) y descarte de candidatos con polo dentro.
+// El paso 0.25 recupera raíces que con paso 1 se perdían porque los extremos
+// del paso caían con el mismo signo (p. ej. tan(x) - x = 4.493: f(4) y f(5)
+// son negativos, pero en 4.25 y 4.5 cambian de signo).
 function buscarIntervaloAuto(expr) {
     const inicio = -100.0, fin = 100.0;
-    const pasoGrueso = 1.0;
+    const pasoGrueso = 0.25;
     const pasoFino = 1 / 16;
 
     // --- 1) Barrido grueso: localiza ceros exactos y cambios de signo ---
@@ -135,9 +138,13 @@ function buscarIntervaloAuto(expr) {
     candidatos.sort((p, q) => Math.abs((p[0] + p[1]) / 2) - Math.abs((q[0] + q[1]) / 2));
 
     // --- 2) Refinar candidatos y descartar los que son polos, no raíces ---
-    for (const [c0, c1] of candidatos) {
-        let lo = c0;
-        let hi = c1;
+    // Tope de 20 candidatos refinados: funciones con muchos polos (tan, cot...)
+    // generan más de un centenar de cambios de signo y no vale la pena
+    // revisarlos todos; el primer candidato sin polo se devuelve de inmediato.
+    const limite = Math.min(candidatos.length, 20);
+    for (let i = 0; i < limite; i++) {
+        let lo = candidatos[i][0];
+        let hi = candidatos[i][1];
         let fLo = evaluarFuncion(expr, lo);
         for (let xf = lo + pasoFino; xf < hi; xf += pasoFino) {
             const fXf = evaluarFuncion(expr, xf);
@@ -152,17 +159,41 @@ function buscarIntervaloAuto(expr) {
         // se descarta y se prueba el siguiente candidato.
         const centro = (lo + hi) / 2;
         if (detectarPolo(expr, centro)) continue;
+        if (hayPoloEnIntervalo(expr, lo, hi)) continue;
 
         return [lo, hi, 'auto'];
     }
 
-    // Todos los candidatos eran discontinuidades
+    // Todos los candidatos (revisados) eran discontinuidades
     return [candidatos[0][0], candidatos[0][1], 'discontinuo'];
+}
+
+// ¿Hay un polo (discontinuidad no evitable) dentro de [lo, hi]?
+// Muestrea el interior y ejecuta detectarPolo en el punto de MAYOR |f|: en un
+// polo la función se dispara, así que el máximo absoluto lo delata (con la
+// revisión solo del centro se escapaban polos descentrados). También devuelve
+// true si algún punto del intervalo no es evaluable (hueco de dominio).
+function hayPoloEnIntervalo(expr, lo, hi) {
+    const ancho = hi - lo;
+    if (!(ancho > 0)) return false;
+    const muestras = Math.min(512, Math.max(64, Math.round(ancho / 0.002)));
+    let xMax = null;
+    let fMaxAbs = 0;
+    for (let i = 1; i < muestras; i++) {
+        const x = lo + (ancho * i) / muestras;
+        const y = evaluarFuncion(expr, x);
+        if (!Number.isFinite(y)) return true; // punto no evaluable: hueco/polo
+        const abs = Math.abs(y);
+        if (abs > fMaxAbs) { fMaxAbs = abs; xMax = x; }
+    }
+    if (xMax === null) return false;
+    return detectarPolo(expr, xMax);
 }
 
 // Exponer globalmente
 window.evaluarFuncion = evaluarFuncion;
 window.buscarIntervaloAuto = buscarIntervaloAuto;
+window.hayPoloEnIntervalo = hayPoloEnIntervalo;
 
 // Formato numérico compartido (tablas, LaTeX y expresiones).
 // Evita notación tipo "0.30000000000000004" y usa exponencial fuera de
@@ -247,20 +278,104 @@ window.detectarPolo = detectarPolo;
 
 // Distingue "sintaxis inválida" de "punto fuera de dominio".
 // Devuelve un mensaje de error apropiado para fa/fb no finitos.
-function mensajeErrorEvaluacion(expr, donde) {
+// `nombre` permite reutilizarlo en otros métodos ('g(x)' en Punto Fijo).
+function mensajeErrorEvaluacion(expr, donde, nombre = 'f(x)') {
     let sintaxisOk = true;
     try {
         if (typeof math !== 'undefined' && math.parse) math.parse(normalizarExpresion(expr));
     } catch (e) { sintaxisOk = false; }
 
     if (!sintaxisOk) {
-        return 'Error: Revisa la sintaxis de tu función f(x).';
+        return `Error: Revisa la sintaxis de tu función ${nombre}.`;
     }
-    return `Error: f(x) no está definida en ${donde} (el punto está fuera del dominio de la función). ` +
+    return `Error: ${nombre} no está definida en ${donde} (el punto está fuera del dominio de la función). ` +
         `Ej.: sqrt(x) y ln(x) solo existen para x > 0.`;
 }
 
 window.mensajeErrorEvaluacion = mensajeErrorEvaluacion;
+
+// --- PISTAS CUANDO NO HAY CAMBIO DE SIGNO (fa · fb > 0) ---
+// El error de Bolzano por sí solo no dice por qué falló. Estas funciones
+// miran el interior del intervalo y sugieren la causa más probable:
+//   - una raíz doble (f toca 0 sin cruzar: (x-1)^2) → Newton o Punto Fijo;
+//   - una discontinuidad (un polo / asíntota: tan(x) en π/2 + kπ);
+//   - una raíz real escondida dentro de [a, b] → bisectar ese tramo.
+
+// Refina el tramo donde f cambia de signo y clasifica el cruce:
+// si |f| se dispara es un polo; si se anula, hay una raíz dentro.
+function pistaPorCambioDeSigno(expr, x1, x2, f1, f2) {
+    let lo = x1, hi = x2, fLo = f1;
+    let it = 0;
+    while ((hi - lo) > 1e-7 && it < 80) {
+        const mid = (lo + hi) / 2;
+        const fMid = evaluarFuncion(expr, mid);
+        if (!Number.isFinite(fMid)) {
+            return ' Pista: f cambia de signo dentro del intervalo por una discontinuidad (polo), no por ' +
+                'una raíz: p. ej. tan(x) tiene asíntotas verticales en π/2 + kπ. Por eso f(a) y f(b) pueden ' +
+                'tener el mismo signo aunque existan raíces: usa un intervalo que no cruce la asíntota.';
+        }
+        if (fMid === 0) break;
+        if (fLo * fMid < 0) hi = mid;
+        else { lo = mid; fLo = fMid; }
+        it++;
+    }
+    const fHi = evaluarFuncion(expr, hi);
+    const minFinal = Math.min(Math.abs(fLo), Number.isFinite(fHi) ? Math.abs(fHi) : Infinity);
+    const umbral = Math.max(1e-6, 1e-3 * Math.max(Math.abs(f1), Math.abs(f2)));
+    if (detectarPolo(expr, (lo + hi) / 2) || minFinal > umbral) {
+        return ' Pista: f cambia de signo dentro del intervalo por una discontinuidad (polo), no por una ' +
+            'raíz: p. ej. tan(x) tiene asíntotas verticales en π/2 + kπ. Por eso f(a) y f(b) pueden tener ' +
+            'el mismo signo aunque existan raíces: usa un intervalo que no cruce la asíntota.';
+    }
+    return ` Pista: f cambia de signo dentro del intervalo (hay una raíz entre ${numTexto(x1)} y ${numTexto(x2)}), ` +
+        'así que f(a) y f(b) pueden tener el mismo signo igual: usa ese tramo más pequeño como intervalo.';
+}
+
+// Barrido del interior de [a, b] buscando la causa de la ausencia de cambio
+// de signo. Devuelve '' si no hay nada notable que reportar.
+function pistaSinCambioDeSigno(expr, a, b, fa, fb) {
+    const N = 200;
+    const paso = (b - a) / N;
+    let xPrev = a;
+    let fPrev = fa;
+    let minAbs = Math.abs(fa);
+    let minX = a;
+
+    for (let i = 1; i <= N; i++) {
+        const x = a + paso * i;
+        const y = evaluarFuncion(expr, x);
+        if (!Number.isFinite(y)) {
+            return ' Pista: f no está definida en todo el intervalo (hay una discontinuidad o una asíntota ' +
+                'vertical, p. ej. tan(x) en π/2 + kπ), por eso f(a) y f(b) pueden tener el mismo signo ' +
+                'aunque exista una raíz.';
+        }
+        const abs = Math.abs(y);
+        if (abs < minAbs) { minAbs = abs; minX = x; }
+
+        if (y === 0) {
+            // Cero exacto en el interior: ¿cruza el eje o solo lo toca?
+            const fSiguiente = evaluarFuncion(expr, x + paso);
+            if (Number.isFinite(fSiguiente) && fPrev !== 0 && fPrev * fSiguiente < 0) {
+                return ` Pista: f cambia de signo en x ≈ ${x.toFixed(4)} (y f ahí es 0): hay una raíz DENTRO ` +
+                    'de [a, b]. Bisecta un tramo más pequeño alrededor de esa x.';
+            }
+            // No cruza: es un toque (típico de una raíz doble); el mínimo
+            // reportado al final del barrido lo describe mejor.
+        } else if (fPrev !== 0 && fPrev * y < 0) {
+            return pistaPorCambioDeSigno(expr, xPrev, x, fPrev, y);
+        }
+        xPrev = x;
+        fPrev = y;
+    }
+
+    const escala = Math.max(Math.abs(fa), Math.abs(fb));
+    if (minAbs <= Math.max(1e-6, 1e-3 * escala)) {
+        return ` Pista: f(x) toca 0 sin cruzar el eje (|f| mínimo = ${numTexto(minAbs)} cerca de x ≈ ` +
+            `${minX.toFixed(4)}): puede ser una raíz doble, p. ej. (x - 1)^2. Bisección no la detecta porque ` +
+            'f(a) y f(b) no cambian de signo: prueba Newton o Punto Fijo.';
+    }
+    return '';
+}
 
 // Lee el criterio de paro y su valor (acepta fracciones como 1/16).
 // Muestra error y retorna null si el valor no es valido.
@@ -409,6 +524,19 @@ function calcularBiseccion() {
         return;
     }
 
+    // El intervalo automático solo encontró polos: en vez de bisectar una
+    // discontinuidad y reconocerlo recién al final, se avisa ANTES de calcular.
+    if (intervaloModo === 'discontinuo') {
+        mostrarInfo(
+            'Aviso: el intervalo automático solo encontró discontinuidades (polos) de f(x) en [-100, 100], ' +
+            'así que no hay cambio de signo válido donde bisectar. Se llenaron a y b con el primer candidato ' +
+            `[${a.toFixed(4)}, ${b.toFixed(4)}]: pulsa "Calcular Procedimiento" de nuevo para ver el detalle ` +
+            'de ese tramo, o escribe un intervalo donde f sí cambie de signo.',
+            'aviso'
+        );
+        return;
+    }
+
     // Mostrar indicador de intervalo automático
     if (intervaloModo === 'auto' || intervaloModo === 'exacta') {
         mostrarInfo(`Intervalo automático detectado: [${a.toFixed(4)}, ${b.toFixed(4)}]. Puedes modificarlo manualmente si es necesario.`, 'info');
@@ -448,7 +576,8 @@ function calcularBiseccion() {
     }
 
     if (fa * fb > 0) {
-        mostrarError('Error: f(a) y f(b) deben tener signos opuestos (Teorema de Bolzano).');
+        mostrarError('Error: f(a) y f(b) deben tener signos opuestos (Teorema de Bolzano).' +
+            pistaSinCambioDeSigno(expr, a, b, fa, fb));
         return;
     }
 

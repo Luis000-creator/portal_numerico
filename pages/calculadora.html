@@ -257,7 +257,13 @@
                 <input type="text" id="valorCriterio" name="valorCriterio" placeholder="Ej. 0.001 o 1/16" maxlength="50" required>
             </div>
 
-            <button type="submit">Calcular Procedimiento</button>
+            <!-- Calcular (submit) + Graficar (gráfica independiente, sin ejecutar el método) -->
+            <div class="form-actions">
+                <button type="submit">Calcular Procedimiento</button>
+                <button type="button" id="btn-graficar-libre" class="btn-graficar" style="display: none;">
+                    Graficar
+                </button>
+            </div>
         </form>
 
         <div id="error-box" class="error-box" style="display: none;">

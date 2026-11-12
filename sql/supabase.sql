@@ -100,6 +100,42 @@ with check (bucket_id = 'archivos_apuntes');
 
 
 -- =========================================================
+-- 5. LÍMITES SIN LOGIN (12-nov)
+-- SELECT/INSERT siguen públicos (no hay login por decisión del equipo),
+-- pero la base acota lo que se puede escribir: nada de URLs en el título
+-- y archivo_url apuntando solo al bucket propio del portal. El cliente
+-- (js/apuntes.js) valida lo mismo; el CHECK es la garantía real, porque
+-- no depende del JavaScript del navegador.
+-- =========================================================
+
+alter table public.apuntes
+    drop constraint if exists apuntes_titulo_sin_url;
+
+alter table public.apuntes
+    add constraint apuntes_titulo_sin_url
+        check (titulo !~* 'https?://|www\.');
+
+alter table public.apuntes
+    drop constraint if exists apuntes_archivo_url_bloque;
+
+alter table public.apuntes
+    add constraint apuntes_archivo_url_bloque
+        check (archivo_url is null
+            or archivo_url like 'https://ekmgyckzxhuiyzlncryw.supabase.co/storage/v1/object/public/archivos_apuntes/%');
+
+
+-- =========================================================
+-- 6. BORRAR DUPLICADOS (12-nov)
+-- EJERCICIO_7: ids 32 y 33 (33 = versión corregida).
+-- EJERCICIO_6_PF: ids 45 y 47 (archivos idénticos).
+-- La página ya deduplica al mostrar, pero las filas siguen en la BD
+-- y RLS no permite DELETE público: este borrado se hace desde el
+-- panel de Supabase (SQL Editor).
+-- =========================================================
+delete from public.apuntes where id in (32, 45);
+
+
+-- =========================================================
 -- IMPORTANTE
 --
 -- NO damos permisos UPDATE ni DELETE públicamente.
