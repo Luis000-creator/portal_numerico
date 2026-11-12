@@ -8,57 +8,146 @@
 const CABECERA_BISECCION = '<tr><th>Iter</th><th>a</th><th>b</th><th>x_m</th><th>f(x_m)</th><th>Ea (%)</th></tr>';
 const CABECERA_PUNTOFIJO = '<tr><th>Iter (n)</th><th>x</th><th>g(x)</th><th>Ea (%)</th></tr>';
 const CABECERA_NEWTON = '<tr><th>Iter (n)</th><th>xₙ</th><th>f(xₙ)</th><th>f\'(xₙ)</th><th>xₙ₊₁</th><th>Ea (%)</th></tr>';
+const CABECERA_TAYLOR = '<tr><th>Orden (n)</th><th>Derivada f⁽ⁿ⁾(x)</th><th>f⁽ⁿ⁾(a)</th><th>Término</th><th>Aproximación</th><th>Error Verdadero (%)</th></tr>';
+const CABECERA_LAGRANGE_LINEAL = '<tr><th>Término</th><th>Cálculo (sustitución)</th><th>Valor</th></tr>';
+const CABECERA_LAGRANGE = '<tr><th>i</th><th>xᵢ</th><th>yᵢ</th><th>Lᵢ(x)</th><th>Lᵢ(x)·yᵢ</th></tr>';
+const CABECERA_SIMPSON = '<tr><th>i</th><th>xᵢ</th><th>f(xᵢ)</th><th>Coeficiente</th><th>Producto</th></tr>';
+
+// Configuración de cada método disponible en el selector.
+//   bloque    id del <div> que contiene sus inputs
+//   campos    inputs que se deshabilitan cuando el método no está activo
+//   requeridos subset de `campos` con required solo mientras esté activo
+//   criterio  false cuando el método no usa criterio de paro (Taylor,
+//             Lagrange y Simpson trabajan con un parámetro n, no iteran)
+const CONFIG_METODOS = {
+    biseccion: {
+        bloque: 'inputs-biseccion',
+        titulo: 'Método de Bisección',
+        subtitulo: 'Análisis de Procedimiento y Raíces',
+        cabecera: CABECERA_BISECCION,
+        campos: ['funcion'],
+        requeridos: ['funcion'],
+        criterio: true,
+    },
+    puntofijo: {
+        bloque: 'inputs-puntofijo',
+        titulo: 'Iteración de Punto Fijo',
+        subtitulo: 'Convergencia hacia x = g(x)',
+        cabecera: CABECERA_PUNTOFIJO,
+        campos: ['funcion-gx', 'x0'],
+        requeridos: ['funcion-gx', 'x0'],
+        criterio: true,
+    },
+    newton: {
+        bloque: 'inputs-newton',
+        titulo: 'Método de Newton-Raphson',
+        subtitulo: 'Aproximación sucesiva xₙ₊₁ = xₙ - f(xₙ)/f\'(xₙ)',
+        cabecera: CABECERA_NEWTON,
+        campos: ['funcion-newton', 'x0-newton'],
+        requeridos: ['funcion-newton', 'x0-newton'],
+        criterio: true,
+    },
+    taylor: {
+        bloque: 'inputs-taylor',
+        titulo: 'Series de Taylor y Maclaurin',
+        subtitulo: 'Aproximación polinómica Pₙ(x) alrededor del punto a',
+        cabecera: CABECERA_TAYLOR,
+        campos: ['funcion-taylor', 'a-taylor', 'x-taylor', 'n-taylor'],
+        requeridos: ['funcion-taylor', 'a-taylor', 'x-taylor', 'n-taylor'],
+        criterio: false,
+    },
+    lagrangelineal: {
+        bloque: 'inputs-lagrangelineal',
+        titulo: 'Interpolación Lineal de Lagrange',
+        subtitulo: 'Recta que une dos puntos conocidos',
+        cabecera: CABECERA_LAGRANGE_LINEAL,
+        campos: ['x0-lineal', 'y0-lineal', 'x1-lineal', 'y1-lineal', 'x-lineal'],
+        requeridos: ['x0-lineal', 'y0-lineal', 'x1-lineal', 'y1-lineal', 'x-lineal'],
+        criterio: false,
+    },
+    lagrangepoly: {
+        bloque: 'inputs-lagrangepoly',
+        titulo: 'Interpolación Polinomial de Lagrange',
+        subtitulo: 'Polinomio que pasa por todos los puntos dados',
+        cabecera: CABECERA_LAGRANGE,
+        campos: ['x-poly'],
+        requeridos: ['x-poly'],
+        criterio: false,
+    },
+    simpson: {
+        bloque: 'inputs-simpson',
+        titulo: 'Regla de Simpson 1/3',
+        subtitulo: 'Integración numérica por parábolas',
+        cabecera: CABECERA_SIMPSON,
+        campos: ['funcion-simpson', 'a-simpson', 'b-simpson', 'n-simpson'],
+        requeridos: ['funcion-simpson', 'a-simpson', 'b-simpson', 'n-simpson'],
+        criterio: false,
+    },
+};
 
 // Muestra u oculta los campos segun el metodo elegido
 function alternarMetodoUI() {
-    const metodo = document.getElementById('metodo-selector').value;
-    const divBiseccion = document.getElementById('inputs-biseccion');
-    const divPuntoFijo = document.getElementById('inputs-puntofijo');
-    const divNewton = document.getElementById('inputs-newton');
+    const selector = document.getElementById('metodo-selector');
+    const metodo = selector ? selector.value : 'biseccion';
+    const cfg = CONFIG_METODOS[metodo] || CONFIG_METODOS.biseccion;
+    const claves = Object.keys(CONFIG_METODOS);
+
+    // 1) Solo se ve el bloque de inputs del método activo
+    claves.forEach((key) => {
+        const div = document.getElementById(CONFIG_METODOS[key].bloque);
+        if (div) div.style.display = key === metodo ? '' : 'none';
+    });
+
+    // 2) Los campos ocultos se deshabilitan para no bloquear el submit de
+    //    HTML5; los del método activo recuperan su `required` de config.
+    claves.forEach((key) => {
+        const activo = key === metodo;
+        const cfgM = CONFIG_METODOS[key];
+        (cfgM.campos || []).forEach((id) => {
+            const campo = document.getElementById(id);
+            if (!campo) return;
+            campo.disabled = !activo;
+            campo.required = activo && (cfgM.requeridos || []).indexOf(id) !== -1;
+        });
+    });
+
+    // 3) El criterio de paro solo aplica a los métodos iterativos
+    const usaCriterio = cfg.criterio !== false;
+    ['grupo-criterio', 'grupo-valor-criterio'].forEach((id) => {
+        const grupo = document.getElementById(id);
+        if (grupo) grupo.style.display = usaCriterio ? '' : 'none';
+    });
+    const selCriterio = document.getElementById('criterio');
+    if (selCriterio) { selCriterio.disabled = !usaCriterio; selCriterio.required = usaCriterio; }
+    const valCriterio = document.getElementById('valorCriterio');
+    if (valCriterio) { valCriterio.disabled = !usaCriterio; valCriterio.required = usaCriterio; }
+
+    // 4) Cabecera de tabla, título y subtítulo
     const cabecera = document.getElementById('tabla-cabecera');
+    if (cabecera) cabecera.innerHTML = cfg.cabecera;
     const titulo = document.getElementById('titulo-metodo');
+    if (titulo) titulo.innerText = cfg.titulo;
     const subtitulo = document.getElementById('subtitulo-metodo');
-
-    const esBiseccion = metodo === 'biseccion';
-    const esPuntoFijo = metodo === 'puntofijo';
-    const esNewton = metodo === 'newton';
-
-    if (divBiseccion) divBiseccion.style.display = esBiseccion ? '' : 'none';
-    if (divPuntoFijo) divPuntoFijo.style.display = esPuntoFijo ? '' : 'none';
-    if (divNewton) divNewton.style.display = esNewton ? '' : 'none';
-
-    // Los campos ocultos no deben bloquear el submit de HTML5
-    const campoFx = document.getElementById('funcion');
-    const campoGx = document.getElementById('funcion-gx');
-    const campoX0 = document.getElementById('x0');
-    const campoFxNewton = document.getElementById('funcion-newton');
-    const campoX0Newton = document.getElementById('x0-newton');
-    
-    if (campoFx) { campoFx.required = esBiseccion; campoFx.disabled = !esBiseccion; }
-    if (campoGx) { campoGx.required = esPuntoFijo; campoGx.disabled = !esPuntoFijo; }
-    if (campoX0) { campoX0.required = esPuntoFijo; campoX0.disabled = !esPuntoFijo; }
-    if (campoFxNewton) { campoFxNewton.required = esNewton; campoFxNewton.disabled = !esNewton; }
-    if (campoX0Newton) { campoX0Newton.required = esNewton; campoX0Newton.disabled = !esNewton; }
-
-    if (cabecera) {
-        if (esBiseccion) cabecera.innerHTML = CABECERA_BISECCION;
-        else if (esPuntoFijo) cabecera.innerHTML = CABECERA_PUNTOFIJO;
-        else if (esNewton) cabecera.innerHTML = CABECERA_NEWTON;
-    }
-
-    if (titulo) {
-        if (esBiseccion) titulo.innerText = 'Método de Bisección';
-        else if (esPuntoFijo) titulo.innerText = 'Iteración de Punto Fijo';
-        else if (esNewton) titulo.innerText = 'Método de Newton-Raphson';
-    }
-    if (subtitulo) {
-        if (esBiseccion) subtitulo.innerText = 'Análisis de Procedimiento y Raíces';
-        else if (esPuntoFijo) subtitulo.innerText = 'Convergencia hacia x = g(x)';
-        else if (esNewton) subtitulo.innerText = 'Aproximación sucesiva xₙ₊₁ = xₙ - f(xₙ)/f\'(xₙ)';
-    }
+    if (subtitulo) subtitulo.innerText = cfg.subtitulo;
 
     limpiarTabla();
 }
+
+// Router: qué función ejecuta cada valor del selector (se resuelven en
+// window al momento del submit, cuando todos los módulos ya cargaron).
+const EJECUTORES = {
+    biseccion: 'calcularBiseccion',
+    puntofijo: 'calcularPuntoFijo',
+    newton: 'calcularNewton',
+    taylor: 'calcularTaylor',
+    lagrangelineal: 'calcularLagrangeLineal',
+    lagrangepoly: 'calcularLagrangePolinomial',
+    simpson: 'calcularSimpson',
+};
+
+// Se exponen para que los tests (y la consola) puedan inspeccionarlas
+window.CONFIG_METODOS = CONFIG_METODOS;
+window.EJECUTORES = EJECUTORES;
 
 // Router: decide que algoritmo ejecutar segun el metodo activo.
 // Espera al motor lazy (math/KaTeX) antes de calcular.
@@ -76,13 +165,12 @@ async function ejecutarCalculo(event) {
         return;
     }
     const metodo = document.getElementById('metodo-selector').value;
-
-    if (metodo === 'biseccion') {
-        calcularBiseccion();
-    } else if (metodo === 'puntofijo') {
-        calcularPuntoFijo();
-    } else if (metodo === 'newton') {
-        calcularNewton();
+    const nombre = EJECUTORES[metodo];
+    const fn = nombre ? window[nombre] : null;
+    if (typeof fn === 'function') {
+        fn();
+    } else {
+        mostrarError('Este método aún no está disponible.');
     }
 }
 

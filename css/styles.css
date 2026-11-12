@@ -1418,3 +1418,146 @@ select option {
 select:hover, select:focus {
     border-color: var(--accent-cyan) !important;
 }
+
+/* =========================================
+   NUEVOS MÉTODOS: Taylor, Lagrange, Simpson
+   ========================================= */
+
+/* --- Procedimiento en LaTeX (KaTeX) --- */
+.procedimiento-katex {
+  margin: 18px 0 6px 0;
+  padding: 18px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--text-main, #fff);
+}
+
+.procedimiento-katex .katex-display {
+  margin: 0.4em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+/* --- Tabla dinámica de puntos (Interpolación Polinomial) --- */
+.tabla-puntos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.punto-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.punto-indice {
+  flex: 0 0 auto;
+  min-width: 34px;
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.punto-fila input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.btn-quitar-punto {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: rgba(244, 63, 94, 0.10);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  border-radius: var(--radius-sm);
+  color: #f43f5e;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-quitar-punto:hover {
+  background: rgba(244, 63, 94, 0.25);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);
+}
+
+.btn-agregar-punto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px dashed rgba(0, 240, 255, 0.4);
+  border-radius: var(--radius-sm);
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-agregar-punto:hover {
+  background: rgba(0, 240, 255, 0.14);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+}
+
+/* --- Tarjetas de estado del criterio de paro --- */
+.resumen-card--ok {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.resumen-card--ok .resumen-icon,
+.resumen-card--ok .resumen-value {
+  color: #34d399;
+}
+
+.resumen-card--warn {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.resumen-card--warn .resumen-icon,
+.resumen-card--warn .resumen-value {
+  color: #fbbf24;
+}
+
+/* Más de 4 tarjetas (Taylor muestra 6): pasan a 3 columnas */
+.resumen-grid--6 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* --- Responsive: filas de puntos en pantallas pequeñas --- */
+@media (max-width: 640px) {
+  .procedimiento-katex {
+    font-size: 0.9rem;
+    padding: 14px 10px;
+  }
+
+  .punto-fila {
+    flex-wrap: wrap;
+  }
+
+  .punto-fila input {
+    flex: 1 1 40%;
+  }
+
+  .btn-quitar-punto {
+    margin-left: auto;
+  }
+}

@@ -121,6 +121,19 @@ function buscarIntervaloAuto(expr) {
 window.evaluarFuncion = evaluarFuncion;
 window.buscarIntervaloAuto = buscarIntervaloAuto;
 
+// Formato numérico compartido (tablas, LaTeX y expresiones).
+// Evita notación tipo "0.30000000000000004" y usa exponencial fuera de
+// un rango razonable para que mathjs y KaTeX lo acepten.
+function numTexto(n) {
+    if (!Number.isFinite(n)) return '0';
+    if (n === 0) return '0';
+    const abs = Math.abs(n);
+    if (abs >= 1e-4 && abs < 1e7) return String(Number(n.toPrecision(12)));
+    return n.toExponential(6);
+}
+
+window.numTexto = numTexto;
+
 // Helpers de UI para errores
 function mostrarError(mensaje) {
     const errorBox = document.getElementById('error-box');
@@ -186,8 +199,33 @@ function limpiarTabla() {
     if (tbody) tbody.innerHTML = '';
     const grafCont = document.getElementById('grafica-container');
     if (grafCont) grafCont.style.display = 'none';
+    ocultarProcedimiento();
     ocultarInfo();
 }
+
+// --- PASO A PASO EN KATEX (Taylor, Lagrange, Simpson) ---
+// Renderiza LaTeX en el bloque #procedimiento-katex y lo muestra.
+function renderizarProcedimiento(latex) {
+    const el = document.getElementById('procedimiento-katex');
+    if (!el) return false;
+    if (!latex || typeof katex === 'undefined') { ocultarProcedimiento(); return false; }
+    try {
+        katex.render(latex, el, { displayMode: true, throwOnError: false });
+        el.style.display = 'block';
+        return true;
+    } catch (e) {
+        ocultarProcedimiento();
+        return false;
+    }
+}
+
+function ocultarProcedimiento() {
+    const el = document.getElementById('procedimiento-katex');
+    if (el) { el.innerHTML = ''; el.style.display = 'none'; }
+}
+
+window.renderizarProcedimiento = renderizarProcedimiento;
+window.ocultarProcedimiento = ocultarProcedimiento;
 
 // Conecta un input de funcion con su previsualizacion KaTeX en vivo.
 // Carga math/KaTeX bajo demanda en el primer input (lazy-load anti-TBT).
@@ -437,6 +475,11 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
                 <span class="resumen-label">Criterio de Paro</span>
                 <span class="resumen-value resumen-value--small">${textoCriterio}</span>
             </div>
+            <div class="resumen-card ${criterioAlcanzado ? 'resumen-card--ok' : 'resumen-card--warn'}">
+                <span class="resumen-icon"><i class="fa-solid ${criterioAlcanzado ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i></span>
+                <span class="resumen-label">Estado</span>
+                <span class="resumen-value resumen-value--small">${criterioAlcanzado ? 'Criterio alcanzado' : 'Criterio no alcanzado'}</span>
+            </div>
         </div>
     `;
     resumenBox.style.display = 'block';
@@ -447,7 +490,38 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
     if (btnExport) btnExport.style.display = 'inline-flex';
 }
 
+// Resumen genérico para métodos que no encajan en las tarjetas de raíz
+// (Taylor, Lagrange, Simpson): recibe la lista de tarjetas a mostrar.
+//   tarjetas: [{ etiqueta, valor, tipo?: 'principal', icono? }]
+//   opciones: { informacion?, tipoInfo? }
+function mostrarResumenCustom(tarjetas, opciones = {}) {
+    const resumenBox = document.getElementById('resumen-container');
+    const btnCopy = document.getElementById('btn-copy-icon');
+    if (!resumenBox) return;
+
+    const html = (tarjetas || []).map((t) => `
+            <div class="resumen-card${t.tipo === 'principal' ? ' resumen-card--raiz' : ''}">
+                <span class="resumen-icon"><i class="fa-solid ${t.icono || 'fa-calculator'}"></i></span>
+                <span class="resumen-label">${t.etiqueta}</span>
+                <span class="resumen-value">${t.valor}</span>
+            </div>`).join('');
+
+    // Con más de 4 tarjetas (Taylor) se pasan a 3 columnas para que no
+    // queden filas a medio llenar.
+    const claseGrid = (tarjetas || []).length > 4 ? 'resumen-grid resumen-grid--6' : 'resumen-grid';
+    resumenBox.innerHTML = `<div class="${claseGrid}">${html}
+        </div>`;
+    resumenBox.style.display = 'block';
+
+    if (opciones.informacion) mostrarInfo(opciones.informacion, opciones.tipoInfo || 'info');
+
+    if (btnCopy) btnCopy.style.display = 'inline-flex';
+    const btnExport = document.getElementById('btn-export-csv');
+    if (btnExport) btnExport.style.display = 'inline-flex';
+}
+
 window.mostrarResumen = mostrarResumen;
+window.mostrarResumenCustom = mostrarResumenCustom;
 
 window.calcularBiseccion = calcularBiseccion;
 window.mostrarError = mostrarError;

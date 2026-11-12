@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Itera | Calculadora Bisección</title>
+    <title>Itera | Calculadora de Métodos Numéricos</title>
     <link rel="icon" type="image/x-icon" href="../img/IteraFavicon.ico" />
     <link rel="icon" type="image/webp" sizes="16x16" href="../img/IteraFavicon-16x16.webp" />
     <link rel="icon" type="image/webp" sizes="32x32" href="../img/IteraFavicon-32x32.webp" />
@@ -11,7 +11,7 @@
     <link rel="manifest" href="/portal_numerico/site.webmanifest" />
     <meta
       name="description"
-      content="Calculadora de métodos numéricos en Itera: bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
+      content="Calculadora de métodos numéricos en Itera: bisección, punto fijo, Newton-Raphson, Taylor, interpolación de Lagrange y Simpson 1/3 con tabla paso a paso."
     />
     <link rel="canonical" href="https://luis000-creator.github.io/portal_numerico/pages/calculadora.html" />
     <meta name="theme-color" content="#07090e" />
@@ -21,7 +21,7 @@
     <meta property="og:title" content="Itera | Calculadora de Métodos Numéricos" />
     <meta
       property="og:description"
-      content="Bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
+      content="Bisección, punto fijo, Newton-Raphson, Taylor, Lagrange y Simpson 1/3 con tabla de iteraciones paso a paso."
     />
     <meta property="og:url" content="https://luis000-creator.github.io/portal_numerico/pages/calculadora.html" />
     <meta property="og:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp" />
@@ -29,7 +29,7 @@
     <meta name="twitter:title" content="Itera | Calculadora de Métodos Numéricos" />
     <meta
       name="twitter:description"
-      content="Bisección, punto fijo y Newton-Raphson con tabla de iteraciones paso a paso."
+      content="Bisección, punto fijo, Newton-Raphson, Taylor, Lagrange y Simpson 1/3 con tabla de iteraciones paso a paso."
     />
     <meta name="twitter:image" content="https://luis000-creator.github.io/portal_numerico/img/og-cover.webp" />
     <meta property="og:image:width" content="1200" />
@@ -46,7 +46,7 @@
 
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="../css/styles.css?v=2">
+    <link rel="stylesheet" href="../css/styles.css?v=3">
 </head>
 <body>
 
@@ -75,6 +75,10 @@
                     <option value="biseccion">Método de Bisección</option>
                     <option value="puntofijo">Iteración de Punto Fijo</option>
                     <option value="newton">Método de Newton-Raphson</option>
+                    <option value="taylor">Series de Taylor y Maclaurin</option>
+                    <option value="lagrangelineal">Interpolación Lineal de Lagrange</option>
+                    <option value="lagrangepoly">Interpolación Polinomial de Lagrange</option>
+                    <option value="simpson">Regla de Simpson 1/3</option>
                 </select>
             </div>
 
@@ -137,7 +141,109 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <!-- ================== Series de Taylor / Maclaurin ================== -->
+            <div id="inputs-taylor" style="display: none;">
+                <div class="form-group">
+                    <label for="funcion-taylor">Función f(x)</label>
+                    <input type="text" id="funcion-taylor" name="funcion-taylor" placeholder="Ej. exp(x)" maxlength="200">
+                    <div id="preview-fx-taylor" class="preview-fx"></div>
+                </div>
+
+                <!-- Menú matemático para Taylor (se construye en biseccion.js) -->
+                <div id="menu-taylor" class="examples-container math-menu" data-target="funcion-taylor"></div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--flex1">
+                        <label for="a-taylor">Centro a (expansión alrededor de)</label>
+                        <input type="number" step="any" id="a-taylor" name="a-taylor" placeholder="Ej. 0 (Maclaurin)">
+                    </div>
+                    <div class="form-group form-group--flex1">
+                        <label for="x-taylor">Punto x a evaluar</label>
+                        <input type="number" step="any" id="x-taylor" name="x-taylor" placeholder="Ej. 1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="n-taylor">Grado del polinomio n</label>
+                    <input type="number" step="1" min="1" max="20" id="n-taylor" name="n-taylor" placeholder="Ej. 5">
+                </div>
+            </div>
+
+            <!-- ============== Interpolación Lineal de Lagrange ============== -->
+            <div id="inputs-lagrangelineal" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group form-group--flex1">
+                        <label for="x0-lineal">x₀</label>
+                        <input type="number" step="any" id="x0-lineal" name="x0-lineal" placeholder="Ej. 1">
+                    </div>
+                    <div class="form-group form-group--flex1">
+                        <label for="y0-lineal">y₀ = f(x₀)</label>
+                        <input type="number" step="any" id="y0-lineal" name="y0-lineal" placeholder="Ej. 2">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--flex1">
+                        <label for="x1-lineal">x₁</label>
+                        <input type="number" step="any" id="x1-lineal" name="x1-lineal" placeholder="Ej. 3">
+                    </div>
+                    <div class="form-group form-group--flex1">
+                        <label for="y1-lineal">y₁ = f(x₁)</label>
+                        <input type="number" step="any" id="y1-lineal" name="y1-lineal" placeholder="Ej. 6">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="x-lineal">Valor de x a interpolar</label>
+                    <input type="number" step="any" id="x-lineal" name="x-lineal" placeholder="Ej. 2">
+                </div>
+            </div>
+
+            <!-- ============ Interpolación Polinomial de Lagrange ============ -->
+            <div id="inputs-lagrangepoly" style="display: none;">
+                <div class="form-group">
+                    <label for="x-poly">Valor de X a interpolar</label>
+                    <input type="number" step="any" id="x-poly" name="x-poly" placeholder="Ej. 2.5">
+                </div>
+
+                <div class="form-group">
+                    <label>Puntos conocidos (mínimo 3)</label>
+                    <div id="tabla-puntos" class="tabla-puntos"></div>
+                    <button type="button" id="btn-agregar-punto" class="btn-agregar-punto">
+                        <i class="fa-solid fa-plus"></i> Agregar punto
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================== Regla de Simpson 1/3 ================== -->
+            <div id="inputs-simpson" style="display: none;">
+                <div class="form-group">
+                    <label for="funcion-simpson">Función f(x) a integrar</label>
+                    <input type="text" id="funcion-simpson" name="funcion-simpson" placeholder="Ej. x^2" maxlength="200">
+                    <div id="preview-fx-simpson" class="preview-fx"></div>
+                </div>
+
+                <!-- Menú matemático para Simpson (se construye en biseccion.js) -->
+                <div id="menu-simpson" class="examples-container math-menu" data-target="funcion-simpson"></div>
+
+                <div class="form-row">
+                    <div class="form-group form-group--flex1">
+                        <label for="a-simpson">Límite inferior (a)</label>
+                        <input type="number" step="any" id="a-simpson" name="a-simpson" placeholder="Ej. 0">
+                    </div>
+                    <div class="form-group form-group--flex1">
+                        <label for="b-simpson">Límite superior (b)</label>
+                        <input type="number" step="any" id="b-simpson" name="b-simpson" placeholder="Ej. 2">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="n-simpson">Número de subintervalos n (par, ≥ 2)</label>
+                    <input type="number" step="2" min="2" max="1000" id="n-simpson" name="n-simpson" placeholder="Ej. 4">
+                </div>
+            </div>
+
+            <div class="form-group" id="grupo-criterio">
                 <label for="criterio">Criterio de Paro</label>
                 <select id="criterio" name="criterio" onchange="mostrarCampoCriterio()">
                     <option value="tolerancia">Tolerancia</option>
@@ -165,6 +271,10 @@
         <div id="resultado-container" class="result-container" style="display: none;">
             <div class="result-divider"></div>
             <div id="resumen-container" class="resumen-container" style="display: none;"></div>
+
+            <!-- Procedimiento en LaTeX (Taylor, Lagrange, Simpson) -->
+            <div id="procedimiento-katex" class="procedimiento-katex" style="display: none;" aria-live="polite"></div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0;">
                 <h2 class="result-title" style="text-align: left; margin: 0;"><i class="fa-solid fa-table-list" style="margin-right: 6px;"></i>Tabla de Procedimiento</h2>
                 <button type="button" id="btn-copy-icon" class="btn-icon-clipboard" onclick="copiarTablaClipboard()" title="Copiar tabla al portapapeles" style="display: none;">
@@ -209,6 +319,9 @@
 <script src="../js/punto-fijo.js" defer></script>
 <script src="../js/newton-raphson.js" defer></script>
 <script src="../js/graficadora.js" defer></script>
+<script src="../js/taylor.js" defer></script>
+<script src="../js/lagrange.js" defer></script>
+<script src="../js/simpson.js" defer></script>
 <script src="../js/canvas-animation.js" defer></script>
 </body>
 </html>
