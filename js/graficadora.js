@@ -11,6 +11,8 @@
 //   a, b     bracket/intervalo: padding del rango + líneas punteadas
 //   xs       array de x visitados (define el rango)
 //   raiz     punto marcado sobre la curva principal
+//   identidad true → dibuja la recta y = x (método de punto fijo)
+//   titulo   texto del encabezado del bloque de gráfica
 //   curvas   [{ expr, color, etiqueta, discontinua }]  curvas adicionales
 //   puntos   [{ x, y, color, etiqueta, r }]  dispersión (datos interpolados)
 //   marca(s) { x, y, color, etiqueta, radio } punto(s) marcado(s)
@@ -128,6 +130,16 @@ function graficarResultado(expr, opts = {}) {
         const etiquetaAria = curvas.map(c => c.etiqueta).join(', ');
         canvas.setAttribute('aria-label', 'Gráfica de ' + etiquetaAria);
 
+        // Título del bloque de gráfica (los métodos pueden nombrarla mejor:
+        // "g(x) y la recta y = x", "f(x) y P_n(x)", ...)
+        const tituloEl = document.getElementById('grafica-titulo');
+        if (tituloEl) {
+            const span = tituloEl.querySelector('span');
+            const txt = opts.titulo || 'Gráfica de la función';
+            if (span) span.textContent = txt;
+            else tituloEl.textContent = txt;
+        }
+
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, GRAF_ALTO);
@@ -147,7 +159,18 @@ function graficarResultado(expr, opts = {}) {
         for (let gx = Math.ceil(xmin / pasoX) * pasoX; gx <= xmax; gx += pasoX) {
             const px = X(gx);
             ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, GRAF_ALTO); ctx.stroke();
-            if (Math.abs(gx) > 1e-12) ctx.fillText(Number(gx.toPrecision(4)), px + 3, GRAF_ALTO - 5);
+            if (Math.abs(gx) > 1e-12) {
+                const txt = String(Number(gx.toPrecision(4)));
+                // Si la etiqueta se saldría del borde derecho, se alinea hacia
+                // dentro (antes quedaba cortada por el canvas).
+                if (px + 6 + txt.length * 6 > w) {
+                    ctx.textAlign = 'right';
+                    ctx.fillText(txt, w - 4, GRAF_ALTO - 5);
+                    ctx.textAlign = 'left';
+                } else {
+                    ctx.fillText(txt, px + 3, GRAF_ALTO - 5);
+                }
+            }
         }
         ctx.textAlign = 'right';
         for (let gy = Math.ceil(ymin / pasoY) * pasoY; gy <= ymax; gy += pasoY) {
@@ -207,6 +230,28 @@ function graficarResultado(expr, opts = {}) {
             }
             ctx.stroke();
             ctx.setLineDash([]);
+        }
+
+        // --- Recta identidad y = x (punto fijo: el cruce es la solución) ---
+        if (opts.identidad) {
+            const i0 = Math.max(xmin, ymin);
+            const i1 = Math.min(xmax, ymax);
+            if (i1 > i0) {
+                ctx.save();
+                ctx.setLineDash([6, 5]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.moveTo(X(i0), Y(i0));
+                ctx.lineTo(X(i1), Y(i1));
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillText('y = x', X(i1) - 4, Math.max(Y(i1) - 6, 12));
+                ctx.restore();
+            }
         }
 
         // --- Intervalo [a, b] ---

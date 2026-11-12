@@ -1561,3 +1561,77 @@ select:hover, select:focus {
     margin-left: auto;
   }
 }
+
+/* =========================================
+   AJUSTES DE LA REVISIÓN (12 nov)
+   ========================================= */
+
+/* --- Estado/criterio: el texto largo se recortaba (overflow:hidden + nowrap) --- */
+.resumen-card .resumen-value--small,
+.resumen-card--criterio .resumen-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.resumen-card--criterio {
+  align-items: center;
+  gap: 12px;
+}
+
+.resumen-card--criterio .resumen-label {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.resumen-card--criterio .resumen-value {
+  flex: 1 1 auto;
+}
+
+/* Estado: error (polo / sin raíz) y aviso (sin converger) */
+.resumen-card--error {
+  border-color: rgba(255, 77, 77, 0.5);
+  background: rgba(255, 77, 77, 0.08);
+}
+
+.resumen-card--error .resumen-icon,
+.resumen-card--error .resumen-value {
+  color: #ff4d4d;
+}
+
+/* --- Cuadros de aviso y de error (antes solo existían info y éxito) --- */
+.info-box--aviso {
+  background: rgba(251, 191, 36, 0.10);
+  border-left: 3px solid #fbbf24;
+  color: #fbbf24;
+  text-align: left;
+}
+
+.info-box--error {
+  background: rgba(255, 77, 77, 0.10);
+  border-left: 3px solid #ff4d4d;
+  color: #ff8080;
+  text-align: left;
+}
+
+.error-box {
+  text-align: left;
+}
+
+/* --- Teclado matemático: ÷ se confundía con + --- */
+button.btn-chip--division {
+  color: #ff8fb3 !important;
+  background: rgba(255, 0, 123, 0.12) !important;
+  border-color: rgba(255, 0, 123, 0.5) !important;
+  font-weight: 700;
+  font-size: 0.9rem !important;
+}
+
+button.btn-chip--division:hover {
+  background: rgba(255, 0, 123, 0.28) !important;
+  border-color: #ff007b !important;
+  box-shadow: 0 4px 12px rgba(255, 0, 123, 0.35) !important;
+  color: #ffffff !important;
+}

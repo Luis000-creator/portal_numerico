@@ -1,7 +1,7 @@
 'use strict';
 // ============================================================================
 // Tests de la Regla de Simpson 1/3 (js/simpson.js)
-// Ejecutar con:  node --test tests/
+// Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
 const { test } = require('node:test');

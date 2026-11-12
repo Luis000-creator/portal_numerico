@@ -5,7 +5,18 @@
 // de biseccion para calculadora.html
 // ============================================================================
 
-function mostrarCampoCriterio() {
+// Valores por defecto de cada criterio. Se reasignan al cambiar de criterio
+// o de método para que no se arrastre un valor que no tiene sentido
+// (p. ej. "5 iteraciones" usada como tolerancia, o un Ea % heredado).
+const VALORES_CRITERIO = {
+    tolerancia: '0.001',
+    error: '1',
+    iteraciones: '100',
+};
+
+//   reiniciar: true cuando cambia el criterio/método (reescribe el valor);
+//               false al cargar la página (solo rellena si está vacío).
+function mostrarCampoCriterio(reiniciar = false) {
     const criterio = document.getElementById('criterio');
     const label = document.getElementById('label-criterio');
     const input = document.getElementById('valorCriterio');
@@ -14,13 +25,18 @@ function mostrarCampoCriterio() {
     const valor = criterio.value;
     if (valor === 'tolerancia') {
         label.innerText = "Valor de Tolerancia";
-        input.placeholder = "0.0001";
+        input.placeholder = "0.001";
     } else if (valor === 'error') {
         label.innerText = "Porcentaje de Error Máximo Permitido (%)";
         input.placeholder = "1.0 o 0.5";
     } else if (valor === 'iteraciones') {
         label.innerText = "Número Exacto de Iteraciones";
         input.placeholder = "10 o 15";
+    }
+
+    const porDefecto = VALORES_CRITERIO[valor];
+    if (porDefecto && (reiniciar || input.value.trim() === '')) {
+        input.value = porDefecto;
     }
 }
 
@@ -81,40 +97,67 @@ function evaluarFuncion(expr, x) {
     } catch (err) { return NaN; }
 }
 
+// Busca automáticamente un intervalo [a, b] con cambio de signo.
+// Estrategia en 2 pasadas para no hacer ~20,000 evaluaciones:
+//   1) barrido grueso (paso 1) sobre [-100, 100] → candidatos;
+//   2) refinado fino (paso 1/16) solo sobre el mejor candidato.
 function buscarIntervaloAuto(expr) {
-    const inicio = -100.0, fin = 100.0, paso = 0.25;
-    let mejorIntervalo = null;
-    let menorDistancia = Infinity;
+    const inicio = -100.0, fin = 100.0;
+    const pasoGrueso = 1.0;
+    const pasoFino = 1 / 16;
 
-    for (let x = inicio; x < fin; x += paso) {
-        const fa = evaluarFuncion(expr, x);
-        const fb = evaluarFuncion(expr, x + paso);
+    // --- 1) Barrido grueso: localiza ceros exactos y cambios de signo ---
+    const candidatos = [];
+    let x = inicio;
+    let fx = evaluarFuncion(expr, x);
 
-        // Saltar zonas discontinuas o no definidas
-        if (!Number.isFinite(fa) || !Number.isFinite(fb)) continue;
-        if (esDiscontinuo(expr, x)) continue;
+    while (x + pasoGrueso <= fin + 1e-9) {
+        const xSiguiente = x + pasoGrueso;
+        const fSiguiente = evaluarFuncion(expr, xSiguiente);
 
-        // Raíz exacta en extremo
-        if (Math.abs(fa) < 1e-12) {
-            return [x, x + paso, 'exacta', x];
+        if (Number.isFinite(fx) && Math.abs(fx) < 1e-12 && x !== inicio) {
+            return [x - pasoGrueso, x, 'exacta'];
         }
-        if (Math.abs(fb) < 1e-12) {
-            return [x, x + paso, 'exacta', x + paso];
+        if (Number.isFinite(fSiguiente) && Math.abs(fSiguiente) < 1e-12) {
+            return [x, xSiguiente, 'exacta'];
+        }
+        if (Number.isFinite(fx) && Number.isFinite(fSiguiente) && fx * fSiguiente < 0) {
+            candidatos.push([x, xSiguiente]);
         }
 
-        if (fa * fb < 0) {
-            // Priorizar intervalo cercano a 0 (más intuitivo para el usuario)
-            const centro = (x + x + paso) / 2;
-            const dist = Math.abs(centro);
-            if (dist < menorDistancia) {
-                menorDistancia = dist;
-                mejorIntervalo = [x, x + paso];
-            }
-        }
+        x = xSiguiente;
+        fx = fSiguiente;
     }
 
-    if (mejorIntervalo) return [...mejorIntervalo, 'auto'];
-    return [0, 2, 'default'];
+    if (!candidatos.length) return [0, 2, 'default'];
+
+    // Priorizar los intervalos más cercanos a 0 (más intuitivos)
+    candidatos.sort((p, q) => Math.abs((p[0] + p[1]) / 2) - Math.abs((q[0] + q[1]) / 2));
+
+    // --- 2) Refinar candidatos y descartar los que son polos, no raíces ---
+    for (const [c0, c1] of candidatos) {
+        let lo = c0;
+        let hi = c1;
+        let fLo = evaluarFuncion(expr, lo);
+        for (let xf = lo + pasoFino; xf < hi; xf += pasoFino) {
+            const fXf = evaluarFuncion(expr, xf);
+            if (!Number.isFinite(fXf)) break;
+            if (Math.abs(fXf) < 1e-12) return [xf - pasoFino, xf + pasoFino, 'exacta'];
+            if (Number.isFinite(fLo) && fLo * fXf < 0) { hi = xf; break; }
+            lo = xf;
+            fLo = fXf;
+        }
+
+        // Un cambio de signo atravesando una discontinuidad NO es una raíz:
+        // se descarta y se prueba el siguiente candidato.
+        const centro = (lo + hi) / 2;
+        if (detectarPolo(expr, centro)) continue;
+
+        return [lo, hi, 'auto'];
+    }
+
+    // Todos los candidatos eran discontinuidades
+    return [candidatos[0][0], candidatos[0][1], 'discontinuo'];
 }
 
 // Exponer globalmente
@@ -134,7 +177,10 @@ function numTexto(n) {
 
 window.numTexto = numTexto;
 
-// Helpers de UI para errores
+// Helpers de UI para errores.
+// Además de mostrar el mensaje, OCULTA los resultados del cálculo anterior:
+// si no, un error (intervalo inválido, n impar, función fuera de dominio...)
+// dejaría en pantalla la tabla y el resumen viejos junto a los datos nuevos.
 function mostrarError(mensaje) {
     const errorBox = document.getElementById('error-box');
     const errorText = document.getElementById('error-text');
@@ -142,6 +188,12 @@ function mostrarError(mensaje) {
         errorText.innerText = mensaje;
         errorBox.style.display = 'block';
     }
+    const resContainer = document.getElementById('resultado-container');
+    if (resContainer) resContainer.style.display = 'none';
+    const grafCont = document.getElementById('grafica-container');
+    if (grafCont) grafCont.style.display = 'none';
+    ocultarInfo();
+    ocultarProcedimiento();
 }
 
 // --- HELPERS COMPARTIDOS ENTRE MÉTODOS ---
@@ -165,6 +217,50 @@ function esDiscontinuo(expr, x, paso = 0.01) {
 }
 
 window.esDiscontinuo = esDiscontinuo;
+
+// Detecta si `x` es un POLO (discontinuidad no evitable) y no una raíz.
+// Criterio: a izquierda y derecha el signo es constante y opuesto entre sí,
+// y ACERCÁNDOSE a x el valor crece en los dos lados. En una raíz verdadera
+// |f| decrece hacia 0 al acercarse, así que no se confunde.
+//   Ej.: f(x) = 1/(x-2) en x = 2.000244 → |f| = 101 → 1255 (izq.)
+//        y 99 → 818 (der.) con signos opuestos: hay un polo, no una raíz.
+function detectarPolo(expr, x) {
+    const h1 = 1e-2, h2 = 1e-3;
+    const l1 = evaluarFuncion(expr, x - h1);
+    const l2 = evaluarFuncion(expr, x - h2);
+    const r2 = evaluarFuncion(expr, x + h2);
+    const r1 = evaluarFuncion(expr, x + h1);
+    if (![l1, l2, r1, r2].every(Number.isFinite)) return false;
+
+    const sgn = (v) => (v > 0 ? 1 : v < 0 ? -1 : 0);
+    // Signo constante en cada lado y opuesto entre lados
+    if (sgn(l1) === 0 || sgn(l2) === 0 || sgn(r1) === 0 || sgn(r2) === 0) return false;
+    if (sgn(l1) !== sgn(l2) || sgn(r1) !== sgn(r2)) return false;
+    if (sgn(l1) === sgn(r1)) return false;
+    // |f| crece al acercarse por ambos lados
+    if (!(Math.abs(l2) > Math.abs(l1) && Math.abs(r2) > Math.abs(r1))) return false;
+    // Y el salto es grande (no es solo una pendiente pronunciada)
+    return Math.min(Math.abs(l2), Math.abs(r2)) > 50;
+}
+
+window.detectarPolo = detectarPolo;
+
+// Distingue "sintaxis inválida" de "punto fuera de dominio".
+// Devuelve un mensaje de error apropiado para fa/fb no finitos.
+function mensajeErrorEvaluacion(expr, donde) {
+    let sintaxisOk = true;
+    try {
+        if (typeof math !== 'undefined' && math.parse) math.parse(normalizarExpresion(expr));
+    } catch (e) { sintaxisOk = false; }
+
+    if (!sintaxisOk) {
+        return 'Error: Revisa la sintaxis de tu función f(x).';
+    }
+    return `Error: f(x) no está definida en ${donde} (el punto está fuera del dominio de la función). ` +
+        `Ej.: sqrt(x) y ln(x) solo existen para x > 0.`;
+}
+
+window.mensajeErrorEvaluacion = mensajeErrorEvaluacion;
 
 // Lee el criterio de paro y su valor (acepta fracciones como 1/16).
 // Muestra error y retorna null si el valor no es valido.
@@ -321,7 +417,7 @@ function calcularBiseccion() {
     let fa = evaluarFuncion(expr, a);
     let fb = evaluarFuncion(expr, b);
     if (!Number.isFinite(fa) || !Number.isFinite(fb)) {
-        mostrarError('Error: Revisa la sintaxis de tu función f(x).');
+        mostrarError(mensajeErrorEvaluacion(expr, !Number.isFinite(fa) ? `x = ${a}` : `x = ${b}`));
         return;
     }
 
@@ -332,7 +428,9 @@ function calcularBiseccion() {
         tr.innerHTML = `<td data-label="Iter">0</td><td data-label="a">${a.toFixed(4)}</td><td data-label="b">${b.toFixed(4)}</td><td data-label="x_m"><strong>${a.toFixed(4)}</strong></td><td data-label="f(x_m)">0.0000</td><td data-label="Ea (%)">--</td>`;
         tbody.appendChild(tr);
         resContainer.style.display = 'block';
-        mostrarResumen(a, 0, 0, criterio, valorCriterio);
+        mostrarResumen(a, 0, 0, criterio, valorCriterio, null, true, {
+            motivo: 'f(x) = 0 (raíz exacta en el extremo)',
+        });
         graficarResultado(expr, { a, b, raiz: a });
         return;
     }
@@ -342,7 +440,9 @@ function calcularBiseccion() {
         tr.innerHTML = `<td data-label="Iter">0</td><td data-label="a">${a.toFixed(4)}</td><td data-label="b">${b.toFixed(4)}</td><td data-label="x_m"><strong>${b.toFixed(4)}</strong></td><td data-label="f(x_m)">0.0000</td><td data-label="Ea (%)">--</td>`;
         tbody.appendChild(tr);
         resContainer.style.display = 'block';
-        mostrarResumen(b, 0, 0, criterio, valorCriterio);
+        mostrarResumen(b, 0, 0, criterio, valorCriterio, null, true, {
+            motivo: 'f(x) = 0 (raíz exacta en el extremo)',
+        });
         graficarResultado(expr, { a, b, raiz: b });
         return;
     }
@@ -352,7 +452,13 @@ function calcularBiseccion() {
         return;
     }
 
+    // Escala del residuo inicial: sirve para comprobar después si |f|
+    // realmente decreció (si no, el cambio de signo era de un polo).
+    const escalaResiduo = Math.max(Math.abs(fa), Math.abs(fb));
+
     let x_m_anterior = null;
+    let x_m_ultimo = null;
+    let motivoParo = null;
     // Límite de seguridad de 100 iteraciones. Se guarda lo que pidió el
     // usuario para poder avisar si el cálculo quedó truncado (B3).
     const maxIterSolicitado = criterio === 'iteraciones' ? Math.max(1, Math.floor(valorCriterio)) : 100;
@@ -365,7 +471,7 @@ function calcularBiseccion() {
         const x_m = (a + b) / 2;
         const fx_m = evaluarFuncion(expr, x_m);
         if (!Number.isFinite(fx_m)) {
-            mostrarError('Error: La función produjo un valor no válido durante el cálculo.');
+            mostrarError(mensajeErrorEvaluacion(expr, `x = ${x_m}`));
             return;
         }
         // Ea relativo: queda indefinido cuando x_m = 0 (división entre cero).
@@ -377,24 +483,38 @@ function calcularBiseccion() {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td data-label="Iter">${n}</td><td data-label="a">${a.toFixed(4)}</td><td data-label="b">${b.toFixed(4)}</td><td data-label="x_m">${x_m.toFixed(4)}</td><td data-label="f(x_m)">${fx_m.toFixed(4)}</td><td data-label="Ea (%)">${eaTexto}</td>`;
         tbody.appendChild(tr);
+        x_m_ultimo = x_m;
 
         // Raíz exacta hallada: f(x_m) = 0.
         // Hay que parar ANTES de actualizar el intervalo: si no, fa = 0 hace
         // que "fa * fx_m" sea siempre 0 en las iteraciones siguientes y el
-        // algoritmo converge hacia b en vez de hacia la raíz (B1).
+        // algoritmo colapsa hacia b en vez de hacia la raíz (B1).
         if (fx_m === 0) {
             criterioAlcanzado = true;
+            motivoParo = 'f(x) = 0 (raíz exacta)';
             break;
         }
 
-        // Criterios de paro (combinados: f(x_m) y cambio en x_m)
+        // Criterios de paro. Se registra CUAL se cumplió, para no decir
+        // "criterio alcanzado" sin explicar que fue solo por Δx (B4).
         let parar = false;
-        if (criterio === 'iteraciones' && n >= maxIter) parar = true;
-        if (criterio === 'tolerancia') {
-            if (Math.abs(fx_m) <= valorCriterio) parar = true;
-            if (x_m_anterior !== null && Math.abs(x_m - x_m_anterior) <= valorCriterio) parar = true;
+        if (criterio === 'iteraciones' && n >= maxIter) {
+            parar = true;
+            motivoParo = `${n} iteraciones pedidas`;
         }
-        if (criterio === 'error' && ea !== null && Number.isFinite(ea) && ea <= valorCriterio) parar = true;
+        if (criterio === 'tolerancia') {
+            if (Math.abs(fx_m) <= valorCriterio) {
+                parar = true;
+                motivoParo = `residuo |f(x)| ≤ ${numTexto(valorCriterio)}`;
+            } else if (x_m_anterior !== null && Math.abs(x_m - x_m_anterior) <= valorCriterio) {
+                parar = true;
+                motivoParo = `Δx ≤ ${numTexto(valorCriterio)}`;
+            }
+        }
+        if (criterio === 'error' && ea !== null && Number.isFinite(ea) && ea <= valorCriterio) {
+            parar = true;
+            motivoParo = `Ea ≤ ${numTexto(valorCriterio)}%`;
+        }
 
         if (parar) {
             criterioAlcanzado = true;
@@ -407,53 +527,136 @@ function calcularBiseccion() {
         n++;
     }
 
-    const x_final = (a + b) / 2;
+    // Último punto de la tabla (coherente con lo que el usuario ve); si el
+    // bucle no llegó a iterar, se usa el punto medio del intervalo.
+    const x_final = x_m_ultimo !== null ? x_m_ultimo : (a + b) / 2;
     const fx_final = evaluarFuncion(expr, x_final);
     // Mismo guard que en el bucle: x_final = 0 deja el Ea indefinido (B2)
     const ea_final = (x_m_anterior === null || x_final === 0)
         ? null
         : Math.abs((x_final - x_m_anterior) / x_final) * 100;
 
+    // --- Verificación de que el resultado ES una raíz ---
+    // 1) ¿Hay un polo cerca? (cambio de signo a través de una discontinuidad)
+    const esPolo = detectarPolo(expr, x_final);
+    // 2) ¿|f| decreció de verdad? Si mantiene la escala inicial, no convergió.
+    const residuoAbs = Math.abs(fx_final);
+    const residuoRel = escalaResiduo > 0 ? residuoAbs / escalaResiduo : 0;
+    const residuoNoCayo = Number.isFinite(residuoRel)
+        && residuoRel > 0.05
+        && residuoAbs > Math.max(valorCriterio, 1e-12);
+
+    const etiquetas = {};
+    if (esPolo) {
+        etiquetas.etiquetaRaiz = 'Posible polo (sin raíz)';
+        etiquetas.estadoTexto = 'Sin raíz: discontinuidad';
+        etiquetas.estado = 'polo';
+        etiquetas.motivo = 'el signo cambia por una división entre cero, no por una raíz';
+    } else if (!criterioAlcanzado) {
+        etiquetas.etiquetaRaiz = 'Último estimado (sin converger)';
+        etiquetas.estadoTexto = 'Criterio no alcanzado';
+        etiquetas.estado = 'fallo';
+    } else {
+        etiquetas.motivo = motivoParo || 'criterio cumplido';
+    }
+
     // Avisos si el cálculo quedó truncado por el límite de 100 iteraciones (B3)
     const avisos = [];
+    if (esPolo) {
+        avisos.push(
+            `<strong>Posible discontinuidad (polo) cerca de x = ${numTexto(x_final)}:</strong> ` +
+            `f(x) salta de un lado a otro del cero y |f| crece al acercarse ` +
+            `(f = ${numTexto(fx_final)}). Ese punto NO es una raíz.`
+        );
+    } else if (residuoNoCayo) {
+        avisos.push(
+            `El residuo |f(x)| = ${numTexto(fx_final)} no disminuyó frente al inicio ` +
+            `(|f| máx = ${numTexto(escalaResiduo)}); revisa si hay una discontinuidad en el intervalo.`
+        );
+    }
+    if (criterioAlcanzado && !esPolo && residuoAbs > Math.max(valorCriterio * 10, 1e-12)
+        && (motivoParo || '').indexOf('Δx') !== -1) {
+        avisos.push(
+            `El criterio se cumplió por Δx, pero |f(x)| = ${numTexto(fx_final)} sigue siendo ` +
+            `mayor que la tolerancia: x convergió antes que el residuo.`
+        );
+    }
     if (truncadoPorLimite) {
         avisos.push(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`);
     }
     if (!criterioAlcanzado) {
         avisos.push(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`);
     }
-    if (avisos.length) agregarInfo(avisos.join(' '), 'info');
+    if (avisos.length) agregarInfo(avisos.join(' '), esPolo || residuoNoCayo ? 'aviso' : 'info');
 
     resContainer.style.display = 'block';
-    mostrarResumen(x_final, fx_final, n, criterio, valorCriterio, ea_final, criterioAlcanzado);
-    graficarResultado(expr, { a: a0, b: b0, raiz: x_final });
+    mostrarResumen(
+        x_final, fx_final,
+        tbody.children.length,
+        criterio, valorCriterio, ea_final, criterioAlcanzado, etiquetas
+    );
+    graficarResultado(expr, { a: a0, b: b0, raiz: esPolo ? null : x_final });
 }
 
 // --- MOSTRAR RESUMEN FINAL DE LA RAÍZ ---
+// Formato de 6 decimales que nunca imprime "-0.000000" (cero con signo)
+// ni "NaN".
+function formatoDecimal(v, dec = 6) {
+    if (!Number.isFinite(v)) return 'N/A';
+    const r = Number(v.toFixed(dec));
+    return (r === 0 ? 0 : r).toFixed(dec);
+}
+
 function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea_final = null, criterioAlcanzado = false, etiquetas = {}) {
     const resumenBox = document.getElementById('resumen-container');
     const btnCopy = document.getElementById('btn-copy-icon');
     if (!resumenBox) return;
 
-    const raizStr = Number.isFinite(x_raiz) ? x_raiz.toFixed(6) : 'N/A';
-    const fxStr = Number.isFinite(fx_val) ? fx_val.toFixed(6) : 'N/A';
-    const eaStr = (ea_final !== null && Number.isFinite(ea_final)) ? ea_final.toFixed(4) + '%' : 'N/A';
+    // etiquetas.abs: cuando la tarjeta es |f(x)|, el valor llega con signo
+    const fxMostrar = etiquetas.abs && Number.isFinite(fx_val) ? Math.abs(fx_val) : fx_val;
+    const raizStr = formatoDecimal(x_raiz);
+    const fxStr = formatoDecimal(fxMostrar);
+    const eaStr = (ea_final !== null && Number.isFinite(ea_final)) ? formatoDecimal(Math.abs(ea_final), 4) + '%' : 'N/A';
 
     const etiquetaFx = etiquetas.fx || 'f(x) Final';
     let textoCriterio = '';
     if (criterio === 'tolerancia') {
-        textoCriterio = etiquetas.tolerancia || `|f(x)| ≤ ${Number(valorCriterio).toFixed(6)}  ó  |Δx| ≤ ${Number(valorCriterio).toFixed(6)}`;
+        textoCriterio = etiquetas.tolerancia ||
+            `|f(x)| ≤ ${numTexto(valorCriterio)}  ó  |Δx| ≤ ${numTexto(valorCriterio)}`;
     } else if (criterio === 'error') {
-        textoCriterio = `Ea ≤ ${Number(valorCriterio).toFixed(4)}%`;
+        textoCriterio = `Ea ≤ ${numTexto(valorCriterio)}%`;
     } else {
         textoCriterio = `${iteraciones} iteraciones`;
+    }
+
+    // Estado: indica QUÉ criterio se cumplió (o por qué no se cumplió),
+    // en vez de un "Criterio alcanzado" sin más.
+    const etiquetaRaiz = etiquetas.etiquetaRaiz || 'Raíz Aproximada';
+    let claseEstado = 'resumen-card--ok';
+    let iconoEstado = 'fa-circle-check';
+    let textoEstado;
+    if (etiquetas.estadoTexto) {
+        textoEstado = etiquetas.estadoTexto;
+    } else if (criterioAlcanzado) {
+        textoEstado = `Criterio cumplido: ${etiquetas.motivo || 'ok'}`;
+    } else {
+        textoEstado = 'Criterio no alcanzado';
+        claseEstado = 'resumen-card--warn';
+        iconoEstado = 'fa-triangle-exclamation';
+    }
+    if (etiquetas.estado === 'polo') {
+        claseEstado = 'resumen-card--error';
+        iconoEstado = 'fa-circle-xmark';
+    } else if (etiquetas.estado === 'fallo') {
+        claseEstado = 'resumen-card--warn';
+        iconoEstado = 'fa-triangle-exclamation';
     }
 
     resumenBox.innerHTML = `
         <div class="resumen-grid">
             <div class="resumen-card resumen-card--raiz">
                 <span class="resumen-icon"><i class="fa-solid fa-bullseye"></i></span>
-                <span class="resumen-label">Raíz Aproximada</span>
+                <span class="resumen-label">${etiquetaRaiz}</span>
                 <span class="resumen-value">x = ${raizStr}</span>
             </div>
             <div class="resumen-card">
@@ -475,14 +678,18 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
                 <span class="resumen-label">Criterio de Paro</span>
                 <span class="resumen-value resumen-value--small">${textoCriterio}</span>
             </div>
-            <div class="resumen-card ${criterioAlcanzado ? 'resumen-card--ok' : 'resumen-card--warn'}">
-                <span class="resumen-icon"><i class="fa-solid ${criterioAlcanzado ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i></span>
+            <div class="resumen-card ${claseEstado}">
+                <span class="resumen-icon"><i class="fa-solid ${iconoEstado}"></i></span>
                 <span class="resumen-label">Estado</span>
-                <span class="resumen-value resumen-value--small">${criterioAlcanzado ? 'Criterio alcanzado' : 'Criterio no alcanzado'}</span>
+                <span class="resumen-value resumen-value--small">${textoEstado}</span>
             </div>
         </div>
     `;
     resumenBox.style.display = 'block';
+    // El contenedor padre también: sin esto, Taylor/Lagrange/Simpson no se
+    // veían NADA porque #resultado-container seguía en display:none.
+    const cont = document.getElementById('resultado-container');
+    if (cont) cont.style.display = 'block';
 
     // Mostrar botones de acción (copiar + exportar)
     if (btnCopy) btnCopy.style.display = 'inline-flex';
@@ -512,6 +719,10 @@ function mostrarResumenCustom(tarjetas, opciones = {}) {
     resumenBox.innerHTML = `<div class="${claseGrid}">${html}
         </div>`;
     resumenBox.style.display = 'block';
+    // Sin esto el bloque padre seguía oculto y NO se veía ni el resumen, ni
+    // la tabla, ni la gráfica de Taylor/Lagrange/Simpson (bug crítico).
+    const cont = document.getElementById('resultado-container');
+    if (cont) cont.style.display = 'block';
 
     if (opciones.informacion) mostrarInfo(opciones.informacion, opciones.tipoInfo || 'info');
 
@@ -607,6 +818,8 @@ function inicializarMenusMatematicos() {
             b.type = 'button';
             b.className = 'btn-chip';
             b.textContent = t.etiqueta;
+            // ÷ era casi indistinguible de + a tamaño normal: se resalta
+            if (t.inserta === '/') b.classList.add('btn-chip--division');
             if (t.titulo) b.title = t.titulo;
             b.setAttribute('aria-label', t.aria || t.titulo || ('Insertar ' + t.etiqueta));
             b.addEventListener('click', () => {

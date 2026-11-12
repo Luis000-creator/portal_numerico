@@ -121,6 +121,9 @@ function alternarMetodoUI() {
     if (selCriterio) { selCriterio.disabled = !usaCriterio; selCriterio.required = usaCriterio; }
     const valCriterio = document.getElementById('valorCriterio');
     if (valCriterio) { valCriterio.disabled = !usaCriterio; valCriterio.required = usaCriterio; }
+    // Al cambiar de método no se arrastra el valor del criterio anterior
+    // (p. ej. un Ea % heredado de Bisección usado como tolerancia).
+    if (usaCriterio && typeof mostrarCampoCriterio === 'function') mostrarCampoCriterio(true);
 
     // 4) Cabecera de tabla, título y subtítulo
     const cabecera = document.getElementById('tabla-cabecera');
@@ -168,9 +171,19 @@ async function ejecutarCalculo(event) {
     const nombre = EJECUTORES[metodo];
     const fn = nombre ? window[nombre] : null;
     if (typeof fn === 'function') {
-        fn();
+        // Cualquier excepción del método debe verse en pantalla: sin este
+        // try/catch un fallo quedaba como "no pasa nada" (promesa rechazada
+        // de un handler async sin capturar).
+        try {
+            const r = fn();
+            if (r && typeof r.catch === 'function') {
+                r.catch((e) => mostrarError('Error inesperado al calcular: ' + (e && e.message ? e.message : e)));
+            }
+        } catch (e) {
+            mostrarError('Error inesperado al calcular: ' + (e && e.message ? e.message : e));
+        }
     } else {
-        mostrarError('Este método aún no está disponible.');
+        mostrarError(`Este método aún no está disponible ("${metodo}"). Recarga la página o elige otra opción.`);
     }
 }
 
@@ -219,6 +232,7 @@ function calcularPuntoFijo() {
     let x_anterior = null;
     let g_last = NaN, x_last = NaN, ea_last = null;
     let criterioAlcanzado = false;
+    let motivoParo = null;
     const maxIterSolicitado = criterio === 'iteraciones' ? Math.max(1, Math.floor(valorCriterio)) : 100;
     const maxIter = Math.min(100, maxIterSolicitado);
     const truncadoPorLimite = maxIterSolicitado > maxIter;
@@ -249,10 +263,22 @@ function calcularPuntoFijo() {
         x_last = x_actual;
         ea_last = ea;
 
-        // Criterios de paro
-        if (criterio === 'iteraciones' && n >= maxIter) { criterioAlcanzado = true; break; }
-        if (criterio === 'tolerancia' && Math.abs(g_x - x_actual) <= valorCriterio) { criterioAlcanzado = true; break; }
-        if (criterio === 'error' && ea !== null && ea <= valorCriterio) { criterioAlcanzado = true; break; }
+        // Criterios de paro (registrando cuál se cumplió)
+        if (criterio === 'iteraciones' && n >= maxIter) {
+            criterioAlcanzado = true;
+            motivoParo = `${n} iteraciones pedidas`;
+            break;
+        }
+        if (criterio === 'tolerancia' && Math.abs(g_x - x_actual) <= valorCriterio) {
+            criterioAlcanzado = true;
+            motivoParo = `|g(x) - x| ≤ ${numTexto(valorCriterio)}`;
+            break;
+        }
+        if (criterio === 'error' && ea !== null && ea <= valorCriterio) {
+            criterioAlcanzado = true;
+            motivoParo = `Ea ≤ ${numTexto(valorCriterio)}%`;
+            break;
+        }
 
         // Divergencia: el valor se aleja demasiado de la solucion
         if (Math.abs(g_x) > 1e6) {
@@ -272,11 +298,53 @@ function calcularPuntoFijo() {
         agregarInfo(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`, 'info');
     }
     const residuo = (Number.isFinite(g_last) && Number.isFinite(x_last)) ? Math.abs(g_last - x_last) : NaN;
-    mostrarResumen(g_last, residuo, n, criterio, valorCriterio, ea_last, criterioAlcanzado, {
+
+    // Verificación de que el punto fijo ES una solución: |g(x) - x| debe ser
+    // pequeña. Si el criterio es de tolerancia/error se usa su valor; si fue
+    // por iteraciones (que no define precisión) se usa la tolerancia por
+    // defecto del sitio. Cumplir "100 iteraciones" con |g(x)-x| = 1.8 NO es
+    // una raíz: con g(x) = x²-2 y x₀ = 1.9 la secuencia diverge.
+    const umbralResiduo = (criterio === 'iteraciones')
+        ? Number(VALORES_CRITERIO.tolerancia)
+        : Math.max(valorCriterio, 1e-12);
+    const residuoOk = Number.isFinite(residuo) && residuo <= umbralResiduo;
+
+    const etiquetas = {
         fx: '|g(x) - x| Final',
-        tolerancia: `|g(x) - x| ≤ ${Number(valorCriterio).toFixed(6)}`
+        tolerancia: `|g(x) - x| ≤ ${numTexto(valorCriterio)}`,
+        motivo: motivoParo,
+        abs: true,
+    };
+    if (!criterioAlcanzado || !residuoOk) {
+        // Sin convergencia NO se presenta como raíz: se etiqueta como lo que
+        // es (el último iterado) y se avisa explícitamente.
+        etiquetas.etiquetaRaiz = 'Último iterado (sin converger)';
+        etiquetas.estado = 'fallo';
+        if (!criterioAlcanzado) {
+            etiquetas.estadoTexto = 'Criterio no alcanzado';
+        } else {
+            etiquetas.estadoTexto =
+                `Iteraciones cumplidas, pero sin convergencia (|g(x)-x| = ${Number.isFinite(residuo) ? numTexto(residuo) : 'N/A'})`;
+        }
+        agregarInfo(
+            `El método NO convergió: |g(x) - x| = ${Number.isFinite(residuo) ? numTexto(residuo) : 'N/A'} en ` +
+            `${tbody.children.length} iteraciones. El valor mostrado NO es una raíz verificada.`,
+            'aviso'
+        );
+    }
+
+    mostrarResumen(
+        g_last, residuo,
+        tbody.children.length,
+        criterio, valorCriterio, ea_last, criterioAlcanzado && residuoOk, etiquetas
+    );
+    // La gráfica incluye la recta y = x: el punto fijo es su intersección
+    graficarResultado(exprG, {
+        xs,
+        raiz: (criterioAlcanzado && residuoOk) ? g_last : null,
+        identidad: true,
+        titulo: 'g(x) y la recta y = x',
     });
-    graficarResultado(exprG, { xs, raiz: g_last });
 }
 
 window.alternarMetodoUI = alternarMetodoUI;

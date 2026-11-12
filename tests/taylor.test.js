@@ -1,7 +1,7 @@
 'use strict';
 // ============================================================================
 // Tests de Taylor / Maclaurin (js/taylor.js)
-// Ejecutar con:  node --test tests/
+// Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
 const { test } = require('node:test');

@@ -45,8 +45,26 @@ async function cargarApuntesRemotos() {
     cont.innerHTML = '';
     cont.removeAttribute('aria-busy');
     const vacioMsg = document.getElementById('apuntes-vacio');
-    if (vacioMsg) vacioMsg.style.display = data.length === 0 ? 'block' : 'none';
+
+    // --- Deduplicar títulos repetidos ---
+    // En la BD hay filas duplicadas (EJERCICIO_7: ids 32 y 33; EJERCICIO_6_PF:
+    // ids 45 y 47): se subieron dos veces, casi siempre por reemplazar un
+    // archivo con una corrección. La política RLS no permite DELETE público,
+    // así que aquí se muestra UNA tarjeta por título conservando la fila más
+    // reciente (la versión corregida, subida después).
+    // El borrado definitivo de la fila vieja debe hacerse desde el panel de
+    // Supabase (SQL Editor): delete from public.apuntes where id in (32, 45);
+    const mejorPorTitulo = new Map();
     data.forEach(apunte => {
+        const clave = String(apunte.titulo || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        // data viene ordenado ascendente por created_at: la última escritura gana
+        if (clave) mejorPorTitulo.set(clave, apunte);
+        else mejorPorTitulo.set(`__id_${apunte.id}`, apunte);
+    });
+    const apuntes = [...mejorPorTitulo.values()];
+
+    if (vacioMsg) vacioMsg.style.display = apuntes.length === 0 ? 'block' : 'none';
+    apuntes.forEach(apunte => {
         const card = document.createElement('div');
         card.className = 'apunte-card card apunte-remoto';
         card.dataset.id = apunte.id;

@@ -245,7 +245,7 @@
 
             <div class="form-group" id="grupo-criterio">
                 <label for="criterio">Criterio de Paro</label>
-                <select id="criterio" name="criterio" onchange="mostrarCampoCriterio()">
+                <select id="criterio" name="criterio" onchange="mostrarCampoCriterio(true)">
                     <option value="tolerancia">Tolerancia</option>
                     <option value="error">Porcentaje de Error Aproximado (Ea %)</option>
                     <option value="iteraciones">Número Exacto de Iteraciones</option>
@@ -305,7 +305,7 @@
             </div>
 
             <div id="grafica-container" style="display: none; margin-top: 25px;">
-                <h3 class="result-title" style="text-align: left; margin: 0 0 10px 0;"><i class="fa-solid fa-chart-line" style="margin-right: 6px;"></i>Gráfica de la función</h3>
+                <h3 class="result-title" id="grafica-titulo" style="text-align: left; margin: 0 0 10px 0;"><i class="fa-solid fa-chart-line" style="margin-right: 6px;"></i><span>Gráfica de la función</span></h3>
                 <canvas id="grafica" class="grafica-canvas" role="img" aria-label="Gráfica de la función calculada"></canvas>
                 <p id="grafica-msg" class="apuntes-vacio" style="display: none;"></p>
             </div>

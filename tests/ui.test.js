@@ -3,7 +3,7 @@
 // Tests de la interfaz compartida (selector de métodos, criterio de paro)
 // Verifica que los 7 métodos existen en CONFIG_METODOS / EJECUTORES y que
 // los métodos no iterativos ocultan el criterio de paro.
-// Ejecutar con:  node --test tests/
+// Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
 const { test } = require('node:test');

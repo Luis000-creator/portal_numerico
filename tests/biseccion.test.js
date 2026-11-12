@@ -3,7 +3,7 @@
 // Tests de regresión para js/biseccion.js
 // Cubre los bugs B1 (raíz exacta), B2 (Ea Infinity) y B3 (límite de 100
 // iteraciones) detectados en la auditoría, más casos de convergencia normal.
-// Ejecutar con:  node --test tests/
+// Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
 const { test } = require('node:test');

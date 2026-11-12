@@ -2,7 +2,7 @@
 // ============================================================================
 // Tests de interpolación de Lagrange (js/lagrange.js)
 // Lineal (1.er grado) + polinomial general con tabla dinámica de puntos.
-// Ejecutar con:  node --test tests/
+// Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
 const { test } = require('node:test');

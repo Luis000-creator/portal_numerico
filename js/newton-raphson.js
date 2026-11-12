@@ -62,13 +62,14 @@ function calcularNewton() {
     criterio === "iteraciones" ? Math.max(1, Math.floor(valorCriterio)) : 100;
   const maxIter = Math.min(100, maxIterSolicitado);
   const truncadoPorLimite = maxIterSolicitado > maxIter;
-  const xs = [x_actual];
+  const xs = [];
   let n = 1;
   let x_anterior = null;
   let fx_last = NaN,
     x_last = NaN,
     ea_last = null;
   let criterioAlcanzado = false;
+  let motivoParo = null;
 
   while (n <= maxIter) {
     xs.push(x_actual);
@@ -109,17 +110,20 @@ function calcularNewton() {
     x_last = x_siguiente;
     ea_last = ea;
 
-    // Criterios de paro
+    // Criterios de paro (registrando cuál se cumplió, para el resumen)
     if (criterio === "iteraciones" && n >= maxIter) {
       criterioAlcanzado = true;
+      motivoParo = `${n} iteraciones pedidas`;
       break;
     }
     if (criterio === "tolerancia" && Math.abs(fx) <= valorCriterio) {
       criterioAlcanzado = true;
+      motivoParo = `residuo |f(x)| ≤ ${numTexto(valorCriterio)}`;
       break;
     }
     if (criterio === "error" && ea !== null && ea <= valorCriterio) {
       criterioAlcanzado = true;
+      motivoParo = `Ea ≤ ${numTexto(valorCriterio)}%`;
       break;
     }
 
@@ -153,11 +157,29 @@ function calcularNewton() {
     }
   }
   const residuo = Number.isFinite(fx_final) ? Math.abs(fx_final) : NaN;
-  mostrarResumen(x_last, fx_final, n, criterio, valorCriterio, ea_last, criterioAlcanzado, {
+  const etiquetas = {
     fx: "|f(x)| Final",
-    tolerancia: `|f(x)| ≤ ${Number(valorCriterio).toFixed(6)}`,
-  });
-  graficarResultado(exprF, { xs, raiz: x_last });
+    tolerancia: `|f(x)| ≤ ${numTexto(valorCriterio)}`,
+    abs: true,
+    motivo: motivoParo,
+  };
+  if (!criterioAlcanzado) {
+    etiquetas.etiquetaRaiz = "Último estimado (sin converger)";
+    etiquetas.estadoTexto = "Criterio no alcanzado";
+    etiquetas.estado = "fallo";
+  }
+  if (Number.isFinite(residuo) && residuo > Math.max(valorCriterio * 10, 1e-12) && !criterioAlcanzado) {
+    agregarInfo(
+      `El método terminó sin cumplir el criterio: |f(x)| = ${numTexto(residuo)}. El valor mostrado no es una raíz verificada.`,
+      "aviso"
+    );
+  }
+  mostrarResumen(
+    x_last, fx_final,
+    tbody.children.length,
+    criterio, valorCriterio, ea_last, criterioAlcanzado, etiquetas
+  );
+  graficarResultado(exprF, { xs, raiz: criterioAlcanzado ? x_last : null });
 }
 
 // Muestra la derivada f'(x) calculada con mathjs en el panel dedicado.
