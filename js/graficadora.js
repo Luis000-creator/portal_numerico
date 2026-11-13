@@ -44,6 +44,27 @@ function grafMuestrear(expr, xmin, xmax) {
     return pts;
 }
 
+// La gráfica vive DENTRO de #resultado-container: mostrarla exige re-mostrar
+// también ese padre (si no, el canvas queda invisible aunque se dibuje — el
+// botón "Graficar" nunca debe ocultar lo que dejó un Calcular). Además, si
+// aún no hay resultados (tabla vacía y sin resumen), los bloques vacíos se
+// ocultan: en una gráfica libre solo debe verse la curva.
+function mostrarSeccionGrafica() {
+    const res = document.getElementById('resultado-container');
+    if (res) res.style.display = 'block';
+
+    const tbody = document.getElementById('tabla-cuerpo');
+    const resumen = document.getElementById('resumen-container');
+    const hayResultados = (tbody && tbody.children.length > 0)
+        || (resumen && resumen.style.display === 'block');
+
+    const bloque = document.getElementById('bloque-tabla');
+    if (bloque) bloque.style.display = hayResultados ? 'block' : 'none';
+
+    const divider = document.querySelector ? document.querySelector('.result-divider') : null;
+    if (divider) divider.style.display = hayResultados ? 'block' : 'none';
+}
+
 // Dibuja expr en el canvas #grafica.
 function graficarResultado(expr, opts = {}) {
     const canvas = document.getElementById('grafica');
@@ -56,6 +77,7 @@ function graficarResultado(expr, opts = {}) {
         canvas.style.display = 'none';
         if (msg) { msg.textContent = t; msg.style.display = 'block'; }
         cont.style.display = 'block';
+        mostrarSeccionGrafica();
     };
     const ocultarMsg = () => { if (msg) msg.style.display = 'none'; };
 
@@ -127,6 +149,7 @@ function graficarResultado(expr, opts = {}) {
         canvas.style.display = 'block';
         ocultarMsg();
         cont.style.display = 'block';
+        mostrarSeccionGrafica();
         const etiquetaAria = curvas.map(c => c.etiqueta).join(', ');
         canvas.setAttribute('aria-label', 'Gráfica de ' + etiquetaAria);
 
@@ -381,7 +404,13 @@ async function graficarLibre() {
         return;
     }
 
-    limpiarTabla();
+    // Este botón NO ejecuta el método ni borra lo que dejó un Calcular: solo
+    // dibuja la curva (limpiarTabla() vaciaba la tabla, ocultaba los
+    // resultados y, como la gráfica vive dentro de ese contenedor, la curva
+    // tampoco se veía). Solo se descarta un error anterior, que ya no aplica
+    // si esta gráfica sale bien.
+    const errBox = document.getElementById('error-box');
+    if (errBox) errBox.style.display = 'none';
 
     const opts = { titulo: 'Gráfica de la función' };
     const numero = (id) => {

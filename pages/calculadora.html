@@ -281,6 +281,9 @@
             <!-- Procedimiento en LaTeX (Taylor, Lagrange, Simpson) -->
             <div id="procedimiento-katex" class="procedimiento-katex" style="display: none;" aria-live="polite"></div>
 
+            <!-- Bloque de tabla: se oculta con el divisor cuando aún no hay
+                 resultados de un Calcular (p. ej. solo se pulsó Graficar) -->
+            <div id="bloque-tabla">
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 10px 0;">
                 <h2 class="result-title" style="text-align: left; margin: 0;"><i class="fa-solid fa-table-list" style="margin-right: 6px;"></i>Tabla de Procedimiento</h2>
                 <button type="button" id="btn-copy-icon" class="btn-icon-clipboard" onclick="copiarTablaClipboard()" title="Copiar tabla al portapapeles" style="display: none;">
@@ -309,6 +312,7 @@
                     <i class="fa-brands fa-file-excel"></i> Exportar a Excel (CSV)
                 </button>
             </div>
+            </div><!-- /bloque-tabla -->
 
             <div id="grafica-container" style="display: none; margin-top: 25px;">
                 <h3 class="result-title" id="grafica-titulo" style="text-align: left; margin: 0 0 10px 0;"><i class="fa-solid fa-chart-line" style="margin-right: 6px;"></i><span>Gráfica de la función</span></h3>
