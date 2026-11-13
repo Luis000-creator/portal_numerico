@@ -6,7 +6,9 @@
 
 // --- CONFIGURACIÓN GLOBAL DE PARTÍCULAS ---
 const symbolsList = ['+', '-', '×', '÷', '∑', '∫', 'π', '√', 'lim', 'f(x)', 'Δ'];
-const colors = ['#ffffff', '#00f0ff', '#bd00ff', '#ff007b', '#7000ff'];
+// Paleta del sitio: blanco + cian (brillante/principal) + morado (identidad).
+// Se retiran #bd00ff, #ff007b y #7000ff (fuera de paleta).
+const colors = ['#ffffff', '#00f0ff', '#22d3ee', '#a855f7'];
 let mouse = { x: null, y: null, radius: 130 };
 
 // No animar si el usuario prefiere movimiento reducido (ahorra CPU y mejora a11y)
@@ -239,8 +241,9 @@ class ParticleAnimation {
 
     initSymbolParticles() {
         this.symbolParticles = [];
-        // 14 → 7 desktop / 4 móvil
-        const totalSymbols = IS_SMALL_SCREEN ? 4 : 7;
+        // P2-1: los símbolos (π, lim, Σ…) viven DENTRO de este canvas, así que
+        // la forma de bajar su densidad es aquí: 7 → 5 en escritorio (4 en móvil).
+        const totalSymbols = IS_SMALL_SCREEN ? 4 : 5;
         const W = window.innerWidth;
         const H = window.innerHeight;
         const margin = 80;

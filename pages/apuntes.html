@@ -98,15 +98,6 @@
 
     <header>
       <div class="logo-title">Itera</div>
-      <label class="visually-hidden" for="buscador">Buscar apuntes</label>
-      <input
-        type="text"
-        class="search-box"
-        id="buscador"
-        placeholder="Buscar..."
-        aria-label="Buscar apuntes"
-        onkeyup="filtrarContenido()"
-      />
       <ul class="nav-links">
         <li><a href="../index.html">Inicio</a></li>
         <li><a href="calculadora.html">Calculadora</a></li>
@@ -126,7 +117,7 @@
             <input
               type="text"
               name="titulo"
-              placeholder="Título del tema (ej. Teorema de Bolzano)"
+              placeholder="Título del tema"
               maxlength="200"
               required
             />
@@ -158,6 +149,20 @@
           <button type="submit" class="btn-outline" style="width: 100%">Publicar Apunte</button>
         </form>
 
+        <!-- Buscador en el cuerpo (antes en el header): el header queda igual
+             en las 4 páginas y el buscador encabeza la lista de apuntes. -->
+        <div class="apuntes-buscador">
+          <label class="visually-hidden" for="buscador">Buscar apuntes</label>
+          <input
+            type="text"
+            class="search-box"
+            id="buscador"
+            placeholder="Buscar..."
+            aria-label="Buscar apuntes"
+            onkeyup="filtrarContenido()"
+          />
+        </div>
+
         <div id="lista-apuntes">
           <div id="apuntes-remotos"></div>
           <!-- Los apuntes se cargan dinámicamente desde Supabase (js/apuntes.js). -->
@@ -178,6 +183,8 @@
         </div>
       </div>
     </div>
+
+    <footer class="site-footer">Itera · Portal Numérico — Métodos Numéricos</footer>
 
     <script
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"

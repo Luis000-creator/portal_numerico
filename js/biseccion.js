@@ -833,7 +833,7 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
                 <span class="resumen-label">Criterio de Paro</span>
                 <span class="resumen-value resumen-value--small">${textoCriterio}</span>
             </div>
-            <div class="resumen-card ${claseEstado}">
+            <div class="resumen-card resumen-card--estado ${claseEstado}">
                 <span class="resumen-icon"><i class="fa-solid ${iconoEstado}"></i></span>
                 <span class="resumen-label">Estado</span>
                 <span class="resumen-value resumen-value--small">${textoEstado}</span>

@@ -2,15 +2,24 @@
    PORTAL NUMÉRICO — STYLES.CSS
    ========================================================================== */
 
-/* 01 TOKENS */
+/* 01 TOKENS
+   Paleta reducida con significado fijo:
+   cian = acción/información · verde = éxito · rojo = error ·
+   naranja = advertencia · morado = solo identidad (logo/degradado). */
 :root {
   --bg-black: #07090e;
-  --card-bg: rgba(17, 24, 39, 0.85);
-  --border-color: rgba(255, 255, 255, 0.08);
+  --card-bg: #0d1420;
+  --border-color: #1e293b;
   --text-white: #f3f4f6;
-  --text-muted: #9ca3af;
+  --text-muted: #b8c0ce;
+  --text-faint: #8b94a5;
   --accent-cyan: #22d3ee;
-  --accent-indigo: #818cf8;
+  --accent-bright: #00f0ff;
+  --accent-2: #a855f7;
+  --success: #34d399;
+  --error: #f43f5e;
+  --warn: #ff884d;
+  --accent-indigo: #22d3ee; /* se retira el índigo; se mantiene el nombre por compatibilidad */
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 12px;
@@ -216,7 +225,7 @@ header:has(.search-box) .nav-links {
 .landing-title {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #00f0ff, #bd00ff, #ff007b);
+  background: linear-gradient(135deg, #00f0ff, #22d3ee, #a855f7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -347,10 +356,11 @@ button:hover {
   transform: translateY(-1px);
 }
 
-/* Botón principal (Calcular procedimiento) con Degradado Neón */
+/* Botón principal (Calcular procedimiento / Publicar Apunte): degradado cian
+   (antes blanco sólido, fuera de paleta) */
 button[type="submit"] {
-  background: #ffffff !important;
-  color: #0a0a0a !important;
+  background: linear-gradient(135deg, #00f0ff, #22d3ee) !important;
+  color: #06222b !important;
   border: none !important;
   border-radius: 8px !important;
   font-weight: 700;
@@ -358,14 +368,14 @@ button[type="submit"] {
   text-transform: uppercase;
   letter-spacing: 2px;
   padding: 14px !important;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.35);
   transition: all 0.3s ease !important;
   cursor: pointer;
 }
 
 button[type="submit"]:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 25px rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 6px 25px rgba(34, 211, 238, 0.55) !important;
   opacity: 1 !important;
 }
 
@@ -380,16 +390,17 @@ button[type="submit"]:hover {
   width: auto;
 }
 
-/* Botón secundario "Graficar" (gráfica independiente del método activo) */
+/* Botón secundario "Graficar" (gráfica independiente del método activo):
+   outline cian, el mismo lenguaje que el resto de secundarios */
 button.btn-graficar {
   background: transparent;
-  color: var(--text-white);
-  border: 1px solid var(--border-color);
+  color: #22d3ee;
+  border: 1px solid #22d3ee;
   font-weight: 600;
 }
 
 button.btn-graficar:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(34, 211, 238, 0.12);
 }
 
 .procedure-table {
@@ -420,6 +431,7 @@ button.btn-graficar:hover {
   border-radius: var(--radius-sm);
   margin-bottom: 15px;
   scroll-margin-top: 20px;
+  transition: all 0.3s ease; /* P2-2: el hover debe verse animado */
 }
 
 .apunte-card h3,
@@ -498,11 +510,11 @@ button.btn-graficar:hover {
 }
 
 .card-landing--violet {
-  border-left: 3px solid #bd00ff;
+  border-left: 3px solid #a855f7;
 }
 
 .card-landing--magenta {
-  border-left: 3px solid #ff007b;
+  border-left: 3px solid #a855f7;
 }
 
 .card-title {
@@ -520,11 +532,11 @@ button.btn-graficar:hover {
 }
 
 .card-title--violet {
-  color: #bd00ff;
+  color: #a855f7;
 }
 
 .card-title--magenta {
-  color: #ff007b;
+  color: #a855f7;
 }
 
 .card-desc {
@@ -533,16 +545,16 @@ button.btn-graficar:hover {
   font-size: 0.95rem;
   line-height: 1.6;
   flex-grow: 1;
-  text-align: justify;
-  hyphens: auto;
+  text-align: left;
+  hyphens: none;
 }
 
 .btn-outline {
   display: inline-block;
   padding: 12px 20px;
   background: transparent;
-  border: 1px solid var(--text-white);
-  color: var(--text-white);
+  border: 1px solid #22d3ee;
+  color: #22d3ee;
   text-decoration: none;
   border-radius: var(--radius-sm);
   font-weight: 700;
@@ -576,7 +588,7 @@ button.btn-graficar:hover {
 
 .error-box {
   margin-top: 20px;
-  color: #ff4d4d;
+  color: #f43f5e;
   text-align: center;
 }
 
@@ -596,9 +608,9 @@ button.btn-graficar:hover {
 }
 
 .info-box--exito {
-  background: rgba(0, 255, 120, 0.08);
-  border-left: 3px solid #00ff78;
-  color: #00ff78;
+  background: rgba(52, 211, 153, 0.08);
+  border-left: 3px solid #34d399;
+  color: #34d399;
 }
 
 .result-container {
@@ -699,8 +711,19 @@ button.btn-graficar:hover {
   padding: 12px 16px;
   margin-top: 5px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 0, 123, 0.03);
-  border-left: 2px solid #ff007b;
+  background: rgba(168, 85, 247, 0.03);
+  border-left: 2px solid #a855f7;
+}
+
+/* P0-2: ESTADO a todo lo ancho (banner de éxito/aviso/error), en vez de
+   huérfana en la primera columna de la fila de 4 */
+.resumen-card--estado {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-top: 5px;
 }
 
 .resumen-icon {
@@ -728,9 +751,9 @@ button.btn-graficar:hover {
 /* Tarjeta 2: f(x) Final (Rosa / Magenta Neón) */
 .resumen-card:nth-child(2) { border-top: 3px solid #f43f5e; }
 .resumen-card:nth-child(2) i { color: #f43f5e; }
-/* Tarjeta 3: Iteraciones (Índigo / Violeta Espacial) */
-.resumen-card:nth-child(3) { border-top: 3px solid #818cf8; }
-.resumen-card:nth-child(3) i { color: #818cf8; }
+/* Tarjeta 3: Iteraciones (Cian) */
+.resumen-card:nth-child(3) { border-top: 3px solid #22d3ee; }
+.resumen-card:nth-child(3) i { color: #22d3ee; }
 /* Tarjeta 4: Ea Final (Esmeralda / Verde Éxito) */
 .resumen-card:nth-child(4) { border-top: 3px solid #34d399; }
 .resumen-card:nth-child(4) i { color: #34d399; }
@@ -820,7 +843,7 @@ button.btn-graficar:hover {
 }
 
 .preview-fx--valid {
-  color: #00ff78;
+  color: #34d399;
   font-size: 0.85rem;
 }
 
@@ -990,8 +1013,8 @@ button.btn-chip:hover {
 }
 
 .apuntes-vacio--busqueda {
-  border-color: rgba(255, 0, 123, 0.35);
-  background: rgba(255, 0, 123, 0.06);
+  border-color: rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.06);
 }
 
 /* Skeletons de carga para la lista de apuntes */
@@ -1076,7 +1099,7 @@ button.btn-chip:hover {
   line-height: 1.6;
   margin: 0;
   font-size: 0.95rem;
-  text-align: justify;
+  text-align: left;
 }
 
 .mision-vision-grid {
@@ -1105,12 +1128,12 @@ button.btn-chip:hover {
 
 .mision-card--mision h2.mision-title,
 .mision-card--mision h3 {
-  color: #bd00ff;
+  color: #a855f7;
 }
 
 .mision-card--vision h2.mision-title,
 .mision-card--vision h3 {
-  color: #ff007b;
+  color: #a855f7;
 }
 
 .mision-card p {
@@ -1222,11 +1245,11 @@ button.btn-chip:hover {
 }
 
 .red-card--instagram {
-  border-left: 3px solid #ff007b;
+  border-left: 3px solid #a855f7;
 }
 
 .red-card--tiktok {
-  border-left: 3px solid #bd00ff;
+  border-left: 3px solid #a855f7;
 }
 
 .red-icon {
@@ -1252,15 +1275,15 @@ button.btn-chip:hover {
 }
 
 .red-icon--instagram {
-  background: rgba(255, 0, 123, 0.12);
-  border: 1px solid rgba(255, 0, 123, 0.35);
-  color: #ff007b;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #a855f7;
 }
 
 .red-icon--tiktok {
-  background: rgba(189, 0, 255, 0.12);
-  border: 1px solid rgba(189, 0, 255, 0.35);
-  color: #bd00ff;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #a855f7;
 }
 
 .red-info {
@@ -1551,13 +1574,13 @@ select:hover, select:focus {
 }
 
 .resumen-card--warn {
-  border-color: rgba(251, 191, 36, 0.45);
-  background: rgba(251, 191, 36, 0.06);
+  border-color: rgba(255, 136, 77, 0.45);
+  background: rgba(255, 136, 77, 0.06);
 }
 
 .resumen-card--warn .resumen-icon,
 .resumen-card--warn .resumen-value {
-  color: #fbbf24;
+  color: #ff884d;
 }
 
 /* Más de 4 tarjetas (Taylor muestra 6): pasan a 3 columnas */
@@ -1615,26 +1638,26 @@ select:hover, select:focus {
 
 /* Estado: error (polo / sin raíz) y aviso (sin converger) */
 .resumen-card--error {
-  border-color: rgba(255, 77, 77, 0.5);
-  background: rgba(255, 77, 77, 0.08);
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.08);
 }
 
 .resumen-card--error .resumen-icon,
 .resumen-card--error .resumen-value {
-  color: #ff4d4d;
+  color: #f43f5e;
 }
 
 /* --- Cuadros de aviso y de error (antes solo existían info y éxito) --- */
 .info-box--aviso {
-  background: rgba(251, 191, 36, 0.10);
-  border-left: 3px solid #fbbf24;
-  color: #fbbf24;
+  background: rgba(255, 136, 77, 0.10);
+  border-left: 3px solid #ff884d;
+  color: #ff884d;
   text-align: left;
 }
 
 .info-box--error {
-  background: rgba(255, 77, 77, 0.10);
-  border-left: 3px solid #ff4d4d;
+  background: rgba(244, 63, 94, 0.10);
+  border-left: 3px solid #f43f5e;
   color: #ff8080;
   text-align: left;
 }
@@ -1645,16 +1668,166 @@ select:hover, select:focus {
 
 /* --- Teclado matemático: ÷ se confundía con + --- */
 button.btn-chip--division {
-  color: #ff8fb3 !important;
-  background: rgba(255, 0, 123, 0.12) !important;
-  border-color: rgba(255, 0, 123, 0.5) !important;
+  color: #a855f7 !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
   font-weight: 700;
   font-size: 0.9rem !important;
 }
 
 button.btn-chip--division:hover {
-  background: rgba(255, 0, 123, 0.28) !important;
-  border-color: #ff007b !important;
-  box-shadow: 0 4px 12px rgba(255, 0, 123, 0.35) !important;
+  background: rgba(168, 85, 247, 0.28) !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35) !important;
   color: #ffffff !important;
+}
+
+/* ==========================================================================
+   CAMBIOS DE CSS — Portal Numérico (Itera), 13-nov (documento de diseño)
+   Sin tocar estructura ni lógica. Los media queries existentes (768/640/
+   600/480) se conservan tal cual; los cambios de ancho van en min-width.
+   ========================================================================== */
+
+/* --- P1-3: logo con el degradado de identidad también en el header --- */
+.logo-title {
+  background: linear-gradient(135deg, #00f0ff, #22d3ee, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* --- P1-3: link activo con marca visible --- */
+.nav-links a.active-link {
+  color: #f3f4f6;
+  border-bottom: 2px solid #22d3ee;
+  padding-bottom: 3px;
+}
+
+/* --- P1-3: footer general (las 4 páginas) --- */
+.site-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 24px 20px 32px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* --- P1-3: el buscador de Apuntes vive en el cuerpo, arriba de la lista --- */
+.apuntes-buscador {
+  margin-bottom: 15px;
+}
+
+.apuntes-buscador .search-box,
+.apuntes-buscador .search-box:focus {
+  width: 100%;
+}
+
+/* --- Paleta: placeholders usan el token --text-faint --- */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+/* --- P1-4: el equipo como grid real (la estructura HTML la decide el equipo) --- */
+.equipo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.equipo-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px 14px;
+  text-align: center;
+}
+
+.equipo-iniciales {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #06222b;
+  background: linear-gradient(135deg, #00f0ff, #22d3ee);
+}
+
+/* --- P2-1: el fondo (estrellas + símbolos, dentro del canvas) se nota
+       solo al mirar el borde de la pantalla, no al leer --- */
+#particle-canvas {
+  opacity: 0.45;
+}
+
+/* --- P2-2: hover y foco visibles --- */
+.card:hover,
+.apunte-card:hover,
+.resumen-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: var(--shadow-card-hover);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+/* --- P1-1: Apuntes en grid de 2 columnas (≥768px); en móvil, 1 columna --- */
+@media (min-width: 768px) {
+  #apuntes-remotos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  #apuntes-remotos .apunte-card {
+    margin-bottom: 0;
+    height: 100%;
+  }
+}
+
+/* ==========================================================================
+   ESCRITORIO (min-width: 1024px) — P0-1 ancho, P1-2 etiquetas, P2-3 lienzo
+   Por debajo de 1024px manda lo de siempre (media queries de 768/640/600/480).
+   ========================================================================== */
+@media (min-width: 1024px) {
+  /* P0-1: columna ancha y altura natural (sin scroll interno del contenedor) */
+  .container,
+  .container--landing,
+  .container--conocenos,
+  .container--redes {
+    max-width: 1180px;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .main-container {
+    padding: 40px 32px;
+    align-items: flex-start;
+  }
+
+  /* P1-2: con el ancho nuevo las etiquetas largas (intervalo A/B) caben en
+     una sola línea; en móvil siguen partiéndose como hasta ahora */
+  label {
+    white-space: nowrap;
+  }
+
+  /* P2-3: gráfica un poco más alta (el alto en dibujo lo toma el JS del CSS) */
+  .grafica-canvas {
+    height: 320px;
+  }
 }

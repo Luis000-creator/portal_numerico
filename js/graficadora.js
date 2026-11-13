@@ -21,8 +21,24 @@
 // ============================================================================
 
 const GRAF_N = 240;
-const GRAF_ALTO = 280;
+const GRAF_ALTO = 280; // respaldo si no hay CSS utilizable (tests / sin hoja de estilo)
 const GRAF_N_SOMBRA = 160;
+
+// Alto real del lienzo: lo decide el CSS (.grafica-canvas es 280px, y 320px en
+// escritorio ≥1024px). Se limpia el alto en línea para poder leerlo; si no hay
+// CSS utilizable se usa el respaldo GRAF_ALTO.
+function grafAltoDelCSS(canvas) {
+    try {
+        if (canvas && canvas.style) canvas.style.height = '';
+        if (canvas && typeof window.getComputedStyle === 'function') {
+            const h = parseFloat(window.getComputedStyle(canvas).height);
+            // Rango [200, 400]: cubre 280/320 y descarta tamaños intrínsecos
+            // sin CSS (150, o el propio bitmap), que crecerían en cada dibujo.
+            if (Number.isFinite(h) && h >= 200 && h <= 400) return h;
+        }
+    } catch (e) { /* sin CSS computado: respaldo */ }
+    return GRAF_ALTO;
+}
 
 let ultimoGrafico = null;
 
@@ -143,9 +159,10 @@ function graficarResultado(expr, opts = {}) {
         // --- Lienzo (con DPR, tope 2) ---
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const w = Math.max(200, Math.round(canvas.clientWidth || (canvas.parentElement && canvas.parentElement.clientWidth) || 600));
+        const alto = grafAltoDelCSS(canvas);
         canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(GRAF_ALTO * dpr);
-        canvas.style.height = GRAF_ALTO + 'px';
+        canvas.height = Math.round(alto * dpr);
+        canvas.style.height = alto + 'px';
         canvas.style.display = 'block';
         ocultarMsg();
         cont.style.display = 'block';
@@ -165,33 +182,33 @@ function graficarResultado(expr, opts = {}) {
 
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, w, GRAF_ALTO);
+        ctx.clearRect(0, 0, w, alto);
         const X = (x) => ((x - xmin) / (xmax - xmin)) * w;
-        const Y = (y) => GRAF_ALTO - ((y - ymin) / (ymax - ymin)) * GRAF_ALTO;
+        const Y = (y) => alto - ((y - ymin) / (ymax - ymin)) * alto;
         const enVista = (y) => Number.isFinite(y) && y >= ymin && y <= ymax;
-        const Y0 = Math.min(Math.max(Y(0), 0), GRAF_ALTO);
+        const Y0 = Math.min(Math.max(Y(0), 0), alto);
 
         // --- Cuadrícula + etiquetas ---
         const pasoX = grafPasoBonito(xmax - xmin);
         const pasoY = grafPasoBonito(ymax - ymin);
-        ctx.font = '10px monospace';
+        ctx.font = '11px monospace';
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
         ctx.fillStyle = 'rgba(156, 163, 175, 0.9)';
         ctx.textAlign = 'left';
         for (let gx = Math.ceil(xmin / pasoX) * pasoX; gx <= xmax; gx += pasoX) {
             const px = X(gx);
-            ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, GRAF_ALTO); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, alto); ctx.stroke();
             if (Math.abs(gx) > 1e-12) {
                 const txt = String(Number(gx.toPrecision(4)));
                 // Si la etiqueta se saldría del borde derecho, se alinea hacia
-                // dentro (antes quedaba cortada por el canvas).
+                // dentro con ~10px de margen (antes quedaba pegada al corte).
                 if (px + 6 + txt.length * 6 > w) {
                     ctx.textAlign = 'right';
-                    ctx.fillText(txt, w - 4, GRAF_ALTO - 5);
+                    ctx.fillText(txt, w - 10, alto - 5);
                     ctx.textAlign = 'left';
                 } else {
-                    ctx.fillText(txt, px + 3, GRAF_ALTO - 5);
+                    ctx.fillText(txt, px + 3, alto - 5);
                 }
             }
         }
@@ -199,7 +216,8 @@ function graficarResultado(expr, opts = {}) {
         for (let gy = Math.ceil(ymin / pasoY) * pasoY; gy <= ymax; gy += pasoY) {
             const py = Y(gy);
             ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
-            if (Math.abs(gy) > 1e-12) ctx.fillText(Number(gy.toPrecision(4)), w - 4, py - 3);
+            // Etiqueta del eje Y con margen derecho (antes en w - 4, cortada)
+            if (Math.abs(gy) > 1e-12) ctx.fillText(Number(gy.toPrecision(4)), w - 10, py - 3);
         }
 
         // --- Ejes ---
@@ -208,7 +226,7 @@ function graficarResultado(expr, opts = {}) {
             ctx.beginPath(); ctx.moveTo(0, Y0); ctx.lineTo(w, Y0); ctx.stroke();
         }
         if (xmin < 0 && xmax > 0) {
-            ctx.beginPath(); ctx.moveTo(X(0), 0); ctx.lineTo(X(0), GRAF_ALTO); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(X(0), 0); ctx.lineTo(X(0), alto); ctx.stroke();
         }
 
         // --- Sombreado de área (Simpson, integrales) ---
@@ -284,8 +302,8 @@ function graficarResultado(expr, opts = {}) {
         if (Number.isFinite(a) && Number.isFinite(b) && a < b) {
             ctx.strokeStyle = 'rgba(189, 0, 255, 0.8)';
             ctx.fillStyle = '#bd00ff';
-            ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), GRAF_ALTO); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), GRAF_ALTO); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto); ctx.stroke();
             ctx.fillText('a', X(a), 12);
             ctx.fillText('b', X(b), 12);
         }
