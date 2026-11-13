@@ -387,8 +387,8 @@ async function graficarLibre() {
     const numero = (id) => {
         const el = document.getElementById(id);
         if (!el || String(el.value).trim() === '') return NaN;
-        const v = parseFloat(el.value);
-        return Number.isFinite(v) ? v : NaN;
+        // Acepta constantes ("pi", "e"...) igual que los demás métodos
+        return parseNumeroConConstantes(el.value);
     };
 
     if (metodo === 'biseccion' || metodo === 'simpson') {

@@ -28,10 +28,11 @@ function calcularSimpson() {
         return;
     }
 
-    const a = Number(aStr);
-    const b = Number(bStr);
+    // Acepta constantes en los límites: "pi/2", "e", "2*pi"...
+    const a = parseNumeroConConstantes(aStr);
+    const b = parseNumeroConConstantes(bStr);
     if (!Number.isFinite(a) || !Number.isFinite(b)) {
-        mostrarError('Error: Los límites de integración deben ser números válidos.');
+        mostrarError('Error: Los límites de integración deben ser números válidos (aceptan pi, e...).');
         return;
     }
     if (a === b) {

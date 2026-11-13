@@ -94,12 +94,12 @@
 
             <div class="form-row">
                 <div class="form-group form-group--flex1">
-                    <label for="a">Intervalo (a) - Deja en blanco para Auto</label>
-                    <input type="number" step="any" id="a" name="a" placeholder="Auto">
+                    <label for="a">Intervalo (a) - Deja en blanco para Auto (acepta pi, e)</label>
+                    <input type="text" id="a" name="a" placeholder="Auto">
                 </div>
                 <div class="form-group form-group--flex1">
-                    <label for="b">Intervalo (b) - Deja en blanco para Auto</label>
-                    <input type="number" step="any" id="b" name="b" placeholder="Auto">
+                    <label for="b">Intervalo (b) - Deja en blanco para Auto (acepta pi, e)</label>
+                    <input type="text" id="b" name="b" placeholder="Auto">
                 </div>
             </div>
             </div>
@@ -116,7 +116,7 @@
 
                 <div class="form-group">
                     <label for="x0">Valor Inicial (X₀)</label>
-                    <input type="number" step="any" id="x0" name="x0" placeholder="Ej. 1">
+                    <input type="text" id="x0" name="x0" placeholder="Ej. 1 (acepta pi)">
                 </div>
             </div>
 
@@ -137,7 +137,7 @@
 
                 <div class="form-group">
                     <label for="x0-newton">Valor Inicial (X₀)</label>
-                    <input type="number" step="any" id="x0-newton" name="x0-newton" placeholder="Ej. 1" required>
+                    <input type="text" id="x0-newton" name="x0-newton" placeholder="Ej. 1 (acepta pi)" required>
                 </div>
             </div>
 
@@ -155,11 +155,11 @@
                 <div class="form-row">
                     <div class="form-group form-group--flex1">
                         <label for="a-taylor">Centro a (expansión alrededor de)</label>
-                        <input type="number" step="any" id="a-taylor" name="a-taylor" placeholder="Ej. 0 (Maclaurin)">
+                        <input type="text" id="a-taylor" name="a-taylor" placeholder="Ej. 0 (Maclaurin)">
                     </div>
                     <div class="form-group form-group--flex1">
                         <label for="x-taylor">Punto x a evaluar</label>
-                        <input type="number" step="any" id="x-taylor" name="x-taylor" placeholder="Ej. 1">
+                        <input type="text" id="x-taylor" name="x-taylor" placeholder="Ej. 1 (acepta pi/6)">
                     </div>
                 </div>
 
@@ -174,28 +174,28 @@
                 <div class="form-row">
                     <div class="form-group form-group--flex1">
                         <label for="x0-lineal">x₀</label>
-                        <input type="number" step="any" id="x0-lineal" name="x0-lineal" placeholder="Ej. 1">
+                        <input type="text" id="x0-lineal" name="x0-lineal" placeholder="Ej. 1">
                     </div>
                     <div class="form-group form-group--flex1">
                         <label for="y0-lineal">y₀ = f(x₀)</label>
-                        <input type="number" step="any" id="y0-lineal" name="y0-lineal" placeholder="Ej. 2">
+                        <input type="text" id="y0-lineal" name="y0-lineal" placeholder="Ej. 2">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group form-group--flex1">
                         <label for="x1-lineal">x₁</label>
-                        <input type="number" step="any" id="x1-lineal" name="x1-lineal" placeholder="Ej. 3">
+                        <input type="text" id="x1-lineal" name="x1-lineal" placeholder="Ej. 3">
                     </div>
                     <div class="form-group form-group--flex1">
                         <label for="y1-lineal">y₁ = f(x₁)</label>
-                        <input type="number" step="any" id="y1-lineal" name="y1-lineal" placeholder="Ej. 6">
+                        <input type="text" id="y1-lineal" name="y1-lineal" placeholder="Ej. 6">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="x-lineal">Valor de x a interpolar</label>
-                    <input type="number" step="any" id="x-lineal" name="x-lineal" placeholder="Ej. 2">
+                    <input type="text" id="x-lineal" name="x-lineal" placeholder="Ej. 2">
                 </div>
             </div>
 
@@ -203,7 +203,7 @@
             <div id="inputs-lagrangepoly" style="display: none;">
                 <div class="form-group">
                     <label for="x-poly">Valor de X a interpolar</label>
-                    <input type="number" step="any" id="x-poly" name="x-poly" placeholder="Ej. 2.5">
+                    <input type="text" id="x-poly" name="x-poly" placeholder="Ej. 2.5 (acepta pi)">
                 </div>
 
                 <div class="form-group">
@@ -229,11 +229,11 @@
                 <div class="form-row">
                     <div class="form-group form-group--flex1">
                         <label for="a-simpson">Límite inferior (a)</label>
-                        <input type="number" step="any" id="a-simpson" name="a-simpson" placeholder="Ej. 0">
+                        <input type="text" id="a-simpson" name="a-simpson" placeholder="Ej. 0 (acepta pi)">
                     </div>
                     <div class="form-group form-group--flex1">
                         <label for="b-simpson">Límite superior (b)</label>
-                        <input type="number" step="any" id="b-simpson" name="b-simpson" placeholder="Ej. 2">
+                        <input type="text" id="b-simpson" name="b-simpson" placeholder="Ej. 2 o pi">
                     </div>
                 </div>
 

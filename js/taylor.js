@@ -60,11 +60,12 @@ function calcularTaylor() {
         return;
     }
 
-    const a = Number(aStr);
-    const x = Number(xStr);
+    // Acepta constantes: a = "pi/2", x = "pi/6"... (inputs type="text")
+    const a = parseNumeroConConstantes(aStr);
+    const x = parseNumeroConConstantes(xStr);
     const n = Number(nStr);
     if (!Number.isFinite(a) || !Number.isFinite(x)) {
-        mostrarError('Error: a y x deben ser números válidos.');
+        mostrarError('Error: a y x deben ser números válidos (aceptan pi, e...).');
         return;
     }
     if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1) {

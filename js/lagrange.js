@@ -111,14 +111,12 @@ function crearFilaPunto() {
     etiqueta.className = 'punto-indice';
 
     const inpX = document.createElement('input');
-    inpX.type = 'number';
-    inpX.step = 'any';
+    inpX.type = 'text';
     inpX.placeholder = 'x';
     inpX.dataset.campo = 'x';
 
     const inpY = document.createElement('input');
-    inpY.type = 'number';
-    inpY.step = 'any';
+    inpY.type = 'text';
     inpY.placeholder = 'y';
     inpY.dataset.campo = 'y';
 
@@ -173,8 +171,8 @@ function leerPuntos() {
         const sx = String(inpX.value === undefined || inpX.value === null ? '' : inpX.value).trim();
         const sy = String(inpY.value === undefined || inpY.value === null ? '' : inpY.value).trim();
         if (sx === '' || sy === '') return { error: `El punto P${i + 1} tiene campos vacíos.` };
-        const x = Number(sx);
-        const y = Number(sy);
+        const x = parseNumeroConConstantes(sx);
+        const y = parseNumeroConConstantes(sy);
         if (!Number.isFinite(x) || !Number.isFinite(y)) {
             return { error: `El punto P${i + 1} no contiene números válidos.` };
         }
@@ -212,18 +210,17 @@ function calcularLagrangeLineal() {
     const sx1 = leer('x1-lineal');
     const sy1 = leer('y1-lineal');
     const sx = leer('x-lineal');
-
     if (!sx0 || !sy0 || !sx1 || !sy1 || !sx) {
         mostrarError('Error: completa los puntos (x₀, y₀), (x₁, y₁) y el valor de x a interpolar.');
         return;
     }
-    const x0 = Number(sx0);
-    const y0 = Number(sy0);
-    const x1 = Number(sx1);
-    const y1 = Number(sy1);
-    const x = Number(sx);
+    const x0 = parseNumeroConConstantes(sx0);
+    const y0 = parseNumeroConConstantes(sy0);
+    const x1 = parseNumeroConConstantes(sx1);
+    const y1 = parseNumeroConConstantes(sy1);
+    const x = parseNumeroConConstantes(sx);
     if (![x0, y0, x1, y1, x].every(Number.isFinite)) {
-        mostrarError('Error: todos los campos deben ser números válidos.');
+        mostrarError('Error: todos los campos deben ser números válidos (aceptan pi, e...).');
         return;
     }
     if (x0 === x1) {
@@ -292,8 +289,8 @@ function calcularLagrangePolinomial() {
     const campoX = document.getElementById('x-poly');
     const sx = campoX ? String(campoX.value).trim() : '';
     if (!sx) { mostrarError('Error: escribe el valor de X que quieres interpolar.'); return; }
-    const x = Number(sx);
-    if (!Number.isFinite(x)) { mostrarError('Error: X debe ser un número válido.'); return; }
+    const x = parseNumeroConConstantes(sx);
+    if (!Number.isFinite(x)) { mostrarError('Error: X debe ser un número válido (acepta pi, e...).'); return; }
 
     const lectura = leerPuntos();
     if (lectura.error) { mostrarError('Error: ' + lectura.error); return; }

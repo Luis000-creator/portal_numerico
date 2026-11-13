@@ -9,7 +9,8 @@
 
 function calcularNewton() {
   const exprF = normalizarExpresion(document.getElementById("funcion-newton").value.trim());
-  let x_actual = parseFloat(document.getElementById("x0-newton").value);
+  // Acepta constantes en X₀: "pi", "e", "pi/2"... (inputs type="text")
+  let x_actual = parseNumeroConConstantes(document.getElementById("x0-newton").value);
 
   const crit = leerCriterio();
   if (!crit) return;
@@ -81,6 +82,9 @@ function calcularNewton() {
     ea_last = null;
   let criterioAlcanzado = false;
   let motivoParo = null;
+  // Paro ANTES del límite de iteraciones (divergencia o error de evaluación):
+  // el mensaje post-loop debe decir la iteración REAL, no "límite de 100".
+  let paroAnticipado = false;
 
   while (n <= maxIter) {
     xs.push(x_actual);
@@ -102,17 +106,24 @@ function calcularNewton() {
     if (!Number.isFinite(fx)) {
       if (fx === Infinity || fx === -Infinity) {
         mostrarError(`Divergencia: f(x) tiende a ${fx > 0 ? '+∞' : '−∞'} en la iteración ${n}.`);
+        motivoParo = 'divergencia';
       } else {
         mostrarError(mensajeErrorEvaluacion(exprF, `x = ${x_actual}`, 'f(x)'));
+        motivoParo = 'error de evaluación de f(x)';
       }
+      paroAnticipado = true;
       break;
     }
     if (!Number.isFinite(fpx)) {
       mostrarError(`Error: la derivada f'(x) no está definida en x = ${x_actual} (revisa el dominio de f(x)).`);
+      motivoParo = 'derivada no definida';
+      paroAnticipado = true;
       break;
     }
     if (Math.abs(fpx) < 1e-14) {
       mostrarError(`Derivada f'(x) ≈ 0 en la iteración ${n}. División por cero inminente.`);
+      motivoParo = 'derivada ≈ 0';
+      paroAnticipado = true;
       break;
     }
 
@@ -153,6 +164,8 @@ function calcularNewton() {
     // Divergencia: el valor se aleja demasiado
     if (Math.abs(x_siguiente) > 1e6) {
       mostrarError("Divergencia: El valor se está alejando demasiado de la solución.");
+      motivoParo = 'divergencia';
+      paroAnticipado = true;
       break;
     }
 
@@ -163,7 +176,16 @@ function calcularNewton() {
   }
 
   resContainer.style.display = "block";
-  if (truncadoPorLimite) {
+  if (paroAnticipado) {
+    // Paro por divergencia/error antes del límite: se informa la iteración
+    // REAL en la que se detuvo (la que cuenta la tabla), no el límite.
+    agregarInfo(
+      `El cálculo se detuvo en la iteración ${n} (${motivoParo || 'paro anticipado'}) ` +
+      `antes de las ${maxIter} iteraciones; no se cumplió el criterio de paro.` +
+      (truncadoPorLimite ? ` Se habían pedido ${maxIterSolicitado} iteraciones (límite de seguridad: ${maxIter}).` : ''),
+      "info"
+    );
+  } else if (truncadoPorLimite) {
     agregarInfo(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`, "info");
   } else if (!criterioAlcanzado) {
     agregarInfo(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`, "info");
@@ -188,8 +210,17 @@ function calcularNewton() {
   };
   if (!criterioAlcanzado) {
     etiquetas.etiquetaRaiz = "Último estimado (sin converger)";
-    etiquetas.estadoTexto = "Criterio no alcanzado";
     etiquetas.estado = "fallo";
+    if (paroAnticipado) {
+      // Divergencia: el iterado final es un número gigante sin valor
+      // informativo; la tarjeta muestra '—' (el detalle está en la tabla y
+      // en el mensaje de error).
+      etiquetas.raizStr = "—";
+      etiquetas.fxStr = "—";
+      etiquetas.estadoTexto = `Detenido en la iteración ${n} (sin converger)`;
+    } else {
+      etiquetas.estadoTexto = "Criterio no alcanzado";
+    }
   }
   if (Number.isFinite(residuo) && residuo > Math.max(valorCriterio * 10, 1e-12) && !criterioAlcanzado) {
     agregarInfo(
@@ -223,7 +254,16 @@ function actualizarPreviewDerivada(exprF, derivadaYaCalculada) {
   }
   try {
     const d = derivadaYaCalculada || math.derivative(math.parse(normalizarExpresion(expr)), "x");
-    const latex = d.toTex();
+    // mathjs 11.8 serializa "sin(x) - x/2" como "cos(x) + -1 / 2": el signo
+    // negativo queda como término de la suma y toTex lo pinta como
+    // "\frac{-1}{2}". Se limpia el "+ -" y se regenera el LaTeX; si el
+    // re-parse falla se usa el toTex original.
+    let latex;
+    try {
+      latex = math.parse(d.toString().replace(/\+\s*-/g, '-')).toTex();
+    } catch (e) {
+      latex = d.toTex();
+    }
     katex.render(`f'(x) = ${latex}`, preview, { displayMode: true, throwOnError: false });
     preview.className = "preview-fx preview-fx--valid";
   } catch (e) {

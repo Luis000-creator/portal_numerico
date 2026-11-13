@@ -196,13 +196,15 @@ async function ejecutarCalculo(event) {
     }
 }
 
-// Aviso no bloqueante si |g'(x0)| >= 1 (posible divergencia)
+// Aviso no bloqueante si |g'(x0)| > 1 (posible divergencia).
+// El caso límite exacto |g'| = 1 NO avisa: con ln(x)+2 y x₀=1 (g'=1) el
+// método converge igualmente y el aviso solo confundía.
 function avisarConvergencia(exprG, x0) {
     if (typeof math === 'undefined' || !math.derivative) return true;
     try {
         const derivada = math.derivative(normalizarExpresion(exprG), 'x').evaluate({ x: x0 });
-        if (Number.isFinite(derivada) && Math.abs(derivada) >= 1) {
-            mostrarError(`Aviso: |g'(${x0})| = ${Math.abs(derivada).toFixed(4)} >= 1. El método puede diverger. Se continúa el cálculo.`);
+        if (Number.isFinite(derivada) && Math.abs(derivada) > 1) {
+            mostrarError(`Aviso: |g'(${x0})| = ${Math.abs(derivada).toFixed(4)} > 1. El método puede diverger. Se continúa el cálculo.`);
             return false;
         }
     } catch (e) {
@@ -215,7 +217,7 @@ function avisarConvergencia(exprG, x0) {
 
 function calcularPuntoFijo() {
     const exprG = document.getElementById('funcion-gx').value.trim();
-    let x_actual = parseFloat(document.getElementById('x0').value);
+    let x_actual = parseNumeroConConstantes(document.getElementById('x0').value);
 
     const crit = leerCriterio();
     if (!crit) return;
@@ -242,6 +244,10 @@ function calcularPuntoFijo() {
     let g_last = NaN, x_last = NaN, ea_last = null;
     let criterioAlcanzado = false;
     let motivoParo = null;
+    // Paro ANTES de llegar al límite de iteraciones (divergencia o error de
+    // evaluación): el mensaje post-loop debe decir la iteración real, no el
+    // "límite de 100 iteraciones" (bug reportado: paraba en la 14 y decía 100).
+    let paroAnticipado = false;
     const maxIterSolicitado = criterio === 'iteraciones' ? Math.max(1, Math.floor(valorCriterio)) : 100;
     const maxIter = Math.min(100, maxIterSolicitado);
     const truncadoPorLimite = maxIterSolicitado > maxIter;
@@ -265,9 +271,12 @@ function calcularPuntoFijo() {
         if (!Number.isFinite(g_x)) {
             if (g_x === Infinity || g_x === -Infinity) {
                 mostrarError(`Divergencia: g(x) tiende a ${g_x > 0 ? '+∞' : '−∞'} en la iteración ${n}; la secuencia no acota.`);
+                motivoParo = 'divergencia';
             } else {
                 mostrarError(mensajeErrorEvaluacion(exprG, `x = ${x_actual}`, 'g(x)'));
+                motivoParo = 'error de evaluación de g(x)';
             }
+            paroAnticipado = true;
             break;
         }
 
@@ -305,6 +314,8 @@ function calcularPuntoFijo() {
         // Divergencia: el valor se aleja demasiado de la solucion
         if (Math.abs(g_x) > 1e6) {
             mostrarError('Divergencia: El valor se está alejando demasiado de la solución.');
+            motivoParo = 'divergencia';
+            paroAnticipado = true;
             break;
         }
 
@@ -314,7 +325,16 @@ function calcularPuntoFijo() {
         n++;
     }
     resContainer.style.display = 'block';
-    if (truncadoPorLimite) {
+    if (paroAnticipado) {
+        // Paro por divergencia/error antes del límite: se informa la iteración
+        // REAL en la que se detuvo (la misma que cuentan las filas de la tabla).
+        agregarInfo(
+            `El cálculo se detuvo en la iteración ${n} (${motivoParo || 'paro anticipado'}) ` +
+            `antes de las ${maxIter} iteraciones; no se cumplió el criterio de paro.` +
+            (truncadoPorLimite ? ` Se habían pedido ${maxIterSolicitado} iteraciones (límite de seguridad: ${maxIter}).` : ''),
+            'info'
+        );
+    } else if (truncadoPorLimite) {
         agregarInfo(`Se solicitaron ${maxIterSolicitado} iteraciones, pero el cálculo se limitó a ${maxIter} por seguridad.`, 'info');
     } else if (!criterioAlcanzado) {
         agregarInfo(`Se alcanzó el límite de ${maxIter} iteraciones sin cumplir el criterio de paro.`, 'info');
@@ -342,7 +362,14 @@ function calcularPuntoFijo() {
         // es (el último iterado) y se avisa explícitamente.
         etiquetas.etiquetaRaiz = 'Último iterado (sin converger)';
         etiquetas.estado = 'fallo';
-        if (!criterioAlcanzado) {
+        if (paroAnticipado) {
+            // Divergencia: el iterado final es un número gigante sin valor
+            // informativo; la tarjeta muestra '—' (el detalle quedó en la
+            // tabla y en el mensaje de error).
+            etiquetas.raizStr = '—';
+            etiquetas.fxStr = '—';
+            etiquetas.estadoTexto = `Detenido en la iteración ${n} (sin converger)`;
+        } else if (!criterioAlcanzado) {
             etiquetas.estadoTexto = 'Criterio no alcanzado';
         } else {
             etiquetas.estadoTexto =

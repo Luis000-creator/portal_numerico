@@ -208,6 +208,27 @@ function numTexto(n) {
 
 window.numTexto = numTexto;
 
+// Convierte el texto de un campo numérico a number, aceptando constantes y
+// expresiones simples: "pi", "π", "e", "pi/2", "2*e", "1,5" (coma decimal).
+// Devuelve NaN si el texto no evalúa a un número (vacío, letras sueltas...).
+// Así los límites de Simpson/Bisección/Taylor aceptan "pi" sin que el
+// navegador vacíe el campo (los inputs son type="text").
+function parseNumeroConConstantes(valor) {
+    let texto = String(valor == null ? '' : valor).trim().replace(/,/g, '.').replace(/π/g, 'pi');
+    if (!texto) return NaN;
+    try {
+        if (typeof math !== 'undefined' && typeof math.evaluate === 'function') {
+            const r = math.evaluate(texto);
+            return typeof r === 'number' ? r : NaN;
+        }
+    } catch (e) {
+        return NaN;
+    }
+    return Number(texto);
+}
+
+window.parseNumeroConConstantes = parseNumeroConConstantes;
+
 // Helpers de UI para errores.
 // Además de mostrar el mensaje, OCULTA los resultados del cálculo anterior:
 // si no, un error (intervalo inválido, n impar, función fuera de dominio...)
@@ -509,8 +530,9 @@ function calcularBiseccion() {
         document.getElementById('a').value = a;
         document.getElementById('b').value = b;
     } else {
-        a = parseFloat(a_str);
-        b = parseFloat(b_str);
+        // Acepta constantes en los límites: "pi/2", "e", "2*pi"...
+        a = parseNumeroConConstantes(a_str);
+        b = parseNumeroConConstantes(b_str);
     }
     const a0 = a, b0 = b; // bracket inicial para la gráfica
 
@@ -743,8 +765,12 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
 
     // etiquetas.abs: cuando la tarjeta es |f(x)|, el valor llega con signo
     const fxMostrar = etiquetas.abs && Number.isFinite(fx_val) ? Math.abs(fx_val) : fx_val;
-    const raizStr = formatoDecimal(x_raiz);
-    const fxStr = formatoDecimal(fxMostrar);
+    // etiquetas.raizStr: en una divergencia el último iterado es un número
+    // gigante sin valor informativo; el llamador puede mandar '—' para que la
+    // tarjeta no lo muestre en grande.
+    const raizStr = etiquetas.raizStr !== undefined ? etiquetas.raizStr : formatoDecimal(x_raiz);
+    // etiquetas.fxStr: mismo caso que raizStr para la tarjeta de residuo.
+    const fxStr = etiquetas.fxStr !== undefined ? etiquetas.fxStr : formatoDecimal(fxMostrar);
     const eaStr = (ea_final !== null && Number.isFinite(ea_final)) ? formatoDecimal(Math.abs(ea_final), 4) + '%' : 'N/A';
 
     const etiquetaFx = etiquetas.fx || 'f(x) Final';
