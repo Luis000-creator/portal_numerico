@@ -963,7 +963,7 @@ function inicializarMenusMatematicos() {
         cont.dataset.menuListo = '1';
         const etiqueta = document.createElement('span');
         etiqueta.className = 'examples-label';
-        etiqueta.innerHTML = 'Insertar expresión: <small>(log = base 10 · ln = natural)</small>';
+        etiqueta.textContent = 'Insertar expresión:';
         const grupo = document.createElement('div');
         grupo.className = 'chip-group';
         grupo.setAttribute('role', 'group');
