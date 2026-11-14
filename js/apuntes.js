@@ -37,11 +37,15 @@ function mostrarEsqueletosApuntes(cont, n = 3) {
 async function cargarApuntesRemotos() {
     if (!window.supabaseClient) return;
     const cont = document.getElementById('apuntes-remotos');
-    mostrarEsqueletosApuntes(cont, 3);
+    // P2-7 v3: los esqueletos grises solo aparecen si la carga tarda más de
+    // 300 ms; si Supabase responde rápido, la lista entra directa y no hay
+    // parpadeo de skeletons.
+    const tEsqueleto = setTimeout(() => mostrarEsqueletosApuntes(cont, 3), 300);
     const { data, error } = await window.supabaseClient
         .from('apuntes')
         .select('id,titulo,contenido,archivo_url,created_at')
         .order('created_at', { ascending: true });
+    clearTimeout(tEsqueleto);
     if (error) {
         console.error('No se pudieron cargar los apuntes:', error);
         if (cont) { cont.innerHTML = ''; cont.removeAttribute('aria-busy'); }
@@ -90,7 +94,10 @@ async function cargarApuntesRemotos() {
         // Si hay archivo adjunto, agregar visor integrado
         if (apunte.archivo_url) {
             const btnContainer = document.createElement('div');
-            btnContainer.style.cssText = 'margin-top: 12px; display: flex; gap: 10px; align-items: center;';
+            // P2-3 v3: los estilos viven en CSS (.apunte-acciones) para poder
+            // apilarlos en móvil con un media query (el cssText en línea no lo
+            // permite: "Ver documento" y "Descargar original" se partían).
+            btnContainer.className = 'apunte-acciones';
 
             // Boton para visualizar en la pagina (glifo Font Awesome, no emoji)
             const btnVer = document.createElement('button');

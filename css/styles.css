@@ -372,9 +372,10 @@ button:hover {
 }
 
 /* Botón principal (Calcular procedimiento / Publicar Apunte): degradado cian
-   (antes blanco sólido, fuera de paleta) */
+   (antes blanco sólido, fuera de paleta). P2-1 v3: paradas separadas para que
+   el degradado se note (antes #00F0FF → #22D3EE era cian plano a la vista). */
 button[type="submit"] {
-  background: linear-gradient(135deg, #00f0ff, #22d3ee) !important;
+  background: linear-gradient(135deg, #00F0FF 0%, #22D3EE 55%, #0E7490 100%) !important;
   color: #06222b !important;
   border: none !important;
   border-radius: 8px !important;
@@ -504,8 +505,9 @@ button.btn-graficar:hover {
 }
 
 .footer-landing {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
+  /* P2-4 v3: 4.5rem de aire dejaban un tercio de tarjeta vacío en móvil */
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -1812,13 +1814,16 @@ textarea:focus-visible {
   #apuntes-remotos {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    /* Petición v3: las tarjetas iban muy pegadas → más aire entre columnas */
+    gap: 32px;
     align-items: start;
   }
 
   #apuntes-remotos .apunte-card {
     margin-bottom: 0;
-    height: 100%;
+    /* P2-7 v3: height:100% estiraba cada tarjeta a la fila y dejaba ~40%
+       vacío abajo; ahora mide lo que mide su contenido. */
+    height: auto;
   }
 }
 
@@ -1947,15 +1952,209 @@ textarea:focus-visible {
   top: -120px;
   left: 50%;
   transform: translateX(-50%);
-  width: 720px;
-  height: 420px;
-  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.14), transparent 70%);
+  width: 900px;
+  height: 520px;
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.22), transparent 70%);
   pointer-events: none;
   z-index: -1;
 }
 body:has(#lista-apuntes) .main-container::before {
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.14), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.22), transparent 70%);
 }
 body:has(.redes-section) .main-container::before {
-  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.14), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.22), transparent 70%);
+}
+
+/* ==========================================================================
+   CORRECCIONES VISUALES v3 (13-nov) — sobre la base "Ronda 6: CSS v2"
+   Documento: "Portal Numérico — Correcciones visuales v3" (P0/P1/P2) más
+   dos peticiones directas del equipo (bordes del landing, aire en Apuntes).
+   ========================================================================== */
+
+/* --- Petición: el "canva" (contenedor) del landing queda completamente
+   centrado en ambos ejes. margin-block: auto centra en vertical con el truco
+   de márgenes auto: si el contenido es más alto que la pantalla, los márgenes
+   valen 0 y nada se recorta por arriba. --- */
+.container--landing {
+  margin-inline: auto;
+  margin-block: auto;
+}
+
+/* --- Petición: las 3 tarjetas del landing llevan los mismos bordes que la
+   primera (Calculadoras): franja cian de 3px a la izquierda. --- */
+.card-landing--cyan,
+.card-landing--violet,
+.card-landing--magenta {
+  border-left: 3px solid #00f0ff;
+}
+
+/* --- P0-1 v3: tarjetas de Taylor en móvil ---
+   .resumen-grid--6 (3 columnas) no tenía regla móvil y ganaba al
+   .resumen-grid de 2 columnas; con white-space: nowrap los números se
+   cortaban en vez de partirse. */
+@media (max-width: 768px) {
+  .resumen-grid--6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* La tarjeta principal (Aproximación P_n(x)) y la última (Centro a) van a
+     todo lo ancho para cerrar la fila de 6 en filas de 2+2 */
+  .resumen-grid--6 .resumen-card--raiz,
+  .resumen-grid--6 .resumen-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .resumen-grid--6 .resumen-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+  }
+
+  .resumen-grid--6 .resumen-label {
+    letter-spacing: 0.5px;
+    white-space: normal;
+  }
+}
+
+/* --- P0-2 v3: el icono de ESTADO no tapa la "E" ---
+   Cada hijo de la tarjeta en fila queda con su espacio explícito; el valor
+   largo ("Criterio cumplido: residuo |f(x)| ≤ …") se parte en vez de
+   apretar a la etiqueta. */
+.resumen-card--estado {
+  gap: 10px;
+}
+
+.resumen-card--estado .resumen-icon {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.resumen-card--estado .resumen-label {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.resumen-card--estado .resumen-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  text-align: right;
+}
+
+/* --- P1-4 v3: CRITERIO DE PARO apilado en móvil --- */
+@media (max-width: 768px) {
+  .resumen-card--criterio {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* --- P1-2 v3: TODO acento de la calculadora sale de --method ---
+   Iconos de las tarjetas (antes fijos por posición: morado/rosa/cian/verde),
+   botón CALCULAR, GRAFICAR, teclado, etiquetas y anillo de foco. */
+.resumen-card:nth-child(1) i,
+.resumen-card:nth-child(2) i,
+.resumen-card:nth-child(3) i,
+.resumen-card:nth-child(4) i {
+  color: var(--method);
+}
+
+/* Botón CALCULAR: degradado con el color del método. Se mezcla hacia BLANCO
+   (no hacia #06222B) para que el texto #06222B sobre el color del método
+   quede con contraste ≥ 4.5:1 en los 7 métodos. !important para ganarle al
+   background de button[type="submit"] (línea §04, también !important). */
+.container:has(#metodo-selector) button[type="submit"] {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--method) 85%, #FFFFFF),
+    color-mix(in srgb, var(--method) 60%, #FFFFFF)
+  ) !important;
+}
+
+/* GRAFICAR con el color del método */
+.container:has(#metodo-selector) button.btn-graficar {
+  border-color: var(--method);
+  color: var(--method);
+}
+
+.container:has(#metodo-selector) button.btn-graficar:hover {
+  background: color-mix(in srgb, var(--method) 12%, transparent);
+}
+
+/* Teclado matemático: los chips llevan !important en el base (§04), aquí
+   también hace falta para poder teñirlos. */
+.container:has(#metodo-selector) button.btn-chip {
+  border-color: color-mix(in srgb, var(--method) 45%, transparent) !important;
+  color: var(--method) !important;
+}
+
+.container:has(#metodo-selector) button.btn-chip:hover {
+  border-color: var(--method) !important;
+}
+
+/* Etiquetas del formulario con el color del método */
+.container:has(#metodo-selector) label {
+  color: var(--method);
+}
+
+/* El anillo de foco sigue al método (Newton ya no mezcla naranja con cian) */
+.container:has(#metodo-selector)
+  :is(button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--method, #22d3ee);
+  outline-offset: 2px;
+}
+
+/* --- P2-2 v3: "Buscar apuntes" visible como encabezado de sección --- */
+.apuntes-buscador-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-white);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* --- P2-3 v3: acciones de cada nota (VER DOCUMENTO / Descargar original) ---
+   Antes iban en cssText en línea, sin wrap y sin media query posible. */
+.apunte-acciones {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* --- P2-5 v3: el header fijo no tapa encabezados al hacer scroll --- */
+h1,
+h2,
+h3,
+.apuntes-buscador,
+.redes-section {
+  scroll-margin-top: 90px;
+}
+
+/* --- P2-8 v3: el hueco de "DERIVADA DE F(X)" solo se ve cuando hay
+   contenido (en cuanto el JS escribe la derivada vuelve a aparecer) --- */
+.preview-fx:empty {
+  display: none;
+}
+
+/* --- Petición v3: más aire entre las cards de Apuntes en móvil
+   (en ≥768px el aire lo da el gap del grid, ajustado arriba a 32px) --- */
+@media (max-width: 767px) {
+  #apuntes-remotos .apunte-card {
+    margin-bottom: 28px;
+  }
+}
+
+/* --- P2-3 v3: en móvil los botones de cada nota se apilan a todo ancho --- */
+@media (max-width: 768px) {
+  .apunte-acciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .apunte-acciones > * {
+    width: 100%;
+    text-align: center;
+  }
 }

@@ -184,9 +184,13 @@ function calcularTaylor() {
     );
 
     // --- Gráfica: f(x) y el polinomio superpuestos ---
-    const span = Math.max(5, Math.abs(x - a) * 1.25);
+    // P1-3 v3 (auto-zoom): el rango se acota alrededor del centro a y del
+    // punto evaluado x. Antes era [a-span, a+span] con span ≥ 5, y en x=1 el
+    // punto quedaba diminuto abajo (el gráfico abarcaba x −5..5, y −20..160).
+    const x0 = Math.min(a, x) - 1;
+    const x1 = Math.max(a, x) + 1;
     graficarResultado(expr, {
-        rango: [a - span, a + span],
+        rango: [x0, x1],
         etiqueta: 'f(x)',
         curvas: [{ expr: exprPolinomio, color: '#bd00ff', etiqueta: `P${n}(x)`, discontinua: true }],
         marcas: [

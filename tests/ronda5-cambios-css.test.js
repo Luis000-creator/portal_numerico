@@ -84,8 +84,9 @@ test('P0-2: la tarjeta ESTADO se crea con la clase resumen-card--estado', () => 
 test('P0-3: primario en degradado cian y secundarios en outline cian', () => {
     const css = leer('css', 'styles.css');
 
-    assert.match(css, /button\[type="submit"\] \{[\s\S]*?linear-gradient\(135deg, #00f0ff, #22d3ee\)/,
-        'el botón primario debe ser degradado cian (antes blanco sólido)');
+    const reglaSubmit = /button\[type="submit"\] \{[^}]*\}/.exec(css)[0];
+    assert.match(reglaSubmit, /linear-gradient\(135deg, #00F0FF 0%, #22D3EE 55%, #0E7490 100%\)/,
+        'el botón primario debe ser degradado cian con paradas separadas (P2-1 v3)');
     assert.ok(!/button\[type="submit"\] \{[\s\S]*?background: #ffffff/.test(css),
         'sigue el blanco fuera de paleta');
     assert.match(css, /button\.btn-graficar \{[\s\S]*?border: 1px solid #22d3ee/);
@@ -183,7 +184,7 @@ test('P2-3: la gráfica toma el alto del CSS y las etiquetas tienen margen', () 
     assert.match(js, /grafAltoDelCSS\(canvas\)/);
     assert.match(js, /const alto = grafAltoDelCSS\(canvas\)/);
 
-    assert.match(js, /ctx\.font = '11px monospace'/, 'la fuente de los ejes debe ser 11px');
+    assert.match(js, /ctx\.font = '12px monospace'/, 'la fuente de los ejes debe ser 12px (v3)');
     assert.ok(!/toPrecision\(4\)\), w - 4/.test(js), 'la etiqueta del eje Y sigue pegada al borde');
     assert.ok(js.includes('w - 10'), 'las etiquetas deben reservar ~10px de margen derecho');
 });

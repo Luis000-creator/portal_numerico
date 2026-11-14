@@ -199,33 +199,35 @@ function graficarResultado(expr, opts = {}) {
         // --- Cuadrícula + etiquetas ---
         const pasoX = grafPasoBonito(xmax - xmin);
         const pasoY = grafPasoBonito(ymax - ymin);
-        ctx.font = '11px monospace';
+        // P0-3 v3: 12px y gris claro (antes 11px y gris lavado, poco contraste)
+        ctx.font = '12px monospace';
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
-        ctx.fillStyle = 'rgba(156, 163, 175, 0.9)';
+        ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
         ctx.textAlign = 'left';
+        // Las etiquetas del eje X se guardan y se dibujan AL FINAL, con un
+        // chip oscuro detrás: si se dibujaran aquí, después las cruzan la
+        // cuadrícula horizontal y las líneas punteadas del intervalo [a, b].
+        const etiquetasEjeX = [];
         for (let gx = Math.ceil(xmin / pasoX) * pasoX; gx <= xmax; gx += pasoX) {
             const px = X(gx);
             ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, alto); ctx.stroke();
             if (Math.abs(gx) > 1e-12) {
                 const txt = String(Number(gx.toPrecision(4)));
-                // Si la etiqueta se saldría del borde derecho, se alinea hacia
-                // dentro con ~10px de margen (antes quedaba pegada al corte).
-                if (px + 6 + txt.length * 6 > w) {
-                    ctx.textAlign = 'right';
-                    ctx.fillText(txt, w - 10, alto - 5);
-                    ctx.textAlign = 'left';
-                } else {
-                    ctx.fillText(txt, px + 3, alto - 5);
-                }
+                etiquetasEjeX.push({ txt, px });
             }
         }
         ctx.textAlign = 'right';
         for (let gy = Math.ceil(ymin / pasoY) * pasoY; gy <= ymax; gy += pasoY) {
             const py = Y(gy);
             ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
-            // Etiqueta del eje Y con margen derecho (antes en w - 4, cortada)
-            if (Math.abs(gy) > 1e-12) ctx.fillText(Number(gy.toPrecision(4)), w - 10, py - 3);
+            // Etiqueta del eje Y: margen derecho (antes en w - 4, cortada) y
+            // anclaje mínimo en y=12 para que no salga recortada por arriba
+            // (P0-3 v3: el "160" de Taylor salía partido por el borde).
+            if (Math.abs(gy) > 1e-12) {
+                const ly = Math.max(py, 12);
+                ctx.fillText(Number(gy.toPrecision(4)), w - 10, ly - 3);
+            }
         }
 
         // --- Ejes ---
@@ -312,10 +314,38 @@ function graficarResultado(expr, opts = {}) {
             ctx.fillStyle = '#bd00ff';
             ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto); ctx.stroke();
-            ctx.fillText('a', X(a), 12);
-            ctx.fillText('b', X(b), 12);
+            // P0-3 v3: chip detrás y a 16px del borde (antes iban en y=12 y la
+            // línea punteada + el borde superior los partían por la mitad).
+            ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
+            ctx.fillRect(X(a) - 6, 5, 12, 13);
+            ctx.fillRect(X(b) - 6, 5, 12, 13);
+            ctx.fillStyle = '#bd00ff';
+            ctx.fillText('a', X(a), 16);
+            ctx.fillText('b', X(b), 16);
         }
         ctx.setLineDash([]);
+
+        // --- Etiquetas del eje X: al final, con chip oscuro detrás ---
+        // (si se dibujaran con la cuadrícula, después las tapan las líneas
+        //  horizontales y las punteadas del intervalo: guiones sobre los dígitos)
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'left';
+        for (const et of etiquetasEjeX) {
+            const ancho = et.txt.length * 7 + 6;
+            const cercaDerecha = et.px + 6 + et.txt.length * 7 > w;
+            const tx = cercaDerecha ? w - 10 : et.px + 3;
+            ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
+            ctx.fillRect(cercaDerecha ? w - 8 - ancho : et.px + 1, alto - 16, ancho, 13);
+            ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
+            if (cercaDerecha) {
+                ctx.textAlign = 'right';
+                ctx.fillText(et.txt, w - 10, alto - 5);
+                ctx.textAlign = 'left';
+            } else {
+                ctx.fillText(et.txt, tx, alto - 5);
+            }
+        }
+        ctx.font = '10px monospace';
 
         // --- Puntos dispersos (datos conocidos) ---
         for (const pt of puntos) {
@@ -328,8 +358,13 @@ function graficarResultado(expr, opts = {}) {
             if (pt.etiqueta) {
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'left';
+                const lx = X(pt.x) + 7;
+                const ly = Math.max(Y(pt.y) - 7, 12);
+                // P0-3 v3: chip detrás para que la curva no pise la etiqueta
+                ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
+                ctx.fillRect(lx - 3, ly - 11, pt.etiqueta.length * 6 + 6, 13);
                 ctx.fillStyle = pt.color || '#ff007b';
-                ctx.fillText(pt.etiqueta, X(pt.x) + 7, Math.max(Y(pt.y) - 7, 12));
+                ctx.fillText(pt.etiqueta, lx, ly);
             }
         }
 
@@ -343,15 +378,22 @@ function graficarResultado(expr, opts = {}) {
         const marcas = Array.isArray(opts.marcas)
             ? opts.marcas
             : (opts.marca ? [opts.marca] : []);
+        // P0-3 v3: si dos marcas caen en el mismo punto (Taylor: f(x) y
+        // P_n(x)), la segunda etiqueta se baja 14px en vez de superponerse.
+        const etiquetasMarcas = [];
         for (const m of marcas) {
             if (!m || !Number.isFinite(m.x) || !Number.isFinite(m.y)) continue;
+            const enX = X(m.x), enY = Y(m.y);
+            const solapa = etiquetasMarcas.some((e) =>
+                Math.abs(e.x - enX) < 40 && Math.abs(e.y - enY) < 16);
             grafMarcarPunto(ctx, X, Y, enVista, m.x, m.y, m.color || '#ff007b',
-                m.etiqueta || '', w, m.radio || 5);
+                m.etiqueta || '', w, m.radio || 5, solapa ? 14 : 0);
+            if (m.etiqueta) etiquetasMarcas.push({ x: enX, y: enY });
         }
 
         // --- Leyenda (solo con más de una curva) ---
         if (curvas.length > 1) {
-            ctx.font = '11px monospace';
+            ctx.font = '12px monospace';
             ctx.textAlign = 'left';
             let ly = 14;
             for (const c of curvas) {
@@ -366,8 +408,10 @@ function graficarResultado(expr, opts = {}) {
     }
 }
 
-// Punto brillante con etiqueta
-function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio = 4) {
+// Punto brillante con etiqueta (P0-3 v3: chip oscuro detrás para que la curva
+// o la cuadrícula no crucen el texto; desplazY baja la etiqueta cuando otra
+// marca ya escribió en el mismo punto)
+function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio = 4, desplazY = 0) {
     if (!enVista(py)) return;
     ctx.fillStyle = color;
     ctx.shadowColor = color;
@@ -379,8 +423,12 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
     if (etiqueta) {
         ctx.font = '10px monospace';
         ctx.textAlign = 'left';
+        const lx = Math.min(X(px) + 8, w - 90);
+        const ly = Math.max(Y(py) - 8 + desplazY, 12);
+        ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
+        ctx.fillRect(lx - 3, ly - 11, etiqueta.length * 6 + 6, 13);
         ctx.fillStyle = color;
-        ctx.fillText(etiqueta, Math.min(X(px) + 8, w - 90), Math.max(Y(py) - 8, 12));
+        ctx.fillText(etiqueta, lx, ly);
     }
 }
 
