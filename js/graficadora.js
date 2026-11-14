@@ -311,18 +311,17 @@ function graficarResultado(expr, opts = {}) {
         ctx.textAlign = 'center';
         if (Number.isFinite(a) && Number.isFinite(b) && a < b) {
             ctx.strokeStyle = 'rgba(189, 0, 255, 0.8)';
-            ctx.fillStyle = '#bd00ff';
             // v4 P1-1: las punteadas se recortan 20px antes del borde inferior
             // para que NUNCA lleguen a la banda de etiquetas del eje X.
             ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto - 20); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto - 20); ctx.stroke();
-            // Chip visible (fondo claro con borde) y a y=18 para no rozar el
-            // borde superior.
-            grafChipEtiqueta(ctx, X(a) - 6, 6, 12);
-            grafChipEtiqueta(ctx, X(b) - 6, 6, 12);
-            ctx.fillStyle = '#bd00ff';
-            ctx.fillText('a', X(a), 18);
-            ctx.fillText('b', X(b), 18);
+            // Chip visible y 'a'/'b' bajadas (ronda 9): el chip en y=6 y el
+            // texto en y=18 quedaban pegados al borde superior y se cortaban.
+            grafChipEtiqueta(ctx, X(a) - 6, 20, 12);
+            grafChipEtiqueta(ctx, X(b) - 6, 20, 12);
+            ctx.fillStyle = '#06222b';
+            ctx.fillText('a', X(a), 32);
+            ctx.fillText('b', X(b), 32);
         }
         ctx.setLineDash([]);
 
@@ -338,7 +337,9 @@ function graficarResultado(expr, opts = {}) {
             // se sujeta a un mínimo de 4px para que no salga cortada.
             const tx = cercaDerecha ? w - 10 : Math.max(et.px + 3, 4);
             grafChipEtiqueta(ctx, cercaDerecha ? w - 8 - ancho : Math.max(et.px + 1, 1), alto - 16, ancho);
-            ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
+            // Texto oscuro sobre la pastilla clara (ronda 9): el gris claro
+            // salía con poco contraste sobre el fondo translúcido.
+            ctx.fillStyle = '#06222b';
             if (cercaDerecha) {
                 ctx.textAlign = 'right';
                 ctx.fillText(et.txt, w - 10, alto - 5);
@@ -349,15 +350,18 @@ function graficarResultado(expr, opts = {}) {
         }
 
         // El "0" del origen: los bucles de la cuadrícula lo saltan
-        // (Math.abs(gx/gy) > 1e-12), así que nunca se había dibujado.
-        if (xmin < 0 && xmax > 0 && ymin < 0 && ymax > 0) {
-            const ox = X(0), oy = Y(0);
-            const cy = Math.min(oy + 4, Math.max(alto - 26, 4));
-            grafChipEtiqueta(ctx, Math.max(ox - 14, 1), cy, 13);
-            ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
-            ctx.textAlign = 'right';
-            ctx.fillText('0', ox - 3, cy + 10);
+        // (Math.abs(gx/gy) > 1e-12) y las X pueden arrancar en 0.5 —x=0
+        // queda fuera del lienzo izquierdo—, así que nunca salía. Ronda 9:
+        // se dibuja siempre que exista el eje horizontal (y=0) y, si x=0 no
+        // cabe, al inicio del propio eje.
+        if (ymin < 0 && ymax > 0) {
+            const ox = (xmin < 0 && xmax > 0) ? X(0) : (xmin > 0 ? 0 : w);
+            const cy = Math.min(Y0 + 4, Math.max(alto - 32, 4));
+            const cx = Math.min(Math.max(ox + 2, 1), w - 16);
+            grafChipEtiqueta(ctx, cx, cy, 13);
+            ctx.fillStyle = '#06222b';
             ctx.textAlign = 'left';
+            ctx.fillText('0', cx + 3, cy + 10);
         }
         ctx.font = '10px monospace';
 
@@ -376,7 +380,7 @@ function graficarResultado(expr, opts = {}) {
                 const ly = Math.max(Y(pt.y) - 7, 12);
                 // Chip visible para que la curva no pise la etiqueta
                 grafChipEtiqueta(ctx, lx - 3, ly - 11, pt.etiqueta.length * 6 + 6);
-                ctx.fillStyle = pt.color || '#ff007b';
+                ctx.fillStyle = '#06222b';
                 ctx.fillText(pt.etiqueta, lx, ly);
             }
         }
@@ -421,13 +425,15 @@ function graficarResultado(expr, opts = {}) {
     }
 }
 
-// Chip de fondo detrás de las etiquetas de la gráfica (v4 P1-1: fondo claro
-// translúcido con borde — el chip negro de la v3 era invisible sobre el fondo
-// casi negro del lienzo y la línea punteada se transparentaba por encima).
+// Chip de fondo detrás de las etiquetas de la gráfica (ronda 9: pastilla
+// realmente VISIBLE — fondo claro translúcido con borde. El chip negro de la
+// v3 era invisible sobre el lienzo casi negro, y el gris 0.14 de la v4 seguía
+// leyéndose "gris oscuro sobre negro": ahora el fondo es claro y el texto que
+// va encima es #06222b, con alto contraste en todos los casos).
 function grafChipEtiqueta(ctx, x, y, ancho, altoChip = 13) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.fillRect(x, y, ancho, altoChip);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.strokeStyle = 'rgba(6, 34, 43, 0.55)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x + 0.5, y + 0.5, ancho, altoChip);
 }
@@ -450,7 +456,8 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
         const lx = Math.min(X(px) + 8, w - 90);
         const ly = Math.max(Y(py) - 8 + desplazY, 12);
         grafChipEtiqueta(ctx, lx - 3, ly - 11, etiqueta.length * 6 + 6);
-        ctx.fillStyle = color;
+        // Texto oscuro sobre la pastilla clara (ronda 9)
+        ctx.fillStyle = '#06222b';
         ctx.fillText(etiqueta, lx, ly);
     }
 }

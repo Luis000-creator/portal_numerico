@@ -4,7 +4,7 @@
 // Cubre: §3.1 restauración de #FF007B/#BD00FF en sus reglas, §3.2 distinción
 // por sección (Misión/Visión y pills en magenta), §3.3 un color por método
 // (JS + CSS + gráfica), §3.4 tarjetas con tinte/franja/halo, §3.5 :root final
-// y el bump ?v=7 en las 4 páginas (v4).
+// y el bump ?v=8 en las 4 páginas (ronda 9).
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -182,17 +182,22 @@ test('§3.4: notas y resumen en superficie elevada, sin pisar tintes de estado',
 test('§3.4: halo de color detrás del contenedor, uno por sección', () => {
     const css = leer('css', 'styles.css');
 
-    assert.match(css, /\.main-container::before \{[\s\S]*?radial-gradient\(ellipse at center, rgba\(34, 211, 238, 0\.22\), transparent 70%\)[\s\S]*?pointer-events: none/);
+    // Ronda 9: 3 paradas de gradiente —color 0.26, color 0.16 y
+    // transparente al 80%— en el color de cada sección
+    assert.match(css, /\.main-container::before \{[\s\S]*?radial-gradient\(ellipse at center, rgba\(34, 211, 238, 0\.26\) 0%, rgba\(34, 211, 238, 0\.16\) 45%, transparent 80%\)[\s\S]*?pointer-events: none/);
     // Detrás del contenido (el halo no debe teñir el texto de la tarjeta)
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
     assert.match(halo, /z-index: -1/);
-    // P2-6 v3: halo más notorio (900×520 y 0.22 de opacidad)
-    assert.match(halo, /width: 900px/);
-    assert.match(halo, /height: 520px/);
+    // Ronda 9: sigue a la ventana (fixed) y mide 2000×100vh para asomar
+    // por los lados de las tarjetas de 1180px
+    assert.match(halo, /position: fixed;/);
+    assert.match(halo, /top: 0;/);
+    assert.match(halo, /width: 2000px/);
+    assert.match(halo, /height: 100vh/);
 
-    assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.22\)/,
+    assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.26\)[^}]*rgba\(168, 85, 247, 0\.16\)/,
         'Apuntes debe tener halo violeta');
-    assert.match(css, /body:has\(\.redes-section\) \.main-container::before \{[^}]*rgba\(236, 72, 153, 0\.22\)/,
+    assert.match(css, /body:has\(\.redes-section\) \.main-container::before \{[^}]*rgba\(236, 72, 153, 0\.26\)[^}]*rgba\(236, 72, 153, 0\.16\)/,
         'Conócenos debe tener halo magenta');
 });
 
@@ -226,13 +231,13 @@ test('§3.5: :root final con la paleta v2', () => {
 
 // --- Bump de versión -------------------------------------------------------
 
-test('Las 4 páginas piden styles.css?v=7 (ninguna sirve CSS viejo)', () => {
+test('Las 4 páginas piden styles.css?v=8 (ninguna sirve CSS viejo)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=7"/.test(html),
-            `${archivo} no tiene styles.css?v=7`);
-        assert.ok(!/href="[^"]*styles\.css(?!\?v=7)/.test(html),
-            `${archivo} sigue apuntando a styles.css sin ?v=7`);
+        assert.ok(/href="[^"]*styles\.css\?v=8"/.test(html),
+            `${archivo} no tiene styles.css?v=8`);
+        assert.ok(!/href="[^"]*styles\.css(?!\?v=8)/.test(html),
+            `${archivo} sigue apuntando a styles.css sin ?v=8`);
     }
 });

@@ -77,21 +77,26 @@ test('P1-1: la gráfica con chip visible, punteadas recortadas y "0" en el orige
     const recortes = (js.match(/ctx\.lineTo\(X\([ab]\), alto - 20\)/g) || []).length;
     assert.equal(recortes, 2, 'las dos punteadas deben cortarse en alto - 20');
 
-    // 2) Chip visible (fondo claro translúcido + borde), no negro sobre negro
-    assert.match(js, /function grafChipEtiqueta\(ctx, x, y, ancho, altoChip = 13\) \{[\s\S]*?rgba\(255, 255, 255, 0\.14\)[\s\S]*?rgba\(255, 255, 255, 0\.25\)/);
+    // 2) Chip visible (pastilla clara translúcida + borde oscuro), no gris
+    //    sobre negro — el texto encima va en #06222b (ronda 9)
+    assert.match(js, /function grafChipEtiqueta\(ctx, x, y, ancho, altoChip = 13\) \{[\s\S]*?rgba\(255, 255, 255, 0\.85\)[\s\S]*?rgba\(6, 34, 43, 0\.55\)/);
     assert.ok(!js.includes('rgba(7, 9, 14, 0.9)'), 'quedó el chip negro invisible');
+    assert.ok(!js.includes('rgba(255, 255, 255, 0.14)'), 'quedó el chip gris de la v4');
     const usos = (js.match(/grafChipEtiqueta\(/g) || []).length;
     assert.ok(usos >= 6, `el chip debe usarse en X, a/b, origen, puntos y marcas (usos: ${usos})`);
 
-    // 3) 'a'/'b' a y=18 para no rozar el borde superior
-    assert.ok(js.includes("ctx.fillText('a', X(a), 18)"));
-    assert.ok(js.includes("ctx.fillText('b', X(b), 18)"));
+    // 3) 'a'/'b' a y=32 (chip en y=20): en y=18 se recortaban contra el borde
+    assert.ok(js.includes("ctx.fillText('a', X(a), 32)"));
+    assert.ok(js.includes("ctx.fillText('b', X(b), 32)"));
 
     // 4) La etiqueta pegada al borde izquierdo no sale cortada
     assert.ok(js.includes('Math.max(et.px + 3, 4)'), 'falta el sujete mínimo de la etiqueta izquierda');
 
-    // 5) El "0" del origen, que los bucles de cuadrícula saltan
-    assert.ok(js.includes("ctx.fillText('0', ox - 3, cy + 10)"), 'falta el 0 del origen');
+    // 5) El "0" del origen, aunque x=0 quede fuera del lienzo (las X pueden
+    //    arrancar en 0.5): solo depende del eje horizontal
+    assert.ok(js.includes("ctx.fillText('0', cx + 3, cy + 10)"), 'falta el 0 del origen');
+    assert.ok(!js.includes('xmin < 0 && xmax > 0 && ymin < 0'), 'el 0 sigue condicionado a que cruce en X');
+    assert.ok(js.includes('if (ymin < 0 && ymax > 0) {'), 'el 0 depende del eje horizontal');
 });
 
 // --- P1-2 ------------------------------------------------------------------
@@ -147,9 +152,12 @@ test('P1-3: los inputs numéricos no cambian con la rueda y se suelta el foco', 
 
 // --- P2 --------------------------------------------------------------------
 
-test('P2-1: el landing suelta el centrado vertical (footer sin hueco)', () => {
+test('P2-1: el landing centra el contenedor y deja el footer al pliegue', () => {
     const css = leer('css', 'styles.css');
-    assert.match(css, /body:has\(\.container--landing\) \.main-container \{\s*min-height: auto;\s*align-items: flex-start;/);
+    // Opción híbrida (ronda 9): body flex-column + .main-container creciendo
+    // hasta el footer y centrando su contenido
+    assert.match(css, /body:has\(\.container--landing\) \{\s*display: flex;\s*flex-direction: column;/);
+    assert.match(css, /body:has\(\.container--landing\) \.main-container \{\s*flex: 1 0 auto;\s*min-height: 0;\s*align-items: center;/);
     // El centrado horizontal del contenedor sigue intacto
     assert.match(css, /\.container--landing \{[^}]*margin-inline: auto/);
 });
@@ -158,8 +166,8 @@ test('P2-2: el halo acompaña a la ventana, no a la parte superior de la página
     const css = leer('css', 'styles.css');
     assert.match(css, /\.main-container::before \{[^}]*position: fixed;\s*top: 0;/);
     // Las variantes por sección solo cambian el color (siguen heredando fixed)
-    assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.22\)/);
-    assert.match(css, /body:has\(\.redes-section\) \.main-container::before \{[^}]*rgba\(236, 72, 153, 0\.22\)/);
+    assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.26\)/);
+    assert.match(css, /body:has\(\.redes-section\) \.main-container::before \{[^}]*rgba\(236, 72, 153, 0\.26\)/);
 });
 
 test('P2-3: las acciones de Apuntes se pegan al fondo de la tarjeta', () => {

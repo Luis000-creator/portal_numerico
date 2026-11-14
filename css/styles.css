@@ -331,7 +331,12 @@ textarea:focus {
 input[type="text"]:focus, 
 input[type="number"]:focus, 
 select:focus {
-  background: rgba(30, 41, 59, 0.9) !important;
+  /* Ronda 9: background-color y NO el shorthand background. El shorthand
+     resetea background-repeat / background-position / background-size, y al
+     enfocar el SVG del chevron (background-image del select) se repetía por
+     todo el campo tachando el texto; en Bisección (sin regla propia de
+     color) la imagen desaparecía por completo. */
+  background-color: rgba(30, 41, 59, 0.9) !important;
   border-color: #38bdf8 !important;
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
   outline: none;
@@ -1952,24 +1957,31 @@ textarea:focus-visible {
 
 /* Halo de color tenue detrás del contenedor (uno por sección).
    z-index: -1 dentro del contexto de apilamiento de .main-container (que ya
-   tiene z-index: 2): el halo queda detrás de la tarjeta, no encima del texto. */
+   tiene z-index: 2): el halo queda detrás de la tarjeta, no encima del texto.
+
+   Ronda 9 (post-v4): con position absolute / 900×520 el brillo vivía en la
+   parte superior de la página y, una vez fixed, quedaba entero DETRÁS de las
+   tarjetas de 1180px: no asomaba por los lados y al hacer scroll aparecía
+   solo fondo negro. Ahora mide 2000×100vh (más ancho que el contenido) y el
+   gradiente lleva 3 paradas —color fuerte 0.26, color tenue 0.16 y
+   transparente al 80%— para que el centro se vea y los bordes se fundan. */
 .main-container::before {
   content: '';
-  position: absolute;
-  top: -120px;
+  position: fixed;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 900px;
-  height: 520px;
-  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.22), transparent 70%);
+  width: 2000px;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.26) 0%, rgba(34, 211, 238, 0.16) 45%, transparent 80%);
   pointer-events: none;
   z-index: -1;
 }
 body:has(#lista-apuntes) .main-container::before {
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.22), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.26) 0%, rgba(168, 85, 247, 0.16) 45%, transparent 80%);
 }
 body:has(.redes-section) .main-container::before {
-  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.22), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.26) 0%, rgba(236, 72, 153, 0.16) 45%, transparent 80%);
 }
 
 /* ==========================================================================
@@ -2254,22 +2266,26 @@ button[type="submit"],
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a3e635'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
 }
 
-/* --- P2-1: el landing sin hueco entre el contenido y el footer ---
-   El centrado vertical de .main-container (min-height: 100vh − header) deja
-   ~190px de negro abajo y el footer por debajo del pliegue: se suelta la
-   altura mínima y la alineación en el landing. El centrado horizontal
-   (margin auto de .container--landing) sigue intacto. */
-body:has(.container--landing) .main-container {
-  min-height: auto;
-  align-items: flex-start;
+/* --- P2-1 (ronda 9, opción híbrida elegida por el equipo): el contenedor
+   centrado en pantalla Y el footer siempre al pliegue ---
+   Con el fix v4 (min-height auto + flex-start) el contenedor quedaba arriba
+   y el vacío de ~195px se movía debajo del footer. Ahora el body pasa a
+   flex-column y .main-container crece (flex: 1 0 auto) hasta el .site-footer:
+   con contenido corto la caja se estira y la tarjeta queda centrada en el
+   hueco que sobra (align-items: center); con contenido alto flex-shrink: 0
+   evita que la caja se comprima y la página hace scroll con normalidad.
+   min-height: 0 anula el calc(100vh - 90px), que empujaba el footer por
+   debajo del pliegue. El centrado horizontal (margin-inline: auto de
+   .container--landing) sigue intacto. */
+body:has(.container--landing) {
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- P2-2: el halo sigue a la ventana ---
-   En Calculadora y Apuntes el contenedor es alto y el brillo (top: -120px)
-   se quedaba arriba, fuera de la vista al hacer scroll. */
-.main-container::before {
-  position: fixed;
-  top: 0;
+body:has(.container--landing) .main-container {
+  flex: 1 0 auto;
+  min-height: 0;
+  align-items: center;
 }
 
 /* --- P2-3: en las tarjetas de Apuntes las acciones se pegan al fondo;

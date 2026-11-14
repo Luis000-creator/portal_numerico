@@ -62,12 +62,12 @@ test('P0-3: etiquetas de la gráfica con contraste, sin recorte y con chip', () 
     // 2) La etiqueta Y nunca se dibuja pegada al borde superior
     assert.ok(js.includes('const ly = Math.max(py, 12);'), 'falta el clamp de la etiqueta Y');
 
-    // 3) Chip detrás de X, a/b, puntos y marcas (v4: chip VISIBLE, fondo
-    //    claro con borde — el negro de la v3 era invisible sobre el lienzo)
+    // 3) Chip detrás de X, a/b, puntos y marcas (ronda 9: pastilla CLARA
+    //    translúcida con borde oscuro y texto #06222b encima)
     const chips = (js.match(/grafChipEtiqueta\(/g) || []).length;
     assert.ok(chips >= 5, `se esperaban chips detrás de las etiquetas (hay ${chips})`);
-    assert.ok(js.includes("ctx.fillStyle = 'rgba(255, 255, 255, 0.14)'"), 'falta el fondo claro del chip');
-    assert.ok(js.includes("ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)'"), 'falta el borde del chip');
+    assert.ok(js.includes("ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'"), 'falta el fondo claro del chip');
+    assert.ok(js.includes("ctx.strokeStyle = 'rgba(6, 34, 43, 0.55)'"), 'falta el borde del chip');
     assert.ok(!js.includes('rgba(7, 9, 14, 0.9)'), 'quedó el chip negro invisible');
 
     // 4) Las etiquetas del eje X se dibujan DESPUÉS del intervalo punteado
@@ -76,9 +76,9 @@ test('P0-3: etiquetas de la gráfica con contraste, sin recorte y con chip', () 
     assert.ok(idxEjeX > idxIntervalo, 'las etiquetas X deben dibujarse después del intervalo');
     assert.ok(js.includes('const etiquetasEjeX = [];'), 'falta la colecta de etiquetas X');
 
-    // 5) 'a'/'b' a y=18 con chip detrás
-    assert.ok(js.includes("ctx.fillText('a', X(a), 18);"), "'a' debe ir a y=18");
-    assert.ok(js.includes("ctx.fillText('b', X(b), 18);"), "'b' debe ir a y=18");
+    // 5) 'a'/'b' a y=32 (chip en y=20) para no quedar recortadas arriba
+    assert.ok(js.includes("ctx.fillText('a', X(a), 32);"), "'a' debe ir a y=32");
+    assert.ok(js.includes("ctx.fillText('b', X(b), 32);"), "'b' debe ir a y=32");
 
     // 6) Dos marcas en el mismo punto no se superponen (2ª etiqueta +14px)
     assert.ok(js.includes('solapa ? 14 : 0'), 'falta el desplazamiento de la 2ª marca');
