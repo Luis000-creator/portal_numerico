@@ -85,8 +85,8 @@ test('P0-3: primario en degradado cian y secundarios en outline cian', () => {
     const css = leer('css', 'styles.css');
 
     const reglaSubmit = /button\[type="submit"\] \{[^}]*\}/.exec(css)[0];
-    assert.match(reglaSubmit, /linear-gradient\(135deg, #00F0FF 0%, #22D3EE 55%, #0E7490 100%\)/,
-        'el botón primario debe ser degradado cian con paradas separadas (P2-1 v3)');
+    assert.match(reglaSubmit, /linear-gradient\(135deg, #00F0FF 0%, #0891B2 55%, #155E75 100%\)/,
+        'el botón primario debe ser degradado cian con paradas bien separadas (P2-4 v4)');
     assert.ok(!/button\[type="submit"\] \{[\s\S]*?background: #ffffff/.test(css),
         'sigue el blanco fuera de paleta');
     assert.match(css, /button\.btn-graficar \{[\s\S]*?border: 1px solid #22d3ee/);

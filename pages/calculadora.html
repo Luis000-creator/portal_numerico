@@ -46,7 +46,7 @@
 
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="../css/styles.css?v=6">
+    <link rel="stylesheet" href="../css/styles.css?v=7">
 </head>
 <body>
 
@@ -70,7 +70,8 @@
 
         <form id="form-biseccion" onsubmit="ejecutarCalculo(event)">
             <div class="form-group" style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                <label for="metodo-selector" style="color: #00f0ff;">Selecciona el Método Numérico</label>
+                <!-- v4 P1-2: sin style en línea; el color lo pone --method -->
+                <label for="metodo-selector">Selecciona el Método Numérico</label>
                 <select id="metodo-selector" onchange="alternarMetodoUI()">
                     <option value="biseccion">Método de Bisección</option>
                     <option value="puntofijo">Iteración de Punto Fijo</option>

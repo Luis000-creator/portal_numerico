@@ -312,20 +312,21 @@ function graficarResultado(expr, opts = {}) {
         if (Number.isFinite(a) && Number.isFinite(b) && a < b) {
             ctx.strokeStyle = 'rgba(189, 0, 255, 0.8)';
             ctx.fillStyle = '#bd00ff';
-            ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto); ctx.stroke();
-            // P0-3 v3: chip detrás y a 16px del borde (antes iban en y=12 y la
-            // línea punteada + el borde superior los partían por la mitad).
-            ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
-            ctx.fillRect(X(a) - 6, 5, 12, 13);
-            ctx.fillRect(X(b) - 6, 5, 12, 13);
+            // v4 P1-1: las punteadas se recortan 20px antes del borde inferior
+            // para que NUNCA lleguen a la banda de etiquetas del eje X.
+            ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto - 20); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto - 20); ctx.stroke();
+            // Chip visible (fondo claro con borde) y a y=18 para no rozar el
+            // borde superior.
+            grafChipEtiqueta(ctx, X(a) - 6, 6, 12);
+            grafChipEtiqueta(ctx, X(b) - 6, 6, 12);
             ctx.fillStyle = '#bd00ff';
-            ctx.fillText('a', X(a), 16);
-            ctx.fillText('b', X(b), 16);
+            ctx.fillText('a', X(a), 18);
+            ctx.fillText('b', X(b), 18);
         }
         ctx.setLineDash([]);
 
-        // --- Etiquetas del eje X: al final, con chip oscuro detrás ---
+        // --- Etiquetas del eje X: al final, con chip detrás ---
         // (si se dibujaran con la cuadrícula, después las tapan las líneas
         //  horizontales y las punteadas del intervalo: guiones sobre los dígitos)
         ctx.font = '12px monospace';
@@ -333,9 +334,10 @@ function graficarResultado(expr, opts = {}) {
         for (const et of etiquetasEjeX) {
             const ancho = et.txt.length * 7 + 6;
             const cercaDerecha = et.px + 6 + et.txt.length * 7 > w;
-            const tx = cercaDerecha ? w - 10 : et.px + 3;
-            ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
-            ctx.fillRect(cercaDerecha ? w - 8 - ancho : et.px + 1, alto - 16, ancho, 13);
+            // v4 P1-1: la etiqueta pegada al borde izquierdo (p. ej. "-0.5")
+            // se sujeta a un mínimo de 4px para que no salga cortada.
+            const tx = cercaDerecha ? w - 10 : Math.max(et.px + 3, 4);
+            grafChipEtiqueta(ctx, cercaDerecha ? w - 8 - ancho : Math.max(et.px + 1, 1), alto - 16, ancho);
             ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
             if (cercaDerecha) {
                 ctx.textAlign = 'right';
@@ -344,6 +346,18 @@ function graficarResultado(expr, opts = {}) {
             } else {
                 ctx.fillText(et.txt, tx, alto - 5);
             }
+        }
+
+        // El "0" del origen: los bucles de la cuadrícula lo saltan
+        // (Math.abs(gx/gy) > 1e-12), así que nunca se había dibujado.
+        if (xmin < 0 && xmax > 0 && ymin < 0 && ymax > 0) {
+            const ox = X(0), oy = Y(0);
+            const cy = Math.min(oy + 4, Math.max(alto - 26, 4));
+            grafChipEtiqueta(ctx, Math.max(ox - 14, 1), cy, 13);
+            ctx.fillStyle = 'rgba(229, 231, 235, 0.95)';
+            ctx.textAlign = 'right';
+            ctx.fillText('0', ox - 3, cy + 10);
+            ctx.textAlign = 'left';
         }
         ctx.font = '10px monospace';
 
@@ -360,9 +374,8 @@ function graficarResultado(expr, opts = {}) {
                 ctx.textAlign = 'left';
                 const lx = X(pt.x) + 7;
                 const ly = Math.max(Y(pt.y) - 7, 12);
-                // P0-3 v3: chip detrás para que la curva no pise la etiqueta
-                ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
-                ctx.fillRect(lx - 3, ly - 11, pt.etiqueta.length * 6 + 6, 13);
+                // Chip visible para que la curva no pise la etiqueta
+                grafChipEtiqueta(ctx, lx - 3, ly - 11, pt.etiqueta.length * 6 + 6);
                 ctx.fillStyle = pt.color || '#ff007b';
                 ctx.fillText(pt.etiqueta, lx, ly);
             }
@@ -408,6 +421,17 @@ function graficarResultado(expr, opts = {}) {
     }
 }
 
+// Chip de fondo detrás de las etiquetas de la gráfica (v4 P1-1: fondo claro
+// translúcido con borde — el chip negro de la v3 era invisible sobre el fondo
+// casi negro del lienzo y la línea punteada se transparentaba por encima).
+function grafChipEtiqueta(ctx, x, y, ancho, altoChip = 13) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+    ctx.fillRect(x, y, ancho, altoChip);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, ancho, altoChip);
+}
+
 // Punto brillante con etiqueta (P0-3 v3: chip oscuro detrás para que la curva
 // o la cuadrícula no crucen el texto; desplazY baja la etiqueta cuando otra
 // marca ya escribió en el mismo punto)
@@ -425,8 +449,7 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
         ctx.textAlign = 'left';
         const lx = Math.min(X(px) + 8, w - 90);
         const ly = Math.max(Y(py) - 8 + desplazY, 12);
-        ctx.fillStyle = 'rgba(7, 9, 14, 0.9)';
-        ctx.fillRect(lx - 3, ly - 11, etiqueta.length * 6 + 6, 13);
+        grafChipEtiqueta(ctx, lx - 3, ly - 11, etiqueta.length * 6 + 6);
         ctx.fillStyle = color;
         ctx.fillText(etiqueta, lx, ly);
     }

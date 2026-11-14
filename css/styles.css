@@ -373,9 +373,10 @@ button:hover {
 
 /* Botón principal (Calcular procedimiento / Publicar Apunte): degradado cian
    (antes blanco sólido, fuera de paleta). P2-1 v3: paradas separadas para que
-   el degradado se note (antes #00F0FF → #22D3EE era cian plano a la vista). */
+   el degradado se note; P2-4 v4: aún más separadas (#0891B2 → #155E75) porque
+   en PC seguía leyéndose casi plano. */
 button[type="submit"] {
-  background: linear-gradient(135deg, #00F0FF 0%, #22D3EE 55%, #0E7490 100%) !important;
+  background: linear-gradient(135deg, #00F0FF 0%, #0891B2 55%, #155E75 100%) !important;
   color: #06222b !important;
   border: none !important;
   border-radius: 8px !important;
@@ -387,6 +388,8 @@ button[type="submit"] {
   box-shadow: 0 4px 20px rgba(34, 211, 238, 0.35);
   transition: all 0.3s ease !important;
   cursor: pointer;
+  /* v4 P2-5: el texto no se parte en 2 líneas dentro del propio botón */
+  white-space: nowrap;
 }
 
 button[type="submit"]:hover {
@@ -1615,7 +1618,9 @@ select:hover, select:focus {
 /* --- Responsive: filas de puntos en pantallas pequeñas --- */
 @media (max-width: 640px) {
   .procedimiento-katex {
-    font-size: 0.9rem;
+    /* v4 P0-2: a 0.8rem el P3(x) de exp(x) cabe completo en 390px y se ve
+       el ·x³; overflow-x: auto sigue como respaldo para N grande. */
+    font-size: 0.8rem;
     padding: 14px 10px;
   }
 
@@ -1636,11 +1641,13 @@ select:hover, select:focus {
    AJUSTES DE LA REVISIÓN (12 nov)
    ========================================= */
 
-/* --- Estado/criterio: el texto largo se recortaba (overflow:hidden + nowrap) --- */
+/* --- Estado/criterio: el texto largo se recortaba (overflow:hidden + nowrap) ---
+   v4 P0-2: break-word en vez de anywhere, para no partir números por la
+   mitad (0.051615|24); solo rompe si la palabra entera no cabe. */
 .resumen-card .resumen-value--small,
 .resumen-card--criterio .resumen-value {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: break-word;
   text-align: center;
   line-height: 1.35;
@@ -2006,7 +2013,9 @@ body:has(.redes-section) .main-container::before {
 
   .resumen-grid--6 .resumen-value {
     white-space: normal;
-    overflow-wrap: anywhere;
+    /* v4 P0-2: "break-word" en vez de "anywhere": solo parte si la palabra
+       entera no cabe, nunca a mitad de un número (0.051615|24). */
+    overflow-wrap: break-word;
     font-size: 0.8rem;
   }
 
@@ -2156,5 +2165,128 @@ h3,
   .apunte-acciones > * {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* ==========================================================================
+   CORRECCIONES VISUALES v4 — pulido final (13-nov)
+   Base: "Ronda 7: correcciones visuales v3". Documento:
+   "Portal Numérico — Correcciones visuales v4".
+   ========================================================================== */
+
+/* --- P0-1: blindaje de taps en móvil ---
+   El diagnóstico con elementFromPoint sigue pendiente en un dispositivo real;
+   aquí se garantiza que el formulario y sus botones quedan por encima de
+   cualquier capa decorativa y que el toque no lleva retardo (double-tap
+   zoom / 300ms). */
+.container form,
+.container .form-row {
+  position: relative;
+  z-index: 1;
+}
+
+button[type="submit"],
+.btn-graficar {
+  position: relative;
+  z-index: 2;
+  touch-action: manipulation;
+}
+
+/* --- P0-3: el salto de línea del criterio de paro solo en pantalla estrecha
+   (en escritorio la fórmula cabe en una línea y el <br> sobraría) --- */
+.criterio-salto {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .criterio-salto {
+    display: inline;
+  }
+}
+
+/* --- P1-2: los últimos restos de cian por método --- */
+
+/* "INSERTAR EXPRESIÓN:" es un <span class="examples-label"> (no un <label>):
+   la regla v3 solo ataba a los <label>. */
+.container:has(#metodo-selector) .examples-label {
+  color: var(--method);
+}
+
+/* El borde del selector/inputs pasa al método también en hover y foco
+   (select:hover, select:focus del §04 fija --accent-cian y gana por
+   especificidad al #metodo-selector de §3.3). */
+.container:has(#metodo-selector) select:hover,
+.container:has(#metodo-selector) select:focus {
+  border-color: var(--method) !important;
+}
+
+/* El texto de los select nunca queda bajo el chevron (el SVG ocupa
+   right 12px + 24px de ancho). */
+#metodo-selector,
+#criterio {
+  padding-right: 44px !important;
+}
+
+/* Chevron con el color del método: el chevron es el SVG de background-image
+   del §04 (fill codificado, fijo a #22D3EE). Un background-image no admite
+   var(), así que cada método lleva su parada; Bisección conserva la base. */
+.container[data-metodo="puntofijo"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a855f7'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+.container[data-metodo="newton"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+.container[data-metodo="taylor"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2334d399'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+.container[data-metodo="lagrangelineal"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ec4899'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+.container[data-metodo="lagrangepoly"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2360a5fa'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+.container[data-metodo="simpson"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a3e635'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+}
+
+/* --- P2-1: el landing sin hueco entre el contenido y el footer ---
+   El centrado vertical de .main-container (min-height: 100vh − header) deja
+   ~190px de negro abajo y el footer por debajo del pliegue: se suelta la
+   altura mínima y la alineación en el landing. El centrado horizontal
+   (margin auto de .container--landing) sigue intacto. */
+body:has(.container--landing) .main-container {
+  min-height: auto;
+  align-items: flex-start;
+}
+
+/* --- P2-2: el halo sigue a la ventana ---
+   En Calculadora y Apuntes el contenedor es alto y el brillo (top: -120px)
+   se quedaba arriba, fuera de la vista al hacer scroll. */
+.main-container::before {
+  position: fixed;
+  top: 0;
+}
+
+/* --- P2-3: en las tarjetas de Apuntes las acciones se pegan al fondo;
+   si sobra espacio, queda entre el contenido y los botones. --- */
+#apuntes-remotos .apunte-card {
+  display: flex;
+  flex-direction: column;
+}
+
+#apuntes-remotos .apunte-acciones {
+  margin-top: auto;
+}
+
+/* --- P2-5: "CALCULAR PROCEDIMIENTO" en una sola línea en móvil --- */
+@media (max-width: 768px) {
+  button[type="submit"] {
+    font-size: 0.8rem;
+    letter-spacing: 1px;
   }
 }

@@ -31,8 +31,9 @@ test('P0-1: Taylor en móvil pasa a 2 columnas y los números parten', () => {
     assert.match(bloque, /\.resumen-grid--6 \{\s*grid-template-columns: repeat\(2, 1fr\);/);
     // La última tarjeta (Centro a) y la principal (Aproximación P_n) a todo ancho
     assert.match(bloque, /\.resumen-grid--6 \.resumen-card--raiz,\s*\.resumen-grid--6 \.resumen-card:last-child \{\s*grid-column: 1 \/ -1;/);
-    // white-space: nowrap era lo que cortaba "2.718281828" en "666666666"
-    assert.match(bloque, /\.resumen-grid--6 \.resumen-value \{\s*white-space: normal;\s*overflow-wrap: anywhere;\s*font-size: 0\.8rem;/);
+    // white-space: nowrap era lo que cortaba "2.718281828" en "666666666";
+    // v4: break-word (no "anywhere") para no partir números por la mitad
+    assert.match(bloque, /\.resumen-grid--6 \.resumen-value \{\s*white-space: normal;(?:[^{}]|\n)*?overflow-wrap: break-word;(?:[^{}]|\n)*?font-size: 0\.8rem;/);
     assert.match(bloque, /\.resumen-grid--6 \.resumen-label \{\s*letter-spacing: 0\.5px;/);
 });
 
@@ -61,9 +62,13 @@ test('P0-3: etiquetas de la gráfica con contraste, sin recorte y con chip', () 
     // 2) La etiqueta Y nunca se dibuja pegada al borde superior
     assert.ok(js.includes('const ly = Math.max(py, 12);'), 'falta el clamp de la etiqueta Y');
 
-    // 3) Chip oscuro detrás de X, a/b, puntos y marcas
-    const chips = (js.match(/rgba\(7, 9, 14, 0\.9\)/g) || []).length;
-    assert.ok(chips >= 4, `se esperaban chips detrás de las etiquetas (hay ${chips})`);
+    // 3) Chip detrás de X, a/b, puntos y marcas (v4: chip VISIBLE, fondo
+    //    claro con borde — el negro de la v3 era invisible sobre el lienzo)
+    const chips = (js.match(/grafChipEtiqueta\(/g) || []).length;
+    assert.ok(chips >= 5, `se esperaban chips detrás de las etiquetas (hay ${chips})`);
+    assert.ok(js.includes("ctx.fillStyle = 'rgba(255, 255, 255, 0.14)'"), 'falta el fondo claro del chip');
+    assert.ok(js.includes("ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)'"), 'falta el borde del chip');
+    assert.ok(!js.includes('rgba(7, 9, 14, 0.9)'), 'quedó el chip negro invisible');
 
     // 4) Las etiquetas del eje X se dibujan DESPUÉS del intervalo punteado
     const idxIntervalo = js.indexOf('// --- Intervalo [a, b] ---');
@@ -71,9 +76,9 @@ test('P0-3: etiquetas de la gráfica con contraste, sin recorte y con chip', () 
     assert.ok(idxEjeX > idxIntervalo, 'las etiquetas X deben dibujarse después del intervalo');
     assert.ok(js.includes('const etiquetasEjeX = [];'), 'falta la colecta de etiquetas X');
 
-    // 5) 'a'/'b' bajan de y=12 a y=16 con chip detrás
-    assert.ok(js.includes("ctx.fillText('a', X(a), 16);"), "'a' debe ir a y=16");
-    assert.ok(js.includes("ctx.fillText('b', X(b), 16);"), "'b' debe ir a y=16");
+    // 5) 'a'/'b' a y=18 con chip detrás
+    assert.ok(js.includes("ctx.fillText('a', X(a), 18);"), "'a' debe ir a y=18");
+    assert.ok(js.includes("ctx.fillText('b', X(b), 18);"), "'b' debe ir a y=18");
 
     // 6) Dos marcas en el mismo punto no se superponen (2ª etiqueta +14px)
     assert.ok(js.includes('solapa ? 14 : 0'), 'falta el desplazamiento de la 2ª marca');
@@ -148,7 +153,7 @@ test('P1-4: CRITERIO DE PARO se apila en móvil', () => {
 test('P2-1: PUBLICAR APUNTE tiene un degradado visible (3 paradas)', () => {
     const css = leer('css', 'styles.css');
     const regla = /button\[type="submit"\] \{[^}]*\}/.exec(css)[0];
-    assert.match(regla, /#00F0FF 0%, #22D3EE 55%, #0E7490 100%/);
+    assert.match(regla, /#00F0FF 0%, #0891B2 55%, #155E75 100%/);
 });
 
 test('P2-2: "Buscar apuntes" es un encabezado visible', () => {

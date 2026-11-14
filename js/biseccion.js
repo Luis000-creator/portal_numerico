@@ -776,8 +776,11 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
     const etiquetaFx = etiquetas.fx || 'f(x) Final';
     let textoCriterio = '';
     if (criterio === 'tolerancia') {
+        // v4 P0-3: salto antes de la "ó" para que en móvil no quede un
+        // "0.001" huérfano en la 2ª línea. En escritorio el <br> se oculta
+        // (ver .criterio-salto en css/styles.css) y sigue en una sola línea.
         textoCriterio = etiquetas.tolerancia ||
-            `|f(x)| ≤ ${numTexto(valorCriterio)}  ó  |Δx| ≤ ${numTexto(valorCriterio)}`;
+            `|f(x)| ≤ ${numTexto(valorCriterio)}<br class="criterio-salto">ó |Δx| ≤ ${numTexto(valorCriterio)}`;
     } else if (criterio === 'error') {
         textoCriterio = `Ea ≤ ${numTexto(valorCriterio)}%`;
     } else {
@@ -1000,7 +1003,24 @@ window.inicializarMenusMatematicos = inicializarMenusMatematicos;
 document.addEventListener('DOMContentLoaded', () => {
     cablearPreview('funcion', 'preview-fx', 'f(x)');
     inicializarMenusMatematicos();
+    blindarInputsNumericos();
 });
+
+// --- v4 P1-3: la rueda/scroll no cambia los campos numéricos ---
+// type="number" incrementa/decrementa con el scroll mientras tiene el foco;
+// en móvil eso cambiaba el GRADO de Taylor al desplazar la página. El primer
+// scroll con foco se cancela y se suelta el foco, así el resto de la página
+// vuelve a desplazarse con normalidad.
+function blindarInputsNumericos() {
+    document.querySelectorAll('input[type="number"]').forEach((el) => {
+        el.addEventListener('wheel', (e) => {
+            if (document.activeElement !== el) return;
+            e.preventDefault();
+            el.blur();
+        }, { passive: false });
+    });
+}
+window.blindarInputsNumericos = blindarInputsNumericos;
 
 // --- COPIAR TABLA DE RESULTADOS (botón icono en cabecera) ---
 function copiarTablaClipboard() {

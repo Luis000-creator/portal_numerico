@@ -4,7 +4,7 @@
 // Cubre: §3.1 restauración de #FF007B/#BD00FF en sus reglas, §3.2 distinción
 // por sección (Misión/Visión y pills en magenta), §3.3 un color por método
 // (JS + CSS + gráfica), §3.4 tarjetas con tinte/franja/halo, §3.5 :root final
-// y el bump ?v=6 en las 4 páginas (v3).
+// y el bump ?v=7 en las 4 páginas (v4).
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -226,13 +226,13 @@ test('§3.5: :root final con la paleta v2', () => {
 
 // --- Bump de versión -------------------------------------------------------
 
-test('Las 4 páginas piden styles.css?v=6 (ninguna sirve CSS viejo)', () => {
+test('Las 4 páginas piden styles.css?v=7 (ninguna sirve CSS viejo)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=6"/.test(html),
-            `${archivo} no tiene styles.css?v=6`);
-        assert.ok(!/href="[^"]*styles\.css(?!\?v=6)/.test(html),
-            `${archivo} sigue apuntando a styles.css sin ?v=6`);
+        assert.ok(/href="[^"]*styles\.css\?v=7"/.test(html),
+            `${archivo} no tiene styles.css?v=7`);
+        assert.ok(!/href="[^"]*styles\.css(?!\?v=7)/.test(html),
+            `${archivo} sigue apuntando a styles.css sin ?v=7`);
     }
 });

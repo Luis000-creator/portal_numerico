@@ -202,7 +202,7 @@ function calcularTaylor() {
     mostrarResumenCustom([
         { etiqueta: 'Aproximación P' + n + '(x)', valor: numTexto(aproximacion), tipo: 'principal', icono: 'fa-bullseye' },
         { etiqueta: 'Valor real f(x)', valor: numTexto(fReal), icono: 'fa-square-root-variable' },
-        { etiqueta: 'Error absoluto', valor: numTexto(errorAbs), icono: 'fa-ruler-horizontal' },
+        { etiqueta: 'Error absoluto', valor: formatoDecimal(errorAbs, 6), icono: 'fa-ruler-horizontal' },
         { etiqueta: 'Error relativo', valor: Number.isFinite(errorRel) ? errorRel.toFixed(4) + '%' : 'N/A', icono: 'fa-percent' },
         { etiqueta: 'Grado n', valor: String(n), icono: 'fa-superscript' },
         { etiqueta: 'Centro a', valor: numTexto(a), icono: 'fa-hashtag' },

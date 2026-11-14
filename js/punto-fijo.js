@@ -199,6 +199,14 @@ async function ejecutarCalculo(event) {
     } else {
         mostrarError(`Este método aún no está disponible ("${metodo}"). Recarga la página o elige otra opción.`);
     }
+
+    // v4 P1-3: al terminar el cálculo el foco sale del campo numérico, para
+    // que un scroll posterior sobre el input (type="number" incrementa con la
+    // rueda cuando está enfocado) no cambie valores como el GRADO de Taylor.
+    const activo = document.activeElement;
+    if (activo && /^(INPUT|SELECT|TEXTAREA)$/.test(activo.tagName || '')) {
+        try { activo.blur(); } catch (e) { /* nada que soltar */ }
+    }
 }
 
 // Aviso no bloqueante si |g'(x0)| > 1 (posible divergencia).
