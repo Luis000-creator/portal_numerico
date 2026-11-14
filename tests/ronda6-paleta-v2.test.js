@@ -158,13 +158,17 @@ test('§3.4: tarjetas de la landing con tinte y borde en degradado continuo', ()
     const borde = reglas.find((r) => r.includes('border: 3px solid transparent'));
     assert.ok(borde, 'falta el borde de 3px transparente (doble fondo)');
     // El tinte va por DENTRO (padding-box) y el degradado por DEBAJO del
-    // borde (border-box): así el borde sigue el border-radius en las 4 esquinas
+    // borde (border-box): así el borde sigue el border-radius
     assert.match(borde, /linear-gradient\(160deg, rgba\(255, 255, 255, 0\.045\), rgba\(255, 255, 255, 0\.015\)\) padding-box/);
     assert.match(borde, /linear-gradient\(90deg, #00f0ff, #bd00ff, #ff007b\) border-box/);
     // Y ENTRE MEDIAS una capa opaca: el tinte es translúcido y sin base
     // opaca el degradado se ve por toda la tarjeta (texto ilegible)
     assert.match(borde, /linear-gradient\(var\(--card-bg\), var\(--card-bg\)\) padding-box/,
         'falta la capa opaca que tapa el degradado por dentro');
+    // v5: el borde solo se ve a la izquierda y arriba (sin border-right y
+    // border-bottom no hay área de borde y la capa border-box queda tapada)
+    assert.match(borde, /border-right: 0;/, 'el borde no debe verse a la derecha');
+    assert.match(borde, /border-bottom: 0;/, 'el borde no debe verse abajo');
     assert.match(borde, /position: relative/);
     assert.match(borde, /overflow: hidden/);
 

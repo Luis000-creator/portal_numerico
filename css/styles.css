@@ -1937,11 +1937,20 @@ textarea:focus-visible {
    2. color de tarjeta a padding-box → OPACA: tapa el degradado por dentro
       (sin ella, el tinte de arriba deja pasar el degradado y la tarjeta
       entera queda en cian→magenta con el texto ilegible);
-   3. degradado a border-box     → solo asoma por el borde transparente de
-      3px, siguiendo el border-radius en las 4 esquinas.
+   3. degradado a border-box     → solo asoma por el ÁREA DE BORDE, que es
+      solo la izquierda y la superior (border-right/bottom: 0): la capa
+      border-box pinta debajo de las otras dos, así que donde no hay borde
+      la tapan por completo y el degradado no recorre la tarjeta.
+
+   El borde se ve SOLO a la izquierda y arriba (petición v5): dobla la
+   esquina superior izquierda como una sola pieza y termina en las esquinas
+   opuestas (allí el radio de 12px hace que el degradado se afine hasta
+   desaparecer contra el borde derecho/inferior, que no tiene línea).
    (los títulos NO cambian: sus colores están en §3.1) */
 .card-landing {
   border: 3px solid transparent;
+  border-right: 0;
+  border-bottom: 0;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)) padding-box,
     linear-gradient(var(--card-bg), var(--card-bg)) padding-box,

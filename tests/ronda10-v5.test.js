@@ -299,19 +299,27 @@ test('P1-8: el logo del header usa el mismo degradado que el landing', () => {
 
 // --- P1-9 ------------------------------------------------------------------
 
-test('P1-9: las tarjetas del landing llevan un solo borde en degradado', () => {
+test('P1-9: el borde en degradado del landing solo se ve a la izquierda y arriba', () => {
     const css = leer('css', 'styles.css');
     const reglas = [...css.matchAll(/\.card-landing \{[^}]*\}/g)].map((m) => m[0]);
     const borde = reglas.find((r) => r.includes('border: 3px solid transparent'));
     assert.ok(borde, 'falta el borde de 3px transparente (doble fondo)');
 
-    // Tinte por dentro, degradado por debajo del borde: dobla las 4 esquinas
+    // Tinte por dentro, degradado por debajo del borde: dobla la esquina
     assert.match(borde, /linear-gradient\(160deg, rgba\(255, 255, 255, 0\.045\), rgba\(255, 255, 255, 0\.015\)\) padding-box/);
     assert.match(borde, /linear-gradient\(90deg, #00f0ff, #bd00ff, #ff007b\) border-box/);
     // El radio vive en la otra regla .card-landing (color de texto + radius):
     // sin él el borde en degradado saldría en esquinas rectas
     assert.ok(reglas.some((r) => /border-radius: var\(--radius-lg\)/.test(r)),
         'el borde debe seguir el radio de la tarjeta');
+
+    // Solo izquierda y arriba: sin área de borde a la derecha/abajo, la capa
+    // border-box queda tapada por las dos de padding-box y el degradado no
+    // recorre la tarjeta por completo
+    assert.match(borde, /border-right: 0;/, 'el borde no debe verse a la derecha');
+    assert.match(borde, /border-bottom: 0;/, 'el borde no debe verse abajo');
+    assert.ok(!/border: 3px solid transparent;\s*background/.test(borde),
+        'falta anular right/bottom: el degradado daría toda la vuelta');
 
     // El tinte es translúcido: sin una capa OPACA debajo, el degradado se
     // ve a través de él y la tarjeta entera queda en cian→magenta (texto
