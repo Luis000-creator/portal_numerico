@@ -5,13 +5,15 @@
 //   P0-1 fila CALCULAR+GRAFICAR apilada en ≤768px (no desborda a 390px)
 //   P0-2 polinomio de Taylor con coeficientes a 6 cifras significativas
 //   P0-3 opción del selector acortada a "Taylor y Maclaurin"
-//   P0-4 halo a 100vw (fullscreen sin cortes)
+//   P0-4 halo a 100vw (fullscreen sin cortes) — v6 P0-1 lo sustituyó por
+//       max(100vw, 2000px) centrado; el 100vw puro dejaba el brillo de
+//       móvil tapado tras las tarjetas (ver tests/ronda11-v6.test.js)
 //   P1-5 espacio del criterio después del <br> (textContent "0.001 ó")
 //   P1-6 pastilla de la raíz: lienzo medido ya visible + chip a 11px
 //   P1-7 etiquetas del eje X sujetas al lienzo y sin solaparse
 //   P1-8 logo del header con el mismo degradado que el landing
 //   P1-9 borde continuo en degradado en las tarjetas del landing
-//   Cierre: bump ?v=9 en las 4 páginas
+//   Cierre: bump ?v=10 en las 4 páginas (v6 lo subió de ?v=9)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -181,16 +183,17 @@ test('P0-3: el selector acorta la opción a "Taylor y Maclaurin"', () => {
 
 // --- P0-4 ------------------------------------------------------------------
 
-test('P0-4: el halo cubre todo el ancho (100vw, sin centrado fijo)', () => {
+test('P0-4: el halo sigue fijo a 100vh y ya no vive en 100vw puro', () => {
     const css = leer('css', 'styles.css');
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
-    assert.match(halo, /width: 100vw/, 'en fullscreen 2000px no llegaba a los laterales');
-    assert.match(halo, /left: 0;/);
-    assert.match(halo, /transform: none;/);
-    assert.ok(!/translateX/.test(halo), 'quedó el centrado que no escala con el viewport');
-    assert.ok(!/2000px/.test(halo), 'quedó el ancho fijo');
-    assert.match(halo, /height: 100vh/);
     assert.match(halo, /position: fixed;/);
+    assert.match(halo, /height: 100vh/);
+    // v6 P0-1 sustituyó el 100vw puro de la v5: en móvil la elipse de 390px
+    // quedaba tapada tras las tarjetas y el brillo desaparecía al hacer
+    // scroll. Ahora es max(100vw, 2000px) centrado (ver ronda11).
+    assert.match(halo, /width: max\(100vw, 2000px\)/);
+    assert.ok(!/width: 100vw;/.test(halo), 'volvió el 100vw puro de la v5');
+    assert.ok(!/transform: none/.test(halo), 'falta el centrado con translateX');
 });
 
 // --- P1-5 ------------------------------------------------------------------
@@ -351,11 +354,11 @@ test('P1-9: el borde en degradado del landing solo se ve a la izquierda y arriba
 
 // --- Cierre ----------------------------------------------------------------
 
-test('Cierre: las 4 páginas piden styles.css?v=9 (ninguna queda en ?v=8)', () => {
+test('Cierre: las 4 páginas piden styles.css?v=10 (ninguna queda en ?v=9)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=9"/.test(html), `${archivo} no tiene ?v=9`);
-        assert.ok(!/styles\.css\?v=8/.test(html), `${archivo} sigue en ?v=8`);
+        assert.ok(/href="[^"]*styles\.css\?v=10"/.test(html), `${archivo} no tiene ?v=10`);
+        assert.ok(!/styles\.css\?v=9/.test(html), `${archivo} sigue en ?v=9`);
     }
 });

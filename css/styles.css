@@ -267,7 +267,9 @@ header:has(.search-box) .nav-links {
 
 object.visor-pdf {
   width: 100%;
-  height: 500px;
+  /* v6 P1-4: 70vh en vez de 500px fijos: con la tarjeta abierta a todo el
+     ancho, 500px dejaba el PDF recortado en pantallas bajas. */
+  height: 70vh;
 }
 
 /* 04 COMPONENTS */
@@ -1428,7 +1430,9 @@ button.btn-chip:hover {
   }
 
   object.visor-pdf {
-    height: 350px;
+    /* v6 P1-4: 60vh en móvil (los 350px fijos eran menos que la mitad de
+       la pantalla en los teléfonos altos) */
+    height: 60vh;
   }
 }
 
@@ -1993,9 +1997,15 @@ textarea:focus-visible {
   content: '';
   position: fixed;
   top: 0;
-  left: 0;
-  transform: none;
-  width: 100vw;
+  /* v6 P0-1: max(100vw, 2000px) centrado. El 100vw de la v5 cubre el
+     fullscreen, pero en móvil la elipse mide 390px y su color fuerte queda
+     justo detrás de las tarjetas (que ocupan casi todo el ancho): el brillo
+     solo se ve arriba y desaparece al hacer scroll, con los laterales en
+     negro. Con max() el ancho nunca baja de 2000px (elipse ancha, como en
+     la ronda 9) y en pantallas de ≥2000px sigue cubriendo todo el ancho. */
+  left: 50%;
+  transform: translateX(-50%);
+  width: max(100vw, 2000px);
   height: 100vh;
   background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.26) 0%, rgba(34, 211, 238, 0.16) 45%, transparent 80%);
   pointer-events: none;
@@ -2361,4 +2371,64 @@ body:has(.container--landing) .main-container {
    gana por orden de aparición. */
 .card-landing:hover {
   border-color: transparent;
+}
+
+/* ==========================================================================
+   CORRECCIONES v6 (13-nov) — "Portal Numérico — Correcciones v6"
+   Base: "Ronda 10" (405b493) + Ronda 10b (borde del landing a izquierda y
+   arriba). El halo (P0-1) se editó en su sitio, en .main-container::before.
+   ========================================================================== */
+
+/* --- P1-4: el visor de un apunte ocupa las 2 columnas de Apuntes ---
+   Al abrir "VER DOCUMENTO" la tarjeta seguía en media columna (grid de 2
+   columnas desde 768px) y el documento quedaba apretado, con el texto
+   diminuto. Las tarjetas son hijas directas de #apuntes-remotos, así que
+   1 / -1 las ocupa todas. En móvil el contenedor no es grid y la
+   declaración no hace nada (ahí ya se ve a todo el ancho). */
+.apunte-card.visor-abierto {
+  grid-column: 1 / -1;
+}
+
+/* --- P1-4: tipografía del visor Markdown (antes en cssText en línea,
+   js/apuntes.js) ---
+   Ojo con .apunte-card p (más arriba): pinta los párrafos a 0.85rem, así
+   que sin redeclarar font-size aquí el Markdown seguiría saliendo en letra
+   pequeña aunque el contenedor pida 1rem. Las reglas van al final del
+   archivo para ganar por orden con la misma especificidad (sin !important).
+   El color no se toca: --text-muted (#c6cdda) ya se lee bien sobre el
+   fondo oscuro del visor, igual que en el resto de las tarjetas. */
+.visor-documento {
+  display: none;
+  margin-top: 15px;
+  padding: 28px 32px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  max-height: 75vh;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.visor-documento h1,
+.visor-documento h2,
+.visor-documento h3,
+.visor-documento h4,
+.visor-documento h5,
+.visor-documento h6 {
+  color: var(--accent-cyan);
+}
+
+.visor-documento p,
+.visor-documento li {
+  font-size: 1rem;
+  /* Línea de lectura: 75ch evita que las líneas se estiren hasta el borde
+     del visor cuando la tarjeta está expandida */
+  max-width: 75ch;
+}
+
+@media (max-width: 768px) {
+  .visor-documento {
+    padding: 20px 16px;
+  }
 }

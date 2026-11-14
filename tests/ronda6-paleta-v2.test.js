@@ -210,12 +210,14 @@ test('§3.4: halo de color detrás del contenedor, uno por sección', () => {
     // Detrás del contenido (el halo no debe teñir el texto de la tarjeta)
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
     assert.match(halo, /z-index: -1/);
-    // Ronda 9: sigue a la ventana (fixed); v5 P0-4: 100vw (no 2000px fijos,
-    // que en fullscreen dejaban el lateral del degradado al descubierto)
+    // Ronda 9: sigue a la ventana (fixed); v6 P0-1: max(100vw, 2000px)
+    // centrado. El 100vw puro de la v5 dejaba la elipse (390px en móvil)
+    // tapada tras las tarjetas y el brillo desaparecía al hacer scroll.
     assert.match(halo, /position: fixed;/);
     assert.match(halo, /top: 0;/);
-    assert.match(halo, /width: 100vw/);
-    assert.ok(!/width: 2000px/.test(halo), 'quedó el ancho fijo de 2000px');
+    assert.match(halo, /width: max\(100vw, 2000px\)/);
+    assert.match(halo, /left: 50%/);
+    assert.match(halo, /transform: translateX\(-50%\)/);
     assert.match(halo, /height: 100vh/);
 
     assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.26\)[^}]*rgba\(168, 85, 247, 0\.16\)/,
@@ -254,13 +256,13 @@ test('§3.5: :root final con la paleta v2', () => {
 
 // --- Bump de versión -------------------------------------------------------
 
-test('Las 4 páginas piden styles.css?v=9 (ninguna sirve CSS viejo)', () => {
+test('Las 4 páginas piden styles.css?v=10 (ninguna sirve CSS viejo)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=9"/.test(html),
-            `${archivo} no tiene styles.css?v=9`);
-        assert.ok(!/href="[^"]*styles\.css(?!\?v=9)/.test(html),
-            `${archivo} sigue apuntando a styles.css sin ?v=9`);
+        assert.ok(/href="[^"]*styles\.css\?v=10"/.test(html),
+            `${archivo} no tiene styles.css?v=10`);
+        assert.ok(!/href="[^"]*styles\.css(?!\?v=10)/.test(html),
+            `${archivo} sigue apuntando a styles.css sin ?v=10`);
     }
 });

@@ -100,16 +100,18 @@ test('4: los chips de la gráfica son pastillas claras con texto oscuro', () => 
 
 // --- 5) Halo ----------------------------------------------------------------
 
-test('5: el halo mide 100vw×100vh con gradiente de 3 paradas, por sección', () => {
+test('5: el halo mide max(100vw, 2000px)×100vh con gradiente de 3 paradas, por sección', () => {
     const css = leer('css', 'styles.css');
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
 
     assert.match(halo, /position: fixed;/, 'el halo debe seguir a la ventana');
-    // v5 P0-4: 100vw en vez de 2000px fijos (en fullscreen los laterales
-    // del degradado quedaban al descubierto)
-    assert.match(halo, /width: 100vw/, 'el halo debe cubrir todo el ancho de la ventana');
-    assert.ok(!/width: 2000px/.test(halo), 'quedó el ancho fijo de 2000px');
-    assert.ok(!/left: 50%/.test(halo), 'quedó el centrado con translateX que no escala con el viewport');
+    // v6 P0-1: nunca baja de 2000px (elipse ancha en móvil, donde el 100vw
+    // puro de la v5 quedaba tapado tras las tarjetas) y en pantallas de
+    // ≥2000px sigue cubriendo todo el ancho del fullscreen.
+    assert.match(halo, /width: max\(100vw, 2000px\)/,
+        'el halo debe medir max(100vw, 2000px)');
+    assert.match(halo, /left: 50%/);
+    assert.match(halo, /transform: translateX\(-50%\)/);
     assert.match(halo, /height: 100vh/);
 
     // 3 paradas: 0.26 → 0.16 → transparent 80%
@@ -149,9 +151,9 @@ test('7: la fórmula del criterio deja el espacio delante de la "ó"', () => {
 
 // --- 8) Bump ----------------------------------------------------------------
 
-test('8: las 4 páginas piden styles.css?v=9', () => {
+test('8: las 4 páginas piden styles.css?v=10', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
-        assert.ok(/href="[^"]*styles\.css\?v=9"/.test(leer(archivo)), `${archivo} no tiene ?v=9`);
+        assert.ok(/href="[^"]*styles\.css\?v=10"/.test(leer(archivo)), `${archivo} no tiene ?v=10`);
     }
 });

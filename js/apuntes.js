@@ -117,19 +117,34 @@ async function cargarApuntesRemotos() {
 
             // Contenedor oscuro que servira como pantalla del visor
             const visor = document.createElement('div');
-            visor.style.cssText = 'display: none; margin-top: 15px; padding: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 8px; max-height: 600px; overflow-y: auto; font-size: 0.9rem;';
+            // v6 P1-4: los estilos viven en CSS (.visor-documento) para poder
+            // tipografiar el Markdown (1rem, interlineado 1.7, encabezados en
+            // cian) y ajustar el padding en móvil, algo que el cssText en
+            // línea no permite. Solo queda el display, que es el estado.
+            visor.className = 'visor-documento';
+            visor.style.display = 'none';
 
             // Logica para abrir/cerrar el documento
             btnVer.onclick = async () => {
                 // Si esta abierto, cerrarlo
                 if (visor.style.display === 'block') {
                     visor.style.display = 'none';
+                    // v6 P1-4: la tarjeta vuelve a su columna
+                    card.classList.remove('visor-abierto');
+                    // Se mantiene innerHTML: el icono y el texto cambian
+                    // juntos (con textContent se borraría el glifo)
                     btnVer.innerHTML = '<i class="fa-regular fa-eye" style="margin-right:6px;"></i> Ver documento';
                     return;
                 }
 
                 // Abrir visor con estado de carga
                 visor.style.display = 'block';
+                // v6 P1-4: con el visor abierto la tarjeta ocupa las 2
+                // columnas del grid: en media columna el documento quedaba
+                // apretado y el texto se veía diminuto. En móvil el contenedor
+                // no es grid y la clase no hace nada.
+                card.classList.add('visor-abierto');
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 btnVer.innerHTML = '<i class="fa-regular fa-eye-slash" style="margin-right:6px;"></i> Ocultar documento';
                 visor.textContent = 'Cargando documento...';
 

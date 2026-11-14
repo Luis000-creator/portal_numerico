@@ -384,6 +384,8 @@ function graficarResultado(expr, opts = {}) {
         ctx.font = '10px monospace';
 
         // --- Puntos dispersos (datos conocidos) ---
+        // Chips escritos en esta pasada, para no pisarlos (v6 P0-2)
+        const chipsDispersos = [];
         for (const pt of puntos) {
             if (!Number.isFinite(pt.x) || !Number.isFinite(pt.y)) continue;
             if (!enVista(pt.y)) continue;
@@ -394,10 +396,26 @@ function graficarResultado(expr, opts = {}) {
             if (pt.etiqueta) {
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'left';
-                const lx = X(pt.x) + 7;
-                const ly = Math.max(Y(pt.y) - 7, 12);
+                const ancho = pt.etiqueta.length * 6 + 6;
+                // v6 P0-2: el chip se sujeta al lienzo igual que en
+                // grafMarcarPunto. Los puntos de Taylor caen en x=1, pegados
+                // al borde derecho del rango, y sin este Math.min la etiqueta
+                // (de ~100px) salía del gráfico: se cortaban los últimos
+                // dígitos y no se veía el borde derecho de la pastilla.
+                const lx = Math.min(X(pt.x) + 7, Math.max(w - ancho - 3, 4));
+                let ly = Math.max(Y(pt.y) - 7, 12);
+                // v6 P0-2: si otra pastilla ocupa esa zona se baja la nueva
+                // hasta dejar 1px de hueco (Taylor: f(x)=2.718 y P3(x)=2.667
+                // comparten x y tienen y casi iguales: las dos se veían
+                // pegadas). El chip mide 13px de alto (grafChipEtiqueta).
+                for (const c of chipsDispersos) {
+                    const chocaX = lx < c.lx + c.ancho && c.lx < lx + ancho;
+                    const chocaY = Math.abs(ly - c.ly) < 13;
+                    if (chocaX && chocaY) ly = c.ly + 14;
+                }
+                chipsDispersos.push({ lx, ly, ancho });
                 // Chip visible para que la curva no pise la etiqueta
-                grafChipEtiqueta(ctx, lx - 3, ly - 11, pt.etiqueta.length * 6 + 6);
+                grafChipEtiqueta(ctx, lx - 3, ly - 11, ancho);
                 ctx.fillStyle = '#06222b';
                 ctx.fillText(pt.etiqueta, lx, ly);
             }
@@ -472,13 +490,19 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
         // v5 P1-6: 11px en vez de 10px y 12px de aire sobre el punto. La
         // raíz cae SOBRE el eje X (y = 0): con 10px y 8px la pastilla quedaba
         // pegada a la línea del eje y a las etiquetas de la banda inferior, y
-        // en móvil se terminaba de perder. El ancho del chip sigue dentro
-        // del lienzo (sujete con Math.min, igual que antes).
+        // en móvil se terminaba de perder.
         ctx.font = '11px monospace';
         ctx.textAlign = 'left';
-        const lx = Math.min(X(px) + 10, Math.max(w - 96, 4));
+        // v6 P0-2: el sujete usaba un ancho FIJO de 96px, pero las pastillas
+        // de Taylor son más largas ("f(x) = 2.71828182846" → 148px): lx
+        // quedaba en 254px con el chip terminando en 388px, fuera del lienzo
+        // de 350px, y se cortaban los últimos dígitos sin borde derecho.
+        // Ahora el sujete usa el ancho real del chip (7px por carácter +
+        // 8 de relleno), dejando 3px de margen en el borde derecho.
+        const ancho = etiqueta.length * 7 + 8;
+        const lx = Math.min(X(px) + 10, Math.max(w - ancho, 4));
         const ly = Math.max(Y(py) - 12 + desplazY, 14);
-        grafChipEtiqueta(ctx, lx - 3, ly - 11, etiqueta.length * 7 + 8);
+        grafChipEtiqueta(ctx, lx - 3, ly - 11, ancho);
         // Texto oscuro sobre la pastilla clara (ronda 9)
         ctx.fillStyle = '#06222b';
         ctx.fillText(etiqueta, lx, ly);
