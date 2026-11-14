@@ -100,8 +100,16 @@ function graficarResultado(expr, opts = {}) {
     try {
         if (!expr || typeof evaluarFuncion !== 'function') { cont.style.display = 'none'; return; }
 
+        // --- Color del método activo (§3.3): --method del contenedor; si no
+        //     hay CSS utilizable se queda el cian de siempre ---
+        let colorMetodo = '#00f0ff';
+        const contMetodo = document.querySelector('.container');
+        if (contMetodo && typeof window.getComputedStyle === 'function') {
+            colorMetodo = window.getComputedStyle(contMetodo).getPropertyValue('--method').trim() || '#00f0ff';
+        }
+
         // --- Curvas a dibujar (principal + adicionales) ---
-        const curvas = [{ expr, color: '#00f0ff', etiqueta: opts.etiqueta || 'f(x)' }]
+        const curvas = [{ expr, color: colorMetodo, etiqueta: opts.etiqueta || 'f(x)' }]
             .concat(Array.isArray(opts.curvas) ? opts.curvas : [])
             .filter(c => c && c.expr);
         const puntos = Array.isArray(opts.puntos) ? opts.puntos : [];

@@ -142,6 +142,11 @@ function alternarMetodoUI() {
         btnGraf.style.display = esFuncion ? '' : 'none';
     }
 
+    // 6) Un color por método (§3.3): el contenedor marca el método activo y
+    //    de ahí salen --method (CSS) y el color de la curva de la gráfica.
+    const contenedorMetodo = document.querySelector('.container');
+    if (contenedorMetodo) contenedorMetodo.dataset.metodo = metodo;
+
     limpiarTabla();
 }
 

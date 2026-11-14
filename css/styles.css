@@ -2,24 +2,39 @@
    PORTAL NUMÉRICO — STYLES.CSS
    ========================================================================== */
 
-/* 01 TOKENS
-   Paleta reducida con significado fijo:
-   cian = acción/información · verde = éxito · rojo = error ·
-   naranja = advertencia · morado = solo identidad (logo/degradado). */
+/* 01 TOKENS — paleta v2 con significado fijo:
+   cian = acción/información · violeta = identidad y Apuntes ·
+   magenta = Conócenos · verde = éxito · rojo = error · naranja = aviso ·
+   y un color por método numérico (--m-*, ver §3.3 al final del archivo).
+   #FF007B y #BD00FF no son tokens: viven escritos a mano solo en las
+   reglas de §3.1 (título de la landing, tarjetas Apuntes/Conócenos y
+   los iconos de Instagram/TikTok). */
 :root {
   --bg-black: #07090e;
   --card-bg: #0d1420;
+  --card-bg-2: #131c2e;
   --border-color: #1e293b;
   --text-white: #f3f4f6;
-  --text-muted: #b8c0ce;
+  --text-muted: #c6cdda;
   --text-faint: #8b94a5;
   --accent-cyan: #22d3ee;
   --accent-bright: #00f0ff;
-  --accent-2: #a855f7;
+  --accent-violet: #a855f7;
+  --accent-pink: #ec4899;
   --success: #34d399;
   --error: #f43f5e;
   --warn: #ff884d;
-  --accent-indigo: #22d3ee; /* se retira el índigo; se mantiene el nombre por compatibilidad */
+
+  /* Un color por método (§3.3) */
+  --m-biseccion: #22d3ee;
+  --m-puntofijo: #a855f7;
+  --m-newton: #f59e0b;
+  --m-taylor: #34d399;
+  --m-lagrange-lineal: #ec4899;
+  --m-lagrange-poli: #60a5fa;
+  --m-simpson: #a3e635;
+
+  /* Geometría y sombras */
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 12px;
@@ -225,7 +240,7 @@ header:has(.search-box) .nav-links {
 .landing-title {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #00f0ff, #22d3ee, #a855f7);
+  background: linear-gradient(135deg, #00f0ff, #bd00ff, #ff007b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -532,11 +547,11 @@ button.btn-graficar:hover {
 }
 
 .card-title--violet {
-  color: #a855f7;
+  color: #bd00ff;
 }
 
 .card-title--magenta {
-  color: #a855f7;
+  color: #ff007b;
 }
 
 .card-desc {
@@ -1126,14 +1141,15 @@ button.btn-chip:hover {
   font-weight: bold;
 }
 
+/* Títulos Misión/Visión: magenta de la sección (§3.2), no violeta */
 .mision-card--mision h2.mision-title,
 .mision-card--mision h3 {
-  color: #a855f7;
+  color: var(--accent-pink);
 }
 
 .mision-card--vision h2.mision-title,
 .mision-card--vision h3 {
-  color: #a855f7;
+  color: var(--accent-pink);
 }
 
 .mision-card p {
@@ -1167,13 +1183,19 @@ button.btn-chip:hover {
   gap: 12px;
 }
 
+/* Pills del equipo: tinte magenta de la sección (§3.2) */
 .badge-equipo {
   padding: 8px 15px;
-  background: rgba(0, 240, 255, 0.1);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(236, 72, 153, 0.1);
+  border: 1px solid rgba(236, 72, 153, 0.35);
   color: var(--text-white);
   border-radius: var(--radius-pill);
   font-size: 0.85rem;
+}
+
+.badge-equipo:hover {
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.3);
 }
 
 .redes-section {
@@ -1245,11 +1267,11 @@ button.btn-chip:hover {
 }
 
 .red-card--instagram {
-  border-left: 3px solid #a855f7;
+  border-left: 3px solid #ff007b;
 }
 
 .red-card--tiktok {
-  border-left: 3px solid #a855f7;
+  border-left: 3px solid #bd00ff;
 }
 
 .red-icon {
@@ -1275,15 +1297,15 @@ button.btn-chip:hover {
 }
 
 .red-icon--instagram {
-  background: rgba(168, 85, 247, 0.12);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #a855f7;
+  background: rgba(255, 0, 123, 0.12);
+  border: 1px solid rgba(255, 0, 123, 0.35);
+  color: #ff007b;
 }
 
 .red-icon--tiktok {
-  background: rgba(168, 85, 247, 0.12);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #a855f7;
+  background: rgba(189, 0, 255, 0.12);
+  border: 1px solid rgba(189, 0, 255, 0.35);
+  color: #bd00ff;
 }
 
 .red-info {
@@ -1830,4 +1852,110 @@ textarea:focus-visible {
   .grafica-canvas {
     height: 320px;
   }
+}
+
+/* ==========================================================================
+   §3.3 — UN COLOR POR MÉTODO
+   El selector escribe el método activo en .container[data-metodo] (JS:
+   alternarMetodoUI) y de ahí sale --method, que tiñe selector, título,
+   botón, resumen, gráfica y la curva (la lee js/graficadora.js).
+   color-mix() no soportado → la declaración se ignora y todo sigue cian.
+   ========================================================================== */
+/* Color del método activo (fallback: cian) */
+.container { --method: #22d3ee; }
+.container[data-metodo="biseccion"]      { --method: var(--m-biseccion); }
+.container[data-metodo="puntofijo"]      { --method: var(--m-puntofijo); }
+.container[data-metodo="newton"]         { --method: var(--m-newton); }
+.container[data-metodo="taylor"]         { --method: var(--m-taylor); }
+.container[data-metodo="lagrangelineal"] { --method: var(--m-lagrange-lineal); }
+.container[data-metodo="lagrangepoly"]   { --method: var(--m-lagrange-poli); }
+.container[data-metodo="simpson"]        { --method: var(--m-simpson); }
+
+/* El selector muestra el color del método.
+   border-color necesita !important: el base `select { border: … !important }`
+   (§04) lo pisa si no. El box-shadow va normal para no tapar el foco de
+   teclado (select:focus { box-shadow: … !important }). */
+#metodo-selector {
+  border-color: var(--method) !important;
+  box-shadow: 0 0 0 1px var(--method), 0 0 18px color-mix(in srgb, var(--method) 35%, transparent);
+}
+
+/* Título del método e iconos del resumen con el color del método */
+.container:has(#metodo-selector) h1 { color: var(--method); }
+.resumen-card .resumen-icon { color: var(--method); }
+
+/* El botón CALCULAR brilla con el color del método (el degradado cian se
+   mantiene; !important para ganarle al glow cian de button[type="submit"]:hover) */
+.container:has(#metodo-selector) button[type="submit"] {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--method) 45%, transparent) !important;
+}
+.container:has(#metodo-selector) button[type="submit"]:hover {
+  box-shadow: 0 6px 25px color-mix(in srgb, var(--method) 65%, transparent) !important;
+}
+
+/* La línea superior de las tarjetas de resumen usa el color del método */
+.resumen-card::before {
+  background: linear-gradient(90deg, transparent, var(--method), transparent);
+}
+
+/* Borde de la gráfica con el color del método */
+.grafica-canvas {
+  border-color: color-mix(in srgb, var(--method) 40%, var(--border-color));
+}
+
+/* ==========================================================================
+   §3.4 — TARJETAS CON TINTE, FRANJA EN DEGRADADO Y HALO POR SECCIÓN
+   ========================================================================== */
+
+/* Tarjetas de la landing: tinte + franja con el degradado original
+   (los títulos NO cambian: sus colores están en §3.1) */
+.card-landing {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  position: relative;
+  overflow: hidden;
+}
+.card-landing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00f0ff, #bd00ff, #ff007b);
+  opacity: 0.9;
+}
+
+/* Notas y resumen: superficie elevada + borde violeta en Apuntes.
+   Excepciones: las tarjetas de la landing (.card-landing, que también son
+   .apunte-card) conservan su tinte en degradado y su borde por color, y los
+   estados --ok/--warn/--error conservan su tinte de color. */
+.apunte-card:not(.card-landing),
+.resumen-card:not(.resumen-card--ok):not(.resumen-card--warn):not(.resumen-card--error) {
+  background: var(--card-bg-2);
+}
+
+.apunte-card:not(.card-landing) {
+  border-left: 3px solid var(--accent-violet);
+}
+
+/* Halo de color tenue detrás del contenedor (uno por sección).
+   z-index: -1 dentro del contexto de apilamiento de .main-container (que ya
+   tiene z-index: 2): el halo queda detrás de la tarjeta, no encima del texto. */
+.main-container::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 720px;
+  height: 420px;
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.14), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+body:has(#lista-apuntes) .main-container::before {
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.14), transparent 70%);
+}
+body:has(.redes-section) .main-container::before {
+  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.14), transparent 70%);
 }

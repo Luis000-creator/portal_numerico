@@ -7,6 +7,9 @@
 // en grid de 2 columnas, texto sin justificar/guionar, header unificado con
 // footer en las 4 páginas, buscador movido al cuerpo, placeholder cortado,
 // gráfica más alta con etiquetas legibles y fondo con menos ruido.
+// Ajustado a la v2 (mismo día): --text-muted #c6cdda, --accent-2 →
+// --accent-violet, sin --accent-indigo y con #ff007b/#bd00ff de vuelta
+// (esos dos se comprueban en ronda6-paleta-v2.test.js).
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -24,15 +27,18 @@ const leer = (...p) => fs.readFileSync(path.join(RAIZ, ...p), 'utf8');
 test('CSS: tokens nuevos de la paleta y colores retirados fuera del archivo', () => {
     const css = leer('css', 'styles.css').toLowerCase();
 
-    for (const token of ['--text-faint:', '--accent-bright:', '--accent-2:',
+    for (const token of ['--text-faint:', '--accent-bright:', '--accent-violet:',
         '--success:', '--error:', '--warn:']) {
         assert.ok(css.includes(token), `falta el token ${token}`);
     }
-    // El índigo se retira pero el nombre queda por compatibilidad, apuntando al cian
-    assert.match(css, /--accent-indigo:\s*#22d3ee/);
-    assert.match(css, /--text-muted:\s*#b8c0ce/, 'texto secundario debe subir de contraste');
+    // v2: el índigo y el alias --accent-2 desaparecen del todo (sin usos)
+    assert.ok(!css.includes('--accent-indigo'), 'el índigo sigue en la paleta');
+    assert.ok(!css.includes('--accent-2:'), 'quedó el alias --accent-2 (ahora --accent-violet)');
+    assert.match(css, /--text-muted:\s*#c6cdda/, 'texto secundario con la paleta v2');
 
-    for (const retirado of ['#ff007b', '#bd00ff', '#00ff78', '#818cf8', '#fbbf24', '#ff4d4d']) {
+    // #ff007b y #bd00ff vuelven en v2 (§3.1): sus lugares se comprueban en
+    // ronda6-paleta-v2.test.js. Sigue fuera el resto de la paleta retirada.
+    for (const retirado of ['#00ff78', '#818cf8', '#fbbf24', '#ff4d4d']) {
         assert.ok(!css.includes(retirado), `queda el color retirado ${retirado}`);
     }
 });
