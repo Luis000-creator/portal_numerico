@@ -778,11 +778,13 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
     if (criterio === 'tolerancia') {
         // v4 P0-3: salto antes de la "ó" para que en móvil no quede un
         // "0.001" huérfano en la 2ª línea. En escritorio el <br> se oculta
-        // (ver .criterio-salto en css/styles.css) y sigue en una sola línea:
-        // el ESPACIO antes del <br> es el que separa "0.001 ó" allí (sin él
-        // salía "0.001ó", regresión de la v4 reportada en PC).
+        // (ver .criterio-salto en css/styles.css) y sigue en una sola línea.
+        // v5 P1-5: el espacio va DESPUÉS del <br> y antes de la "ó". Con el
+        // espacio delante, al ocultarse el <br> desaparecía con él y el texto
+        // copiado/leído salía "0.001ó"; ahora textContent da "0.001 ó" y, en
+        // móvil, el <br> parte la línea sin dejar espacio inicial visible.
         textoCriterio = etiquetas.tolerancia ||
-            `|f(x)| ≤ ${numTexto(valorCriterio)} <br class="criterio-salto">ó |Δx| ≤ ${numTexto(valorCriterio)}`;
+            `|f(x)| ≤ ${numTexto(valorCriterio)}<br class="criterio-salto"> ó |Δx| ≤ ${numTexto(valorCriterio)}`;
     } else if (criterio === 'error') {
         textoCriterio = `Ea ≤ ${numTexto(valorCriterio)}%`;
     } else {

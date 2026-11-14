@@ -530,17 +530,9 @@ button.btn-graficar:hover {
   transition: all 0.3s ease;
 }
 
-.card-landing--cyan {
-  border-left: 3px solid #00f0ff;
-}
-
-.card-landing--violet {
-  border-left: 3px solid #a855f7;
-}
-
-.card-landing--magenta {
-  border-left: 3px solid #a855f7;
-}
+/* v5 P1-9: .card-landing--cyan/--violet/--magenta ya no llevan border-left.
+   El borde lo pone .card-landing como una sola pieza en degradado (técnica
+   de doble fondo): dos piezas separadas no pueden doblar la esquina. */
 
 .card-title {
   margin-bottom: 10px;
@@ -600,7 +592,13 @@ button.btn-graficar:hover {
 .card-landing:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-card-hover);
-  background: rgba(255, 255, 255, 0.05);
+  /* v5 P1-9: mismas TRES capas que en reposo. Con `background: rgba(...)`
+     en una sola capa se borraba el borde en degradado al pasar el ratón, y
+     sin la capa opaca el degradado se veía por todo el interior. */
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
+    linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+    linear-gradient(90deg, #00f0ff, #bd00ff, #ff007b) border-box;
 }
 
 /* 05 PAGES — CALCULADORA */
@@ -1724,9 +1722,13 @@ button.btn-chip--division:hover {
    600/480) se conservan tal cual; los cambios de ancho van en min-width.
    ========================================================================== */
 
-/* --- P1-3: logo con el degradado de identidad también en el header --- */
+/* --- P1-3: logo con el degradado de identidad también en el header ---
+   v5 P1-8: mismos paradas que .landing-title (#00F0FF → #BD00FF → #FF007B).
+   Con #22d3ee en medio el "ITERA" del header se quedaba en cian→morado y
+   nunca llegaba al magenta: se leía como una identidad distinta de la del
+   landing. */
 .logo-title {
-  background: linear-gradient(135deg, #00f0ff, #22d3ee, #a855f7);
+  background: linear-gradient(135deg, #00f0ff, #bd00ff, #ff007b);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1924,27 +1926,33 @@ textarea:focus-visible {
    §3.4 — TARJETAS CON TINTE, FRANJA EN DEGRADADO Y HALO POR SECCIÓN
    ========================================================================== */
 
-/* Tarjetas de la landing: tinte + franja con el degradado original
+/* Tarjetas de la landing: tinte + borde en degradado (v5 P1-9).
+   Antes eran DOS piezas: la franja superior (::before, 3px) y el borde
+   izquierdo (border-left). Al ser piezas separadas no podían doblar la
+   esquina: la franja terminaba en punta cuadrada justo antes de la esquina
+   superior derecha y el lado derecho se quedaba sin borde.
+
+   TRES capas de background (las dos del truco clásico + una base opaca):
+   1. tinte blanco a padding-box  → el brillo del interior;
+   2. color de tarjeta a padding-box → OPACA: tapa el degradado por dentro
+      (sin ella, el tinte de arriba deja pasar el degradado y la tarjeta
+      entera queda en cian→magenta con el texto ilegible);
+   3. degradado a border-box     → solo asoma por el borde transparente de
+      3px, siguiendo el border-radius en las 4 esquinas.
    (los títulos NO cambian: sus colores están en §3.1) */
 .card-landing {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  border: 3px solid transparent;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)) padding-box,
+    linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+    linear-gradient(90deg, #00f0ff, #bd00ff, #ff007b) border-box;
   position: relative;
   overflow: hidden;
-}
-.card-landing::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #00f0ff, #bd00ff, #ff007b);
-  opacity: 0.9;
 }
 
 /* Notas y resumen: superficie elevada + borde violeta en Apuntes.
    Excepciones: las tarjetas de la landing (.card-landing, que también son
-   .apunte-card) conservan su tinte en degradado y su borde por color, y los
+   .apunte-card) conservan su tinte en degradado y su borde en degradado, y los
    estados --ok/--warn/--error conservan su tinte de color. */
 .apunte-card:not(.card-landing),
 .resumen-card:not(.resumen-card--ok):not(.resumen-card--warn):not(.resumen-card--error) {
@@ -1962,16 +1970,23 @@ textarea:focus-visible {
    Ronda 9 (post-v4): con position absolute / 900×520 el brillo vivía en la
    parte superior de la página y, una vez fixed, quedaba entero DETRÁS de las
    tarjetas de 1180px: no asomaba por los lados y al hacer scroll aparecía
-   solo fondo negro. Ahora mide 2000×100vh (más ancho que el contenido) y el
-   gradiente lleva 3 paradas —color fuerte 0.26, color tenue 0.16 y
-   transparente al 80%— para que el centro se vea y los bordes se fundan. */
+   solo fondo negro. El gradiente lleva 3 paradas —color fuerte 0.26, color
+   tenue 0.16 y transparente al 80%— para que el centro se vea y los bordes
+   se fundan.
+
+   v5 P0-4: el ancho pasó de 2000px fijo a 100vw. Con un ancho fijo y el
+   centrado left: 50% + translateX(-50%), en fullscreen (F11 en un monitor
+   ancho) el viewport superaba los 2000px y el degradado se cortaba a los
+   lados, dejando a la vista el borde del degradado. 100vw cubre todo el
+   ancho de la ventana en cualquier tamaño (el degradado radial ya es
+   relativo al propio elemento, así que escala con él). */
 .main-container::before {
   content: '';
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2000px;
+  left: 0;
+  transform: none;
+  width: 100vw;
   height: 100vh;
   background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.26) 0%, rgba(34, 211, 238, 0.16) 45%, transparent 80%);
   pointer-events: none;
@@ -1999,13 +2014,10 @@ body:has(.redes-section) .main-container::before {
   margin-block: auto;
 }
 
-/* --- Petición: las 3 tarjetas del landing llevan los mismos bordes que la
-   primera (Calculadoras): franja cian de 3px a la izquierda. --- */
-.card-landing--cyan,
-.card-landing--violet,
-.card-landing--magenta {
-  border-left: 3px solid #00f0ff;
-}
+/* --- v5 P1-9: aquí vivía la regla unificada de border-left de las 3
+   tarjetas del landing (franja cian de 3px a la izquierda). Eliminada: el
+   borde ya es una sola pieza en degradado que sale de .card-landing, y esta
+   pieza suelta volvía a cortar la esquina superior derecha. --- */
 
 /* --- P0-1 v3: tarjetas de Taylor en móvil ---
    .resumen-grid--6 (3 columnas) no tenía regla móvil y ganaba al
@@ -2305,4 +2317,39 @@ body:has(.container--landing) .main-container {
     font-size: 0.8rem;
     letter-spacing: 1px;
   }
+}
+
+/* ==========================================================================
+   CORRECCIONES v5 (13-nov) — "Portal Numérico — Correcciones v5"
+   Base: "Ronda 9" (0cc9edb). Documento: P0/P1 de la lista v5.
+   ========================================================================== */
+
+/* --- P0-1: la fila CALCULAR + GRAFICAR no desborda en móvil ---
+   En ≤768px .form-actions era flex en horizontal con dos botones flex: 1:
+   cada botón tiene min-width: auto (no puede encogerse por debajo de su
+   contenido) y el submit lleva white-space: nowrap (v4 P2-5, texto en
+   mayúsculas + letter-spacing). A 390px la suma de ambos contenidos era
+   mayor que el ancho de la tarjeta: el borde derecho de GRAFICAR quedaba
+   fuera de la pantalla y, como el desbordamiento es del contenido del flex
+   y no de la página, el scroll lateral no lo alcanzaba.
+   Solución: en pantalla estrecha los dos botones se apilan, cada uno a todo
+   el ancho de la tarjeta. */
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+/* --- P1-8 (editado en §3.x): el logo del header usa el MISMO degradado que
+   .landing-title (#00F0FF → #BD00FF → #FF007B). --- */
+
+/* --- P1-9: el borde en degradado del landing no se rompe con el ratón ---
+   Reglas editadas en §3.1 (franja ::before de las tarjetas eliminada), §3.4
+   (.card-landing con borde de doble fondo) y la unificada de v3
+   (border-left eliminado). Falta esto: .apunte-card:hover (P2-2) pinta
+   border-color por encima y, al ser más específico/POSTERIOR, taparía el
+   degradado del border-box con un cian opaco. Aquí, al final del archivo,
+   gana por orden de aparición. */
+.card-landing:hover {
+  border-color: transparent;
 }

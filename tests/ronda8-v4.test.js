@@ -57,8 +57,12 @@ test('P0-2: el polinomio cabe en móvil y ningún valor se parte a mitad de núm
 
 test('P0-3: el criterio de paro se parte en la "ó", no a mitad de un número', () => {
     const js = leer('js', 'biseccion.js');
-    assert.ok(js.includes('<br class="criterio-salto">ó |Δx| ≤'),
-        'falta el salto antes de la "ó" en la fórmula del criterio');
+    // v5 P1-5: el espacio del br va DESPUÉS del <br> (antes se perdía al
+    // ocultarlo en escritorio y el texto salía "0.001ó")
+    assert.ok(js.includes('<br class="criterio-salto"> ó |Δx| ≤'),
+        'falta el salto + espacio antes de la "ó" en la fórmula del criterio');
+    assert.ok(!js.includes('<br class="criterio-salto">ó |Δx| ≤'),
+        'la "ó" sigue pegada al <br> sin espacio');
     assert.ok(!/ \|f\(x\)\| ≤ \$\{numTexto\(valorCriterio\)\}  ó  \|/.test(js),
         'quedó la fórmula en una sola línea');
 

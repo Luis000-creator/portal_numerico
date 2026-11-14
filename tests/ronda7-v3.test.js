@@ -208,15 +208,22 @@ test('P2-8: el hueco de DERIVADA solo existe con contenido', () => {
 
 // --- Peticiones nuevas del equipo ------------------------------------------
 
-test('Landing: las 3 tarjetas tienen los mismos bordes que Calculadoras', () => {
+test('Landing: las 3 tarjetas comparten un borde continuo en degradado', () => {
     const css = leer('css', 'styles.css');
-    assert.match(css, /\.card-landing--cyan,\s*\.card-landing--violet,\s*\.card-landing--magenta \{\s*border-left: 3px solid #00f0ff;/);
-    // Ninguna variante conserva su borde propio (violeta) en otra regla posterior
-    const idx = css.indexOf('.card-landing--cyan,\n.card-landing--violet,\n.card-landing--magenta');
-    assert.ok(idx > -1, 'falta la regla unificada de bordes del landing');
-    const despues = css.slice(idx);
-    assert.ok(!/\.card-landing--violet \{\s*border-left: 3px solid #a855f7/.test(despues),
-        'la tarjeta de Apuntes sigue con borde violeta');
+    // v5 P1-9: un solo borde de 3px en degradado (doble fondo). El
+    // border-left por variante era la segunda pieza y cortaba la esquina.
+    const reglas = [...css.matchAll(/\.card-landing \{[^}]*\}/g)].map((m) => m[0]);
+    const borde = reglas.find((r) => r.includes('border: 3px solid transparent'));
+    assert.ok(borde, 'falta el borde de 3px en degradado de .card-landing');
+    assert.match(borde, /linear-gradient\(90deg, #00f0ff, #bd00ff, #ff007b\) border-box/);
+    assert.ok(!/\.card-landing--(?:cyan|violet|magenta)[^{]*\{\s*border-left/.test(css),
+        'alguna variante sigue con su border-left propio');
+    // El hover no debe romper el borde (ni taparlo con cian)
+    const hover = [...css.matchAll(/\.card-landing:hover \{[^}]*\}/g)].map((m) => m[0]);
+    assert.ok(hover.some((r) => r.includes('border-color: transparent')),
+        'falta el hover que deja el borde transparente por encima de .apunte-card:hover');
+    assert.ok(hover.some((r) => r.includes('border-box')),
+        'el hover reescribía el background a una sola capa y perdía el borde');
 });
 
 test('Landing: el contenedor queda completamente centrado en ambos ejes', () => {

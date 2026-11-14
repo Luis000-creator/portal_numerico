@@ -166,15 +166,22 @@ function graficarResultado(expr, opts = {}) {
 
         // --- Lienzo (con DPR, tope 2) ---
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        // v5 P1-6: se MUESTRA antes de MEDIR. Con #resultado-container /
+        // #grafica-container ocultos (primer Calcular de la sesión, o tras un
+        // error que dejó el canvas en display:none) clientWidth vale 0 y el
+        // lienzo se dibujaba a 600px: el bitmap se estiraba al ancho real
+        // (~350px en un móvil de 390px) y todo salía a 0,58× — las etiquetas
+        // de 10px quedaban ilegibles y la pastilla de la raíz "x ≈ 2" no se
+        // distinguía. Midiendo ya visible se usa el ancho real del lienzo.
+        ocultarMsg();
+        cont.style.display = 'block';
+        canvas.style.display = 'block';
+        mostrarSeccionGrafica();
         const w = Math.max(200, Math.round(canvas.clientWidth || (canvas.parentElement && canvas.parentElement.clientWidth) || 600));
         const alto = grafAltoDelCSS(canvas);
         canvas.width = Math.round(w * dpr);
         canvas.height = Math.round(alto * dpr);
         canvas.style.height = alto + 'px';
-        canvas.style.display = 'block';
-        ocultarMsg();
-        cont.style.display = 'block';
-        mostrarSeccionGrafica();
         const etiquetaAria = curvas.map(c => c.etiqueta).join(', ');
         canvas.setAttribute('aria-label', 'Gráfica de ' + etiquetaAria);
 
@@ -327,16 +334,27 @@ function graficarResultado(expr, opts = {}) {
 
         // --- Etiquetas del eje X: al final, con chip detrás ---
         // (si se dibujaran con la cuadrícula, después las tapan las líneas
-        //  horizontales y las punteadas del intervalo: guiones sobre los dígitos)
+        //  horizontales y las punteadas del intervalo [a, b]: guiones sobre los dígitos)
         ctx.font = '12px monospace';
         ctx.textAlign = 'left';
+        // v5 P1-7: pastillas sujetas al ancho del lienzo y sin solaparse.
+        // Antes el chip podía asomar 1px por el borde ("0.5"/"3.5" recortadas)
+        // y en pantallas estrechas dos etiquetas seguidas llegaban a tocarse
+        // ("2 3" en Taylor): la que choca con una ya colocada se salta.
+        const chipsEjeX = [];
         for (const et of etiquetasEjeX) {
             const ancho = et.txt.length * 7 + 6;
             const cercaDerecha = et.px + 6 + et.txt.length * 7 > w;
             // v4 P1-1: la etiqueta pegada al borde izquierdo (p. ej. "-0.5")
             // se sujeta a un mínimo de 4px para que no salga cortada.
             const tx = cercaDerecha ? w - 10 : Math.max(et.px + 3, 4);
-            grafChipEtiqueta(ctx, cercaDerecha ? w - 8 - ancho : Math.max(et.px + 1, 1), alto - 16, ancho);
+            // Chip entero DENTRO del lienzo: 1px de margen a cada lado.
+            const chipIzq = cercaDerecha ? w - 8 - ancho : Math.max(et.px + 1, 1);
+            const chipX = Math.min(Math.max(chipIzq, 1), Math.max(w - 1 - ancho, 1));
+            const solapa = chipsEjeX.some(c => chipX < c.x + c.ancho + 2 && chipX + ancho + 2 > c.x);
+            if (solapa) continue;
+            chipsEjeX.push({ x: chipX, ancho });
+            grafChipEtiqueta(ctx, chipX, alto - 16, ancho);
             // Texto oscuro sobre la pastilla clara (ronda 9): el gris claro
             // salía con poco contraste sobre el fondo translúcido.
             ctx.fillStyle = '#06222b';
@@ -451,11 +469,16 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
     ctx.fill();
     ctx.shadowBlur = 0;
     if (etiqueta) {
-        ctx.font = '10px monospace';
+        // v5 P1-6: 11px en vez de 10px y 12px de aire sobre el punto. La
+        // raíz cae SOBRE el eje X (y = 0): con 10px y 8px la pastilla quedaba
+        // pegada a la línea del eje y a las etiquetas de la banda inferior, y
+        // en móvil se terminaba de perder. El ancho del chip sigue dentro
+        // del lienzo (sujete con Math.min, igual que antes).
+        ctx.font = '11px monospace';
         ctx.textAlign = 'left';
-        const lx = Math.min(X(px) + 8, w - 90);
-        const ly = Math.max(Y(py) - 8 + desplazY, 12);
-        grafChipEtiqueta(ctx, lx - 3, ly - 11, etiqueta.length * 6 + 6);
+        const lx = Math.min(X(px) + 10, Math.max(w - 96, 4));
+        const ly = Math.max(Y(py) - 12 + desplazY, 14);
+        grafChipEtiqueta(ctx, lx - 3, ly - 11, etiqueta.length * 7 + 8);
         // Texto oscuro sobre la pastilla clara (ronda 9)
         ctx.fillStyle = '#06222b';
         ctx.fillText(etiqueta, lx, ly);

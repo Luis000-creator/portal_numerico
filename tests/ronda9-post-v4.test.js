@@ -9,7 +9,8 @@
 //   5) halo ancho (2000×100vh) con gradiente de 3 paradas
 //   6) landing: centrado + sticky footer (opción híbrida)
 //   7) espacio antes de la "ó" del criterio en escritorio
-//   8) bump ?v=8 en las 4 páginas
+//   8) bump ?v=8 en las 4 páginas (v5: la lista de pendientes lo sube a ?v=9;
+//      los tests 5, 7 y 8 se actualizaron aquí porque la v5 los cambia)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -99,14 +100,17 @@ test('4: los chips de la gráfica son pastillas claras con texto oscuro', () => 
 
 // --- 5) Halo ----------------------------------------------------------------
 
-test('5: el halo mide 2000×100vh con gradiente de 3 paradas, por sección', () => {
+test('5: el halo mide 100vw×100vh con gradiente de 3 paradas, por sección', () => {
     const css = leer('css', 'styles.css');
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
 
     assert.match(halo, /position: fixed;/, 'el halo debe seguir a la ventana');
-    assert.match(halo, /width: 2000px/, 'más ancho que el contenido (tarjetas de 1180px)');
+    // v5 P0-4: 100vw en vez de 2000px fijos (en fullscreen los laterales
+    // del degradado quedaban al descubierto)
+    assert.match(halo, /width: 100vw/, 'el halo debe cubrir todo el ancho de la ventana');
+    assert.ok(!/width: 2000px/.test(halo), 'quedó el ancho fijo de 2000px');
+    assert.ok(!/left: 50%/.test(halo), 'quedó el centrado con translateX que no escala con el viewport');
     assert.match(halo, /height: 100vh/);
-    assert.ok(!/width: 900px/.test(halo), 'quedó el halo de 900px, tapado por las tarjetas');
 
     // 3 paradas: 0.26 → 0.16 → transparent 80%
     for (const [color, nombre] of [['34, 211, 238', 'cian'], ['168, 85, 247', 'violeta'], ['236, 72, 153', 'magenta']]) {
@@ -133,18 +137,21 @@ test('6: el landing centra el contenedor y ancla el footer al pliegue', () => {
 
 // --- 7) Criterio de paro ----------------------------------------------------
 
-test('7: la fórmula del criterio deja espacio antes de la "ó"', () => {
+test('7: la fórmula del criterio deja el espacio delante de la "ó"', () => {
     const js = leer('js', 'biseccion.js');
-    assert.ok(js.includes('} <br class="criterio-salto">ó |Δx| ≤'),
-        'falta el espacio antes del <br> (en escritorio salía "0.001ó")');
-    assert.ok(!js.includes('}<br class="criterio-salto">'), 'el <br> sigue pegado al número');
+    // v5 P1-5: el espacio va DESPUÉS del <br>: si va delante, al ocultarse
+    // el <br> en escritorio el texto copiado sale "0.001ó"
+    assert.ok(js.includes('}<br class="criterio-salto"> ó |Δx| ≤'),
+        'falta el espacio después del <br> (en PC se copiaba "0.001ó")');
+    assert.ok(!js.includes('} <br class="criterio-salto">ó'),
+        'el espacio sigue antes del <br>: se pierde con él en escritorio');
 });
 
 // --- 8) Bump ----------------------------------------------------------------
 
-test('8: las 4 páginas piden styles.css?v=8', () => {
+test('8: las 4 páginas piden styles.css?v=9', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
-        assert.ok(/href="[^"]*styles\.css\?v=8"/.test(leer(archivo)), `${archivo} no tiene ?v=8`);
+        assert.ok(/href="[^"]*styles\.css\?v=9"/.test(leer(archivo)), `${archivo} no tiene ?v=9`);
     }
 });

@@ -35,7 +35,11 @@ function taylorPartes(coefs, a) {
     for (let k = 0; k < coefs.length; k++) {
         const c = coefs[k];
         if (!Number.isFinite(c) || c === 0) continue;
-        const mag = numTexto(Math.abs(c));
+        // v5 P0-2: 6 cifras significativas SOLO en el polinomio. numTexto
+        // usa toPrecision(12) y "0.166666666667·x³" no cabe ni a 0.8rem en
+        // 390px (KaTeX no parte el \cdot): "0.166667" sí. numTexto sigue
+        // mandando en el criterio, los intervalos y el resto de la página.
+        const mag = String(Number(Math.abs(c).toPrecision(6)));
         const base = k === 0 ? mag : `${mag} * ${desplazamiento}${k === 1 ? '' : '^' + k}`;
         // El primer término no lleva signo: math.parse('+ x') lo tolera pero
         // ensucia el LaTeX.

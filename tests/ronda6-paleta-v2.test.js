@@ -37,12 +37,15 @@ test('§3.1: #FF007B/#BD00FF restaurados y acotados a sus reglas', () => {
     assert.match(css, /\.red-card--instagram \{\s*border-left: 3px solid #ff007b;/);
     assert.match(css, /\.red-card--tiktok \{\s*border-left: 3px solid #bd00ff;/);
 
-    // 4) Esos dos hex no se esparcen: solo viven en las reglas de §3.1 y en
-    //    la franja de la tarjeta de la landing (§3.4).
+    // 4) Esos dos hex no se esparcen: solo viven en las reglas de §3.1, en el
+    //    borde de la tarjeta de la landing (§3.4) y en el logo del header
+    //    (v5 P1-8: mismo degradado que .landing-title).
     const permitidas = [
-        '.landing-title', '.card-title--violet', '.card-title--magenta',
+        '.landing-title', '.logo-title',
+        '.card-title--violet', '.card-title--magenta',
         '.red-card--instagram', '.red-card--tiktok',
-        '.red-icon--instagram', '.red-icon--tiktok', '.card-landing::before',
+        '.red-icon--instagram', '.red-icon--tiktok',
+        '.card-landing', '.card-landing:hover',
     ];
     const bloques = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
     let vistas = 0;
@@ -148,12 +151,27 @@ test('§3.3: la curva de la gráfica toma el color de --method', () => {
 
 // --- §3.4 ------------------------------------------------------------------
 
-test('§3.4: tarjetas de la landing con tinte y franja en degradado', () => {
+test('§3.4: tarjetas de la landing con tinte y borde en degradado continuo', () => {
     const css = leer('css', 'styles.css');
 
-    assert.match(css, /\.card-landing \{[^}]*linear-gradient\(160deg, rgba\(255, 255, 255, 0\.045\), rgba\(255, 255, 255, 0\.015\)\)[^}]*\}/);
-    assert.match(css, /\.card-landing \{[^}]*position: relative[^}]*overflow: hidden[^}]*\}/);
-    assert.match(css, /\.card-landing::before \{[\s\S]*?height: 3px;[\s\S]*?background: linear-gradient\(90deg, #00f0ff, #bd00ff, #ff007b\)/);
+    const reglas = [...css.matchAll(/\.card-landing \{[^}]*\}/g)].map((m) => m[0]);
+    const borde = reglas.find((r) => r.includes('border: 3px solid transparent'));
+    assert.ok(borde, 'falta el borde de 3px transparente (doble fondo)');
+    // El tinte va por DENTRO (padding-box) y el degradado por DEBAJO del
+    // borde (border-box): así el borde sigue el border-radius en las 4 esquinas
+    assert.match(borde, /linear-gradient\(160deg, rgba\(255, 255, 255, 0\.045\), rgba\(255, 255, 255, 0\.015\)\) padding-box/);
+    assert.match(borde, /linear-gradient\(90deg, #00f0ff, #bd00ff, #ff007b\) border-box/);
+    // Y ENTRE MEDIAS una capa opaca: el tinte es translúcido y sin base
+    // opaca el degradado se ve por toda la tarjeta (texto ilegible)
+    assert.match(borde, /linear-gradient\(var\(--card-bg\), var\(--card-bg\)\) padding-box/,
+        'falta la capa opaca que tapa el degradado por dentro');
+    assert.match(borde, /position: relative/);
+    assert.match(borde, /overflow: hidden/);
+
+    // v5 P1-9: fuera las dos piezas sueltas que cortaban la esquina
+    assert.ok(!css.includes('.card-landing::before'), 'sigue la franja superior suelta');
+    assert.ok(!/\.card-landing--(?:cyan|violet|magenta)[^{]*\{\s*border-left/.test(css),
+        'sigue el border-left por variante');
 });
 
 test('§3.4: notas y resumen en superficie elevada, sin pisar tintes de estado', () => {
@@ -188,11 +206,12 @@ test('§3.4: halo de color detrás del contenedor, uno por sección', () => {
     // Detrás del contenido (el halo no debe teñir el texto de la tarjeta)
     const halo = /\.main-container::before \{[\s\S]*?\}/.exec(css)[0];
     assert.match(halo, /z-index: -1/);
-    // Ronda 9: sigue a la ventana (fixed) y mide 2000×100vh para asomar
-    // por los lados de las tarjetas de 1180px
+    // Ronda 9: sigue a la ventana (fixed); v5 P0-4: 100vw (no 2000px fijos,
+    // que en fullscreen dejaban el lateral del degradado al descubierto)
     assert.match(halo, /position: fixed;/);
     assert.match(halo, /top: 0;/);
-    assert.match(halo, /width: 2000px/);
+    assert.match(halo, /width: 100vw/);
+    assert.ok(!/width: 2000px/.test(halo), 'quedó el ancho fijo de 2000px');
     assert.match(halo, /height: 100vh/);
 
     assert.match(css, /body:has\(#lista-apuntes\) \.main-container::before \{[^}]*rgba\(168, 85, 247, 0\.26\)[^}]*rgba\(168, 85, 247, 0\.16\)/,
@@ -231,13 +250,13 @@ test('§3.5: :root final con la paleta v2', () => {
 
 // --- Bump de versión -------------------------------------------------------
 
-test('Las 4 páginas piden styles.css?v=8 (ninguna sirve CSS viejo)', () => {
+test('Las 4 páginas piden styles.css?v=9 (ninguna sirve CSS viejo)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=8"/.test(html),
-            `${archivo} no tiene styles.css?v=8`);
-        assert.ok(!/href="[^"]*styles\.css(?!\?v=8)/.test(html),
-            `${archivo} sigue apuntando a styles.css sin ?v=8`);
+        assert.ok(/href="[^"]*styles\.css\?v=9"/.test(html),
+            `${archivo} no tiene styles.css?v=9`);
+        assert.ok(!/href="[^"]*styles\.css(?!\?v=9)/.test(html),
+            `${archivo} sigue apuntando a styles.css sin ?v=9`);
     }
 });
