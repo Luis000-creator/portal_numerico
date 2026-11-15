@@ -40,12 +40,10 @@
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-    <!-- v8 P1: KaTeX (JS+CSS), marked y DOMPurify (~360KB) NO se piden aquí.
-         Solo se usan al abrir un apunte (o si un contenido trae fórmulas), y
-         se cargan bajo demanda desde js/vendor-loader.js + js/apuntes.js:
-         quien solo abre la lista se ahorra esos ~360KB. Los preconnect de
-         cdn.jsdelivr/cdnjs siguen sirviendo a Supabase y Font Awesome (y a
-         las propias librerías, cuando toque cargarlas). -->
+    <!-- KaTeX (JS+CSS), marked y DOMPurify (~360KB) NO se piden aquí: solo
+         se usan al abrir un apunte (o si un contenido trae fórmulas), bajo
+         demanda desde js/vendor-loader.js + js/apuntes.js. Los preconnect de
+         cdn.jsdelivr/cdnjs siguen sirviendo a Supabase y Font Awesome. -->
 
     <link
       rel="preload"
@@ -119,8 +117,8 @@
           <button type="submit" class="btn-outline" style="width: 100%">Publicar Apunte</button>
         </form>
 
-        <!-- Buscador en el cuerpo (antes en el header): el header queda igual
-             en las 4 páginas y el buscador encabeza la lista de apuntes. -->
+        <!-- Buscador en el cuerpo: el header queda igual en las 4 páginas y
+             el buscador encabeza la lista de apuntes. -->
         <div class="apuntes-buscador">
           <label class="apuntes-buscador-label" for="buscador">Buscar apuntes</label>
           <input
@@ -163,7 +161,7 @@
       defer
     ></script>
     <script src="../js/supabase-config.js" defer></script>
-    <!-- vendor-loader: KaTeX/marked/DOMPurify bajo demanda (v8 P1) -->
+    <!-- vendor-loader: KaTeX/marked/DOMPurify bajo demanda -->
     <script src="../js/vendor-loader.js" defer></script>
     <script src="../js/apuntes.js" defer></script>
     <script src="../js/canvas-animation.js" defer></script>

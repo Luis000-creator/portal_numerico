@@ -142,7 +142,7 @@ function alternarMetodoUI() {
         btnGraf.style.display = esFuncion ? '' : 'none';
     }
 
-    // 6) Un color por método (§3.3): el contenedor marca el método activo y
+    // 6) Un color por método: el contenedor marca el método activo y
     //    de ahí salen --method (CSS) y el color de la curva de la gráfica.
     const contenedorMetodo = document.querySelector('.container');
     if (contenedorMetodo) contenedorMetodo.dataset.metodo = metodo;
@@ -200,7 +200,7 @@ async function ejecutarCalculo(event) {
         mostrarError(`Este método aún no está disponible ("${metodo}"). Recarga la página o elige otra opción.`);
     }
 
-    // v4 P1-3: al terminar el cálculo el foco sale del campo numérico, para
+    // Al terminar el cálculo el foco sale del campo numérico, para
     // que un scroll posterior sobre el input (type="number" incrementa con la
     // rueda cuando está enfocado) no cambie valores como el GRADO de Taylor.
     const activo = document.activeElement;

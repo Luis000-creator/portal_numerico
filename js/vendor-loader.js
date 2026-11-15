@@ -8,8 +8,8 @@
 
 const MATH_URL = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js';
 const KATEX_URL = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
-// v8 P1: librerías del visor Markdown de Apuntes (antes en el <head> de
-// pages/apuntes.html, donde se bajaban aunque solo se viera la lista).
+// Librerías del visor Markdown de Apuntes: se cargan bajo demanda, no en
+// el <head> de la página.
 const MARKED_URL = 'https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js';
 const PURIFY_URL = 'https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js';
 const KATEX_CSS_URL = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
@@ -99,7 +99,7 @@ window.Vendor = {
             : (katexPromise || (katexPromise = loadVendorScript(KATEX_URL, KATEX_SRI)));
         return Promise.all([asegurarKatexCss(), js]);
     },
-    // v8: visor Markdown de Apuntes (marked traduce, DOMPurify sanitiza)
+    // Visor Markdown de Apuntes (marked traduce, DOMPurify sanitiza)
     ensureMarkdown() {
         if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
             return Promise.resolve();

@@ -2,13 +2,13 @@
    PORTAL NUMÉRICO — STYLES.CSS
    ========================================================================== */
 
-/* 01 TOKENS — paleta v2 con significado fijo:
-   cian = acción/información · violeta = identidad y Apuntes ·
-   magenta = Conócenos · verde = éxito · rojo = error · naranja = aviso ·
-   y un color por método numérico (--m-*, ver §3.3 al final del archivo).
-   #FF007B y #BD00FF no son tokens: viven escritos a mano solo en las
-   reglas de §3.1 (título de la landing, tarjetas Apuntes/Conócenos y
-   los iconos de Instagram/TikTok). */
+/* 01 TOKENS — paleta con significado fijo:
+      cian = acción/información · violeta = identidad y Apuntes ·
+      magenta = Conócenos · verde = éxito · rojo = error · naranja = aviso ·
+      y un color por método numérico (--m-*).
+      #FF007B y #BD00FF no son tokens: se escriben a mano solo en el título de
+      la landing, las tarjetas Apuntes/Conócenos y los iconos de
+      Instagram/TikTok. */
 :root {
   --bg-black: #07090e;
   --card-bg: #0d1420;
@@ -18,14 +18,10 @@
   --text-muted: #c6cdda;
   --text-faint: #8b94a5;
   --accent-cyan: #22d3ee;
-  --accent-bright: #00f0ff;
   --accent-violet: #a855f7;
   --accent-pink: #ec4899;
-  --success: #34d399;
-  --error: #f43f5e;
-  --warn: #ff884d;
 
-  /* Un color por método (§3.3) */
+  /* Un color por método */
   --m-biseccion: #22d3ee;
   --m-puntofijo: #a855f7;
   --m-newton: #f59e0b;
@@ -108,14 +104,6 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.brand-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
 }
 
 .landing-brand {
@@ -231,12 +219,6 @@ header:has(.search-box) .nav-links {
   max-width: 850px;
 }
 
-/* DEPRECATED: .container--redes no usado tras fusión redes→social, se mantiene por compatibilidad */
-.container--redes {
-  max-width: 640px;
-  text-align: center;
-}
-
 .landing-title {
   font-size: 2.5rem;
   margin-bottom: 1rem;
@@ -247,7 +229,6 @@ header:has(.search-box) .nav-links {
   text-transform: uppercase;
 }
 
-.landing-grid,
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -267,8 +248,8 @@ header:has(.search-box) .nav-links {
 
 object.visor-pdf {
   width: 100%;
-  /* v6 P1-4: 70vh en vez de 500px fijos: con la tarjeta abierta a todo el
-     ancho, 500px dejaba el PDF recortado en pantallas bajas. */
+  /* 70vh: con la tarjeta a todo el ancho, 500px fijos cortaban el PDF en
+          pantallas bajas */
   height: 70vh;
 }
 
@@ -333,11 +314,9 @@ textarea:focus {
 input[type="text"]:focus, 
 input[type="number"]:focus, 
 select:focus {
-  /* Ronda 9: background-color y NO el shorthand background. El shorthand
-     resetea background-repeat / background-position / background-size, y al
-     enfocar el SVG del chevron (background-image del select) se repetía por
-     todo el campo tachando el texto; en Bisección (sin regla propia de
-     color) la imagen desaparecía por completo. */
+  /* background-color y NO el shorthand `background`: el shorthand resetea
+          background-size/position/repeat y el SVG del chevron se repetía por todo
+          el campo (y en Bisección desaparecía) */
   background-color: rgba(30, 41, 59, 0.9) !important;
   border-color: #38bdf8 !important;
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
@@ -378,10 +357,8 @@ button:hover {
   transform: translateY(-1px);
 }
 
-/* Botón principal (Calcular procedimiento / Publicar Apunte): degradado cian
-   (antes blanco sólido, fuera de paleta). P2-1 v3: paradas separadas para que
-   el degradado se note; P2-4 v4: aún más separadas (#0891B2 → #155E75) porque
-   en PC seguía leyéndose casi plano. */
+/* Botón principal (Calcular / Publicar): degradado cian con paradas
+      separadas para que se note */
 button[type="submit"] {
   background: linear-gradient(135deg, #00F0FF 0%, #0891B2 55%, #155E75 100%) !important;
   color: #06222b !important;
@@ -395,7 +372,7 @@ button[type="submit"] {
   box-shadow: 0 4px 20px rgba(34, 211, 238, 0.35);
   transition: all 0.3s ease !important;
   cursor: pointer;
-  /* v4 P2-5: el texto no se parte en 2 líneas dentro del propio botón */
+  /* nowrap: el texto no se parte en 2 líneas dentro del propio botón */
   white-space: nowrap;
 }
 
@@ -457,7 +434,7 @@ button.btn-graficar:hover {
   border-radius: var(--radius-sm);
   margin-bottom: 15px;
   scroll-margin-top: 20px;
-  transition: all 0.3s ease; /* P2-2: el hover debe verse animado */
+  transition: all 0.3s ease; 
 }
 
 .apunte-card h3,
@@ -473,14 +450,6 @@ button.btn-graficar:hover {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.85rem;
-}
-
-.section-block {
-  display: none;
-}
-
-.section-block.active {
-  display: block;
 }
 
 .file-upload-label {
@@ -515,7 +484,7 @@ button.btn-graficar:hover {
 }
 
 .footer-landing {
-  /* P2-4 v3: 4.5rem de aire dejaban un tercio de tarjeta vacío en móvil */
+  /* 4.5rem de aire dejaban un tercio de tarjeta vacío en móvil */
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -532,9 +501,9 @@ button.btn-graficar:hover {
   transition: all 0.3s ease;
 }
 
-/* v5 P1-9: .card-landing--cyan/--violet/--magenta ya no llevan border-left.
-   El borde lo pone .card-landing como una sola pieza en degradado (técnica
-   de doble fondo): dos piezas separadas no pueden doblar la esquina. */
+/* .card-landing--cyan/--violet/--magenta sin border-left: el borde en
+      degradado lo pone .card-landing como pieza única (doble fondo); piezas
+      separadas no doblan la esquina */
 
 .card-title {
   margin-bottom: 10px;
@@ -594,9 +563,8 @@ button.btn-graficar:hover {
 .card-landing:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-card-hover);
-  /* v5 P1-9: mismas TRES capas que en reposo. Con `background: rgba(...)`
-     en una sola capa se borraba el borde en degradado al pasar el ratón, y
-     sin la capa opaca el degradado se veía por todo el interior. */
+  /* hover con las mismas TRES capas que en reposo: una capa rgba sola borraba
+          el borde en degradado y sin la capa opaca el degradado se veía dentro */
   background:
     linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
     linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
@@ -740,8 +708,8 @@ button.btn-graficar:hover {
   border-left: 2px solid #a855f7;
 }
 
-/* P0-2: ESTADO a todo lo ancho (banner de éxito/aviso/error), en vez de
-   huérfana en la primera columna de la fila de 4 */
+/* ESTADO a todo el ancho (banner de éxito/aviso/error), no huérfano en la
+      primera columna de la fila de 4 */
 .resumen-card--estado {
   grid-column: 1 / -1;
   flex-direction: row;
@@ -1151,7 +1119,7 @@ button.btn-chip:hover {
   font-weight: bold;
 }
 
-/* Títulos Misión/Visión: magenta de la sección (§3.2), no violeta */
+/* Títulos Misión/Visión: magenta de la sección, no violeta */
 .mision-card--mision h2.mision-title,
 .mision-card--mision h3 {
   color: var(--accent-pink);
@@ -1193,7 +1161,7 @@ button.btn-chip:hover {
   gap: 12px;
 }
 
-/* Pills del equipo: tinte magenta de la sección (§3.2) */
+/* Pills del equipo: tinte magenta de la sección */
 .badge-equipo {
   padding: 8px 15px;
   background: rgba(236, 72, 153, 0.1);
@@ -1221,29 +1189,6 @@ button.btn-chip:hover {
   font-size: 1rem;
   color: var(--text-white);
   text-transform: uppercase;
-}
-
-.redes-grid-conocenos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.red-social-simple {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  color: var(--text-white);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  font-weight: bold;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.red-social-simple:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-1px);
 }
 
 .redes-cards-grid {
@@ -1340,12 +1285,6 @@ button.btn-chip:hover {
   color: var(--text-muted);
 }
 
-.redes-note {
-  margin-top: 1.5rem;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-}
-
 /* 06 UTILITIES */
 .btn-icon {
   margin-left: 6px;
@@ -1357,10 +1296,6 @@ button.btn-chip:hover {
 
 .icon-left-sm {
   margin-right: 6px;
-}
-
-.mono {
-  font-family: monospace;
 }
 
 /* 07 RESPONSIVE */
@@ -1416,7 +1351,6 @@ button.btn-chip:hover {
     font-size: 1.8rem;
   }
 
-  .landing-grid,
   .cards-grid {
     grid-template-columns: 1fr;
   }
@@ -1430,8 +1364,8 @@ button.btn-chip:hover {
   }
 
   object.visor-pdf {
-    /* v6 P1-4: 60vh en móvil (los 350px fijos eran menos que la mitad de
-       la pantalla en los teléfonos altos) */
+    /* 60vh en móvil: 350px fijos eran menos que la mitad de pantalla en
+              teléfonos altos */
     height: 60vh;
   }
 }
@@ -1625,8 +1559,7 @@ select:hover, select:focus {
 /* --- Responsive: filas de puntos en pantallas pequeñas --- */
 @media (max-width: 640px) {
   .procedimiento-katex {
-    /* v4 P0-2: a 0.8rem el P3(x) de exp(x) cabe completo en 390px y se ve
-       el ·x³; overflow-x: auto sigue como respaldo para N grande. */
+    /* 0.8rem: P3(x) de exp(x) cabe en 390px; overflow-x: auto de respaldo */
     font-size: 0.8rem;
     padding: 14px 10px;
   }
@@ -1644,13 +1577,8 @@ select:hover, select:focus {
   }
 }
 
-/* =========================================
-   AJUSTES DE LA REVISIÓN (12 nov)
-   ========================================= */
-
-/* --- Estado/criterio: el texto largo se recortaba (overflow:hidden + nowrap) ---
-   v4 P0-2: break-word en vez de anywhere, para no partir números por la
-   mitad (0.051615|24); solo rompe si la palabra entera no cabe. */
+/* Estado/criterio: break-word en vez de anywhere — solo rompe si la palabra
+      entera no cabe, nunca a mitad de un número (0.051615|24) */
 .resumen-card .resumen-value--small,
 .resumen-card--criterio .resumen-value {
   white-space: normal;
@@ -1685,7 +1613,7 @@ select:hover, select:focus {
   color: #f43f5e;
 }
 
-/* --- Cuadros de aviso y de error (antes solo existían info y éxito) --- */
+/* Cuadros de aviso y de error */
 .info-box--aviso {
   background: rgba(255, 136, 77, 0.10);
   border-left: 3px solid #ff884d;
@@ -1720,17 +1648,8 @@ button.btn-chip--division:hover {
   color: #ffffff !important;
 }
 
-/* ==========================================================================
-   CAMBIOS DE CSS — Portal Numérico (Itera), 13-nov (documento de diseño)
-   Sin tocar estructura ni lógica. Los media queries existentes (768/640/
-   600/480) se conservan tal cual; los cambios de ancho van en min-width.
-   ========================================================================== */
-
-/* --- P1-3: logo con el degradado de identidad también en el header ---
-   v5 P1-8: mismos paradas que .landing-title (#00F0FF → #BD00FF → #FF007B).
-   Con #22d3ee en medio el "ITERA" del header se quedaba en cian→morado y
-   nunca llegaba al magenta: se leía como una identidad distinta de la del
-   landing. */
+/* Logo del header con el mismo degradado que .landing-title
+      (#00F0FF → #BD00FF → #FF007B) */
 .logo-title {
   background: linear-gradient(135deg, #00f0ff, #bd00ff, #ff007b);
   -webkit-background-clip: text;
@@ -1739,14 +1658,14 @@ button.btn-chip--division:hover {
   color: transparent;
 }
 
-/* --- P1-3: link activo con marca visible --- */
+/* Link activo con marca visible */
 .nav-links a.active-link {
   color: #f3f4f6;
   border-bottom: 2px solid #22d3ee;
   padding-bottom: 3px;
 }
 
-/* --- P1-3: footer general (las 4 páginas) --- */
+/* Footer general (las 4 páginas) */
 .site-footer {
   text-align: center;
   color: var(--text-muted);
@@ -1755,7 +1674,7 @@ button.btn-chip--division:hover {
   border-top: 1px solid var(--border-color);
 }
 
-/* --- P1-3: el buscador de Apuntes vive en el cuerpo, arriba de la lista --- */
+/* Buscador de Apuntes en el cuerpo, arriba de la lista */
 .apuntes-buscador {
   margin-bottom: 15px;
 }
@@ -1772,42 +1691,12 @@ textarea::placeholder {
   opacity: 1;
 }
 
-/* --- P1-4: el equipo como grid real (la estructura HTML la decide el equipo) --- */
-.equipo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.equipo-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 20px 14px;
-  text-align: center;
-}
-
-.equipo-iniciales {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 10px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #06222b;
-  background: linear-gradient(135deg, #00f0ff, #22d3ee);
-}
-
-/* --- P2-1: el fondo (estrellas + símbolos, dentro del canvas) se nota
-       solo al mirar el borde de la pantalla, no al leer --- */
+/* El fondo del canvas se nota solo al mirar el borde de la pantalla */
 #particle-canvas {
   opacity: 0.45;
 }
 
-/* --- P2-2: hover y foco visibles --- */
+/* Hover y foco visibles */
 .card:hover,
 .apunte-card:hover,
 .resumen-card:hover {
@@ -1827,34 +1716,32 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* --- P1-1: Apuntes en grid de 2 columnas (≥768px); en móvil, 1 columna --- */
+/* Apuntes en grid de 2 columnas (≥768px); en móvil, 1 columna */
 @media (min-width: 768px) {
   #apuntes-remotos {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    /* Petición v3: las tarjetas iban muy pegadas → más aire entre columnas */
+    /* más aire: las tarjetas iban muy pegadas */
     gap: 32px;
     align-items: start;
   }
 
   #apuntes-remotos .apunte-card {
     margin-bottom: 0;
-    /* P2-7 v3: height:100% estiraba cada tarjeta a la fila y dejaba ~40%
-       vacío abajo; ahora mide lo que mide su contenido. */
+    /* sin height:100%: estiraba cada tarjeta a la fila y dejaba ~40% de
+              vacío abajo */
     height: auto;
   }
 }
 
 /* ==========================================================================
-   ESCRITORIO (min-width: 1024px) — P0-1 ancho, P1-2 etiquetas, P2-3 lienzo
-   Por debajo de 1024px manda lo de siempre (media queries de 768/640/600/480).
-   ========================================================================== */
+      ESCRITORIO (min-width: 1024px) — ancho, etiquetas y lienzo
+      ========================================================================== */
 @media (min-width: 1024px) {
-  /* P0-1: columna ancha y altura natural (sin scroll interno del contenedor) */
+  /* columna ancha y altura natural (sin scroll interno) */
   .container,
   .container--landing,
-  .container--conocenos,
-  .container--redes {
+  .container--conocenos {
     max-width: 1180px;
     max-height: none;
     overflow-y: visible;
@@ -1865,25 +1752,23 @@ textarea:focus-visible {
     align-items: flex-start;
   }
 
-  /* P1-2: con el ancho nuevo las etiquetas largas (intervalo A/B) caben en
-     una sola línea; en móvil siguen partiéndose como hasta ahora */
+  /* el ancho nuevo cabe el intervalo A/B en una sola línea */
   label {
     white-space: nowrap;
   }
 
-  /* P2-3: gráfica un poco más alta (el alto en dibujo lo toma el JS del CSS) */
+  /* gráfica un poco más alta */
   .grafica-canvas {
     height: 320px;
   }
 }
 
 /* ==========================================================================
-   §3.3 — UN COLOR POR MÉTODO
-   El selector escribe el método activo en .container[data-metodo] (JS:
-   alternarMetodoUI) y de ahí sale --method, que tiñe selector, título,
-   botón, resumen, gráfica y la curva (la lee js/graficadora.js).
-   color-mix() no soportado → la declaración se ignora y todo sigue cian.
-   ========================================================================== */
+      UN COLOR POR MÉTODO — .container[data-metodo] (JS: alternarMetodoUI)
+      deja --method, que tiñe selector, título, botón, resumen, gráfica y la
+      curva (la lee js/graficadora.js). color-mix() sin soporte → la
+      declaración se ignora y todo sigue cian.
+      ========================================================================== */
 /* Color del método activo (fallback: cian) */
 .container { --method: #22d3ee; }
 .container[data-metodo="biseccion"]      { --method: var(--m-biseccion); }
@@ -1894,10 +1779,9 @@ textarea:focus-visible {
 .container[data-metodo="lagrangepoly"]   { --method: var(--m-lagrange-poli); }
 .container[data-metodo="simpson"]        { --method: var(--m-simpson); }
 
-/* El selector muestra el color del método.
-   border-color necesita !important: el base `select { border: … !important }`
-   (§04) lo pisa si no. El box-shadow va normal para no tapar el foco de
-   teclado (select:focus { box-shadow: … !important }). */
+/* El selector muestra el color del método. border-color necesita
+      !important: el base `select { border: … !important }` lo pisa si no. El
+      box-shadow va normal para no tapar el foco de teclado. */
 #metodo-selector {
   border-color: var(--method) !important;
   box-shadow: 0 0 0 1px var(--method), 0 0 18px color-mix(in srgb, var(--method) 35%, transparent);
@@ -1927,30 +1811,15 @@ textarea:focus-visible {
 }
 
 /* ==========================================================================
-   §3.4 — TARJETAS CON TINTE, FRANJA EN DEGRADADO Y HALO POR SECCIÓN
-   ========================================================================== */
+      TARJETAS CON TINTE, FRANJA EN DEGRADADO Y HALO POR SECCIÓN
+      ========================================================================== */
 
-/* Tarjetas de la landing: tinte + borde en degradado (v5 P1-9).
-   Antes eran DOS piezas: la franja superior (::before, 3px) y el borde
-   izquierdo (border-left). Al ser piezas separadas no podían doblar la
-   esquina: la franja terminaba en punta cuadrada justo antes de la esquina
-   superior derecha y el lado derecho se quedaba sin borde.
-
-   TRES capas de background (las dos del truco clásico + una base opaca):
-   1. tinte blanco a padding-box  → el brillo del interior;
-   2. color de tarjeta a padding-box → OPACA: tapa el degradado por dentro
-      (sin ella, el tinte de arriba deja pasar el degradado y la tarjeta
-      entera queda en cian→magenta con el texto ilegible);
-   3. degradado a border-box     → solo asoma por el ÁREA DE BORDE, que es
-      solo la izquierda y la superior (border-right/bottom: 0): la capa
-      border-box pinta debajo de las otras dos, así que donde no hay borde
-      la tapan por completo y el degradado no recorre la tarjeta.
-
-   El borde se ve SOLO a la izquierda y arriba (petición v5): dobla la
-   esquina superior izquierda como una sola pieza y termina en las esquinas
-   opuestas (allí el radio de 12px hace que el degradado se afine hasta
-   desaparecer contra el borde derecho/inferior, que no tiene línea).
-   (los títulos NO cambian: sus colores están en §3.1) */
+/* Tarjetas de la landing: tinte + borde en degradado en TRES capas de
+      background — 1) tinte blanco a padding-box (brillo del interior);
+      2) color de tarjeta a padding-box, OPACA, tapa el degradado por dentro
+      (sin ella la tarjeta entera quedaría cian→magenta con texto ilegible);
+      3) degradado a border-box, que solo asoma en el área de borde (izquierda
+      y arriba: border-right/bottom: 0) y en el resto lo tapan las otras dos. */
 .card-landing {
   border: 3px solid transparent;
   border-right: 0;
@@ -1964,9 +1833,8 @@ textarea:focus-visible {
 }
 
 /* Notas y resumen: superficie elevada + borde violeta en Apuntes.
-   Excepciones: las tarjetas de la landing (.card-landing, que también son
-   .apunte-card) conservan su tinte en degradado y su borde en degradado, y los
-   estados --ok/--warn/--error conservan su tinte de color. */
+      Excepciones: .card-landing conserva su tinte/borde en degradado y los
+      estados --ok/--warn/--error su tinte de color. */
 .apunte-card:not(.card-landing),
 .resumen-card:not(.resumen-card--ok):not(.resumen-card--warn):not(.resumen-card--error) {
   background: var(--card-bg-2);
@@ -1977,32 +1845,17 @@ textarea:focus-visible {
 }
 
 /* Halo de color tenue detrás del contenedor (uno por sección).
-   z-index: -1 dentro del contexto de apilamiento de .main-container (que ya
-   tiene z-index: 2): el halo queda detrás de la tarjeta, no encima del texto.
-
-   Ronda 9 (post-v4): con position absolute / 900×520 el brillo vivía en la
-   parte superior de la página y, una vez fixed, quedaba entero DETRÁS de las
-   tarjetas de 1180px: no asomaba por los lados y al hacer scroll aparecía
-   solo fondo negro. El gradiente lleva 3 paradas —color fuerte 0.26, color
-   tenue 0.16 y transparente al 80%— para que el centro se vea y los bordes
-   se fundan.
-
-   v5 P0-4: el ancho pasó de 2000px fijo a 100vw. Con un ancho fijo y el
-   centrado left: 50% + translateX(-50%), en fullscreen (F11 en un monitor
-   ancho) el viewport superaba los 2000px y el degradado se cortaba a los
-   lados, dejando a la vista el borde del degradado. 100vw cubre todo el
-   ancho de la ventana en cualquier tamaño (el degradado radial ya es
-   relativo al propio elemento, así que escala con él). */
+      z-index: -1 dentro del contexto de apilamiento de .main-container (que ya
+      tiene z-index: 2): el halo queda detrás de la tarjeta, no encima del
+      texto. El gradiente lleva 3 paradas (fuerte 0.26, tenue 0.16, transparente
+      al 80%) para que el centro se vea y los bordes se fundan. */
 .main-container::before {
   content: '';
   position: fixed;
   top: 0;
-  /* v6 P0-1: max(100vw, 2000px) centrado. El 100vw de la v5 cubre el
-     fullscreen, pero en móvil la elipse mide 390px y su color fuerte queda
-     justo detrás de las tarjetas (que ocupan casi todo el ancho): el brillo
-     solo se ve arriba y desaparece al hacer scroll, con los laterales en
-     negro. Con max() el ancho nunca baja de 2000px (elipse ancha, como en
-     la ronda 9) y en pantallas de ≥2000px sigue cubriendo todo el ancho. */
+  /* max(100vw, 2000px) centrado: con 100vw solo, la elipse medía lo que la
+          pantalla y el brillo se veía solo arriba con los laterales en negro; el
+          mínimo de 2000px garantiza una elipse ancha en cualquier tamaño. */
   left: 50%;
   transform: translateX(-50%);
   width: max(100vw, 2000px);
@@ -2018,30 +1871,16 @@ body:has(.redes-section) .main-container::before {
   background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.26) 0%, rgba(236, 72, 153, 0.16) 45%, transparent 80%);
 }
 
-/* ==========================================================================
-   CORRECCIONES VISUALES v3 (13-nov) — sobre la base "Ronda 6: CSS v2"
-   Documento: "Portal Numérico — Correcciones visuales v3" (P0/P1/P2) más
-   dos peticiones directas del equipo (bordes del landing, aire en Apuntes).
-   ========================================================================== */
-
-/* --- Petición: el "canva" (contenedor) del landing queda completamente
-   centrado en ambos ejes. margin-block: auto centra en vertical con el truco
-   de márgenes auto: si el contenido es más alto que la pantalla, los márgenes
-   valen 0 y nada se recorta por arriba. --- */
+/* El contenedor del landing queda centrado en ambos ejes: margin-block: auto
+      centra en vertical y, si el contenido supera la pantalla, los márgenes
+      valen 0 y nada se recorta por arriba */
 .container--landing {
   margin-inline: auto;
   margin-block: auto;
 }
 
-/* --- v5 P1-9: aquí vivía la regla unificada de border-left de las 3
-   tarjetas del landing (franja cian de 3px a la izquierda). Eliminada: el
-   borde ya es una sola pieza en degradado que sale de .card-landing, y esta
-   pieza suelta volvía a cortar la esquina superior derecha. --- */
-
-/* --- P0-1 v3: tarjetas de Taylor en móvil ---
-   .resumen-grid--6 (3 columnas) no tenía regla móvil y ganaba al
-   .resumen-grid de 2 columnas; con white-space: nowrap los números se
-   cortaban en vez de partirse. */
+/* Tarjetas de Taylor en móvil: .resumen-grid--6 (3 columnas) no tenía
+      regla móvil y ganaba a la de 2; con nowrap los números se cortaban */
 @media (max-width: 768px) {
   .resumen-grid--6 {
     grid-template-columns: repeat(2, 1fr);
@@ -2056,8 +1895,8 @@ body:has(.redes-section) .main-container::before {
 
   .resumen-grid--6 .resumen-value {
     white-space: normal;
-    /* v4 P0-2: "break-word" en vez de "anywhere": solo parte si la palabra
-       entera no cabe, nunca a mitad de un número (0.051615|24). */
+    /* "break-word" en vez de "anywhere": solo parte si la palabra entera no
+            cabe, nunca a mitad de un número (0.051615|24) */
     overflow-wrap: break-word;
     font-size: 0.8rem;
   }
@@ -2068,10 +1907,8 @@ body:has(.redes-section) .main-container::before {
   }
 }
 
-/* --- P0-2 v3: el icono de ESTADO no tapa la "E" ---
-   Cada hijo de la tarjeta en fila queda con su espacio explícito; el valor
-   largo ("Criterio cumplido: residuo |f(x)| ≤ …") se parte en vez de
-   apretar a la etiqueta. */
+/* El icono de ESTADO no tapa la "E": cada hijo de la tarjeta en fila queda
+      con su espacio explícito y el valor largo se parte en vez de apretar */
 .resumen-card--estado {
   gap: 10px;
 }
@@ -2093,7 +1930,7 @@ body:has(.redes-section) .main-container::before {
   text-align: right;
 }
 
-/* --- P1-4 v3: CRITERIO DE PARO apilado en móvil --- */
+/* CRITERIO DE PARO apilado en móvil */
 @media (max-width: 768px) {
   .resumen-card--criterio {
     flex-direction: column;
@@ -2102,9 +1939,8 @@ body:has(.redes-section) .main-container::before {
   }
 }
 
-/* --- P1-2 v3: TODO acento de la calculadora sale de --method ---
-   Iconos de las tarjetas (antes fijos por posición: morado/rosa/cian/verde),
-   botón CALCULAR, GRAFICAR, teclado, etiquetas y anillo de foco. */
+/* TODO acento de la calculadora sale de --method: iconos de las tarjetas,
+      CALCULAR, GRAFICAR, teclado, etiquetas y anillo de foco */
 .resumen-card:nth-child(1) i,
 .resumen-card:nth-child(2) i,
 .resumen-card:nth-child(3) i,
@@ -2112,10 +1948,9 @@ body:has(.redes-section) .main-container::before {
   color: var(--method);
 }
 
-/* Botón CALCULAR: degradado con el color del método. Se mezcla hacia BLANCO
-   (no hacia #06222B) para que el texto #06222B sobre el color del método
-   quede con contraste ≥ 4.5:1 en los 7 métodos. !important para ganarle al
-   background de button[type="submit"] (línea §04, también !important). */
+/* CALCULAR: degradado con el color del método, hacia BLANCO para que el
+      texto #06222B quede con contraste ≥ 4.5:1 en los 7 métodos; !important
+      para ganarle al background de button[type="submit"]. */
 .container:has(#metodo-selector) button[type="submit"] {
   background: linear-gradient(
     135deg,
@@ -2134,8 +1969,7 @@ body:has(.redes-section) .main-container::before {
   background: color-mix(in srgb, var(--method) 12%, transparent);
 }
 
-/* Teclado matemático: los chips llevan !important en el base (§04), aquí
-   también hace falta para poder teñirlos. */
+/* Teclado: los chips llevan !important en el base, aquí también hace falta */
 .container:has(#metodo-selector) button.btn-chip {
   border-color: color-mix(in srgb, var(--method) 45%, transparent) !important;
   color: var(--method) !important;
@@ -2157,7 +1991,7 @@ body:has(.redes-section) .main-container::before {
   outline-offset: 2px;
 }
 
-/* --- P2-2 v3: "Buscar apuntes" visible como encabezado de sección --- */
+/* "Buscar apuntes" visible como encabezado de sección */
 .apuntes-buscador-label {
   display: block;
   margin-bottom: 8px;
@@ -2166,8 +2000,7 @@ body:has(.redes-section) .main-container::before {
   font-weight: 600;
 }
 
-/* --- P2-3 v3: acciones de cada nota (VER DOCUMENTO / Descargar original) ---
-   Antes iban en cssText en línea, sin wrap y sin media query posible. */
+/* Acciones de cada nota (VER DOCUMENTO / Descargar original) */
 .apunte-acciones {
   margin-top: 12px;
   display: flex;
@@ -2175,7 +2008,7 @@ body:has(.redes-section) .main-container::before {
   align-items: center;
 }
 
-/* --- P2-5 v3: el header fijo no tapa encabezados al hacer scroll --- */
+/* El header fijo no tapa encabezados al hacer scroll */
 h1,
 h2,
 h3,
@@ -2184,21 +2017,20 @@ h3,
   scroll-margin-top: 90px;
 }
 
-/* --- P2-8 v3: el hueco de "DERIVADA DE F(X)" solo se ve cuando hay
-   contenido (en cuanto el JS escribe la derivada vuelve a aparecer) --- */
+/* El hueco de "DERIVADA DE F(X)" solo se ve cuando hay contenido */
 .preview-fx:empty {
   display: none;
 }
 
-/* --- Petición v3: más aire entre las cards de Apuntes en móvil
-   (en ≥768px el aire lo da el gap del grid, ajustado arriba a 32px) --- */
+/* Más aire entre las cards de Apuntes en móvil (en ≥768px el aire lo da
+      el gap del grid) */
 @media (max-width: 767px) {
   #apuntes-remotos .apunte-card {
     margin-bottom: 28px;
   }
 }
 
-/* --- P2-3 v3: en móvil los botones de cada nota se apilan a todo ancho --- */
+/* En móvil los botones de cada nota se apilan a todo ancho */
 @media (max-width: 768px) {
   .apunte-acciones {
     flex-direction: column;
@@ -2211,17 +2043,8 @@ h3,
   }
 }
 
-/* ==========================================================================
-   CORRECCIONES VISUALES v4 — pulido final (13-nov)
-   Base: "Ronda 7: correcciones visuales v3". Documento:
-   "Portal Numérico — Correcciones visuales v4".
-   ========================================================================== */
-
-/* --- P0-1: blindaje de taps en móvil ---
-   El diagnóstico con elementFromPoint sigue pendiente en un dispositivo real;
-   aquí se garantiza que el formulario y sus botones quedan por encima de
-   cualquier capa decorativa y que el toque no lleva retardo (double-tap
-   zoom / 300ms). */
+/* Blindaje de taps en móvil: formulario y botones por encima de capas
+      decorativas y sin retardo de toque (double-tap zoom / 300ms) */
 .container form,
 .container .form-row {
   position: relative;
@@ -2235,8 +2058,8 @@ button[type="submit"],
   touch-action: manipulation;
 }
 
-/* --- P0-3: el salto de línea del criterio de paro solo en pantalla estrecha
-   (en escritorio la fórmula cabe en una línea y el <br> sobraría) --- */
+/* El salto de línea del criterio de paro solo en pantalla estrecha (en
+      escritorio la fórmula cabe en una línea) */
 .criterio-salto {
   display: none;
 }
@@ -2247,17 +2070,15 @@ button[type="submit"],
   }
 }
 
-/* --- P1-2: los últimos restos de cian por método --- */
+/* Últimos restos de cian fijo por método */
 
-/* "INSERTAR EXPRESIÓN:" es un <span class="examples-label"> (no un <label>):
-   la regla v3 solo ataba a los <label>. */
+/* "INSERTAR EXPRESIÓN:" es un <span class="examples-label">, no un <label> */
 .container:has(#metodo-selector) .examples-label {
   color: var(--method);
 }
 
-/* El borde del selector/inputs pasa al método también en hover y foco
-   (select:hover, select:focus del §04 fija --accent-cian y gana por
-   especificidad al #metodo-selector de §3.3). */
+/* El borde del selector/inputs pasa al método también en hover y foco (el
+      select:focus del base fija --accent-cian y gana por especificidad) */
 .container:has(#metodo-selector) select:hover,
 .container:has(#metodo-selector) select:focus {
   border-color: var(--method) !important;
@@ -2270,9 +2091,9 @@ button[type="submit"],
   padding-right: 44px !important;
 }
 
-/* Chevron con el color del método: el chevron es el SVG de background-image
-   del §04 (fill codificado, fijo a #22D3EE). Un background-image no admite
-   var(), así que cada método lleva su parada; Bisección conserva la base. */
+/* Chevron con el color del método: es el SVG de background-image del base
+      (fill fijo, sin var()); cada método lleva su parada y Bisección conserva
+      la base */
 .container[data-metodo="puntofijo"] select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a855f7'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
 }
@@ -2297,17 +2118,12 @@ button[type="submit"],
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a3e635'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
 }
 
-/* --- P2-1 (ronda 9, opción híbrida elegida por el equipo): el contenedor
-   centrado en pantalla Y el footer siempre al pliegue ---
-   Con el fix v4 (min-height auto + flex-start) el contenedor quedaba arriba
-   y el vacío de ~195px se movía debajo del footer. Ahora el body pasa a
-   flex-column y .main-container crece (flex: 1 0 auto) hasta el .site-footer:
-   con contenido corto la caja se estira y la tarjeta queda centrada en el
-   hueco que sobra (align-items: center); con contenido alto flex-shrink: 0
-   evita que la caja se comprima y la página hace scroll con normalidad.
-   min-height: 0 anula el calc(100vh - 90px), que empujaba el footer por
-   debajo del pliegue. El centrado horizontal (margin-inline: auto de
-   .container--landing) sigue intacto. */
+/* Contenedor centrado en pantalla Y footer siempre al pliegue: el body es
+      flex-column y .main-container crece (flex: 1 0 auto) hasta el footer;
+      align-items: center centra la tarjeta en el hueco que sobra,
+      flex-shrink: 0 evita que la caja se comprima con contenido alto y
+      min-height: 0 anula el calc(100vh - 90px) que empujaba el footer bajo el
+      pliegue. */
 body:has(.container--landing) {
   display: flex;
   flex-direction: column;
@@ -2319,8 +2135,8 @@ body:has(.container--landing) .main-container {
   align-items: center;
 }
 
-/* --- P2-3: en las tarjetas de Apuntes las acciones se pegan al fondo;
-   si sobra espacio, queda entre el contenido y los botones. --- */
+/* Acciones de las tarjetas de Apuntes pegadas al fondo; si sobra espacio,
+      quedan entre el contenido y los botones */
 #apuntes-remotos .apunte-card {
   display: flex;
   flex-direction: column;
@@ -2330,7 +2146,7 @@ body:has(.container--landing) .main-container {
   margin-top: auto;
 }
 
-/* --- P2-5: "CALCULAR PROCEDIMIENTO" en una sola línea en móvil --- */
+/* "CALCULAR PROCEDIMIENTO" en una sola línea en móvil */
 @media (max-width: 768px) {
   button[type="submit"] {
     font-size: 0.8rem;
@@ -2338,65 +2154,35 @@ body:has(.container--landing) .main-container {
   }
 }
 
-/* ==========================================================================
-   CORRECCIONES v5 (13-nov) — "Portal Numérico — Correcciones v5"
-   Base: "Ronda 9" (0cc9edb). Documento: P0/P1 de la lista v5.
-   ========================================================================== */
-
-/* --- P0-1: la fila CALCULAR + GRAFICAR no desborda en móvil ---
-   En ≤768px .form-actions era flex en horizontal con dos botones flex: 1:
-   cada botón tiene min-width: auto (no puede encogerse por debajo de su
-   contenido) y el submit lleva white-space: nowrap (v4 P2-5, texto en
-   mayúsculas + letter-spacing). A 390px la suma de ambos contenidos era
-   mayor que el ancho de la tarjeta: el borde derecho de GRAFICAR quedaba
-   fuera de la pantalla y, como el desbordamiento es del contenido del flex
-   y no de la página, el scroll lateral no lo alcanzaba.
-   Solución: en pantalla estrecha los dos botones se apilan, cada uno a todo
-   el ancho de la tarjeta. */
+/* CALCULAR + GRAFICAR no desbordan en móvil: con dos botones flex: 1,
+      min-width: auto y nowrap, a 390px el borde derecho de GRAFICAR se salía
+      (y al ser desbordamiento del flex, el scroll lateral no lo alcanzaba).
+      En pantalla estrecha se apilan a todo el ancho. */
 @media (max-width: 768px) {
   .form-actions {
     flex-direction: column;
   }
 }
 
-/* --- P1-8 (editado en §3.x): el logo del header usa el MISMO degradado que
-   .landing-title (#00F0FF → #BD00FF → #FF007B). --- */
-
-/* --- P1-9: el borde en degradado del landing no se rompe con el ratón ---
-   Reglas editadas en §3.1 (franja ::before de las tarjetas eliminada), §3.4
-   (.card-landing con borde de doble fondo) y la unificada de v3
-   (border-left eliminado). Falta esto: .apunte-card:hover (P2-2) pinta
-   border-color por encima y, al ser más específico/POSTERIOR, taparía el
-   degradado del border-box con un cian opaco. Aquí, al final del archivo,
-   gana por orden de aparición. */
+/* El borde en degradado del landing no se rompe con el ratón:
+      .apunte-card:hover pinta border-color por encima y, al ser más específico
+      y posterior, taparía el degradado con un cian opaco. Esta regla va al
+      final del archivo y gana por orden. */
 .card-landing:hover {
   border-color: transparent;
 }
 
-/* ==========================================================================
-   CORRECCIONES v6 (13-nov) — "Portal Numérico — Correcciones v6"
-   Base: "Ronda 10" (405b493) + Ronda 10b (borde del landing a izquierda y
-   arriba). El halo (P0-1) se editó en su sitio, en .main-container::before.
-   ========================================================================== */
-
-/* --- P1-4: el visor de un apunte ocupa las 2 columnas de Apuntes ---
-   Al abrir "VER DOCUMENTO" la tarjeta seguía en media columna (grid de 2
-   columnas desde 768px) y el documento quedaba apretado, con el texto
-   diminuto. Las tarjetas son hijas directas de #apuntes-remotos, así que
-   1 / -1 las ocupa todas. En móvil el contenedor no es grid y la
-   declaración no hace nada (ahí ya se ve a todo el ancho). */
+/* El visor de un apunte ocupa las 2 columnas de Apuntes: las tarjetas son
+      hijas directas de #apuntes-remotos, así que 1 / -1 las ocupa todas. En
+      móvil el contenedor no es grid y la declaración no hace nada. */
 .apunte-card.visor-abierto {
   grid-column: 1 / -1;
 }
 
-/* --- P1-4: tipografía del visor Markdown (antes en cssText en línea,
-   js/apuntes.js) ---
-   Ojo con .apunte-card p (más arriba): pinta los párrafos a 0.85rem, así
-   que sin redeclarar font-size aquí el Markdown seguiría saliendo en letra
-   pequeña aunque el contenedor pida 1rem. Las reglas van al final del
-   archivo para ganar por orden con la misma especificidad (sin !important).
-   El color no se toca: --text-muted (#c6cdda) ya se lee bien sobre el
-   fondo oscuro del visor, igual que en el resto de las tarjetas. */
+/* Tipografía del visor Markdown. Ojo con .apunte-card p (más arriba):
+      pinta los párrafos a 0.85rem, así que font-size se redeclara aquí; las
+      reglas van al final del archivo para ganar por orden con la misma
+      especificidad. El color no se toca: --text-muted ya se lee bien. */
 .visor-documento {
   display: none;
   margin-top: 15px;
@@ -2427,27 +2213,19 @@ body:has(.container--landing) .main-container {
   max-width: 75ch;
 }
 
-/* --- v7 P0-1: el tope de 75ch se levanta solo en el estado expandido ---
-   Ahora el visor ocupa las 2 columnas de la grilla (~1136px) y el texto
-   seguía cortado en 75ch (~680px), dejando 400px de negro a la derecha y
-   un H1 centrado sobre un ancho con el que no coincidía. Con el tope
-   fuera, párrafos, listas y el H1 comparten la caja completa del visor.
-   (75ch sigue vigente en las tarjetas colapsadas, donde la columna sí es
-   angosta.) La especificidad (0,3,1) gana a la de arriba (0,1,1) aunque
-   esté primero. */
+/* El tope de 75ch se levanta solo en el estado expandido: con el visor a
+      las 2 columnas (~1136px) dejaba 400px de negro a la derecha. En tarjetas
+      colapsadas (columna angosta) sigue vigente; la especificidad (0,3,1) gana
+      aunque esté primero. */
 .apunte-card.visor-abierto .visor-documento p,
 .apunte-card.visor-abierto .visor-documento li {
   max-width: none;
 }
 
-/* --- v7 P0-2: el panel del visor en móvil no va con doble margen ---
-   El panel estaba inset dos veces: 15px de padding de la tarjeta + 16px
-   de padding propio, así que el texto no arrancaba donde el título de la
-   tarjeta. Con margin-inline negativo el panel se extiende hasta el borde
-   interior de la tarjeta y su padding (igual al de la tarjeta) devuelve
-   el texto a la misma raya. Solo la parte horizontal: el fondo del panel
-   sigue a 15px del borde inferior (padding-bottom de la tarjeta), así que
-   sus esquinas redondeadas no se salen de las de la tarjeta. */
+/* El panel del visor en móvil no lleva doble margen: margin-inline negativo
+      anula el padding de la tarjeta y su padding propio (igual al de la
+      tarjeta) devuelve el texto a la misma raya. Solo en horizontal: el fondo
+      sigue a 15px del borde inferior para no salirse de las esquinas. */
 @media (max-width: 768px) {
   .visor-documento {
     padding: 20px 16px;
@@ -2459,21 +2237,12 @@ body:has(.container--landing) .main-container {
   }
 }
 
-/* ==========================================================================
-   CORRECCIONES v8 (14-nov) — Rendimiento en móvil ("Ronda 13")
-   Base: "Ronda 12" (799ff98). El equipo midió lag al hacer scroll en un
-   celular de gama media: canvas de partículas repintando a ~30fps y, encima,
-   dos capas con backdrop-filter + un halo de 2000px recomponiéndose en cada
-   cuadro. Esta sección solo toca composición/pintado: no cambia maquetación.
-   ========================================================================== */
+/* --- Rendimiento en móvil (≤768px) --- */
 
-/* --- P0-1: sin backdrop-filter en móvil (header y tarjeta principal) ---
-   Cada cuadro del canvas obliga al teléfono a recalcular el desenfoque de
-   15px del header y de 20px de .container sobre casi toda la pantalla; eso
-   es lo que trababa el scroll. La tarjeta ya tenía fondo 0.9 (casi opaco),
-   así que sin blur casi no se nota: sube a 0.97 y listo. El header pasa de
-   0.85+blur a negro 0.96, que se ve igual de sólido que antes. La línea
-   -webkit- es por Safari/iOS, que exige el prefijo. */
+/* Sin backdrop-filter en móvil: cada cuadro del canvas obligaba a
+      recalcular el blur de 15px (header) y 20px (.container) sobre casi toda
+      la pantalla. La tarjeta sube su fondo de 0.9 a 0.97 y el header pasa a
+      negro 0.96; -webkit- es la línea que exige Safari/iOS. */
 @media (max-width: 768px) {
   header {
     background: rgba(0, 0, 0, 0.96);
@@ -2488,38 +2257,27 @@ body:has(.container--landing) .main-container {
   }
 }
 
-/* --- P0-2: el halo se achica en móvil (mismo brillo, menos área) ---
-   Sigue vigente lo de la v6: si la elipse mide lo que mide la pantalla
-   (100vw), su borde cae dentro del viewport y los laterales quedan en negro.
-   La condición para que el borde del halo llegue al borde de la pantalla con
-   la misma claridad de hoy es ancho ≥ 2,6 × el viewport (el degradado llega
-   a transparente al 80% de la diagonal). 260vw da ≈1014px a 390px y
-   ≈1997px a 768px: idéntico al aspect actual, pero en teléfonos el área
-   pintada de la capa fija baja de 2000×100vh a ~1014×100vh (≈ la mitad),
-   que es la que hay que recomponer en cada cuadro del canvas. */
+/* El halo se achica en móvil (mismo brillo, menos área): el borde del halo
+      debe caer fuera del viewport (≥ 2,6 × el ancho) para que los laterales no
+      queden en negro; 260vw mantiene el aspecto actual y en teléfonos reduce el
+      área pintada que hay que recomponer en cada cuadro. */
 @media (max-width: 768px) {
   .main-container::before {
     width: max(260vw, 900px);
   }
 }
 
-/* --- P1-4: las tarjetas de apuntes fuera de pantalla no se renderizan ---
-   content-visibility: auto salta estilo/layout/pintado de lo que no se ve
-   (la lista de Apuntes crece con cada apunte publicado). contain-intrinsic
-   size con "auto" recuerda la altura real de la última vez pintada, así la
-   barra de scroll no salta cuando una tarjeta entra en pantalla. Los
-   navegadores viejos lo ignoran y quedan como hoy. */
+/* content-visibility: auto salta estilo/layout/pintado de lo que no se ve;
+      contain-intrinsic-size con "auto" recuerda la altura real de la última
+      vez pintada para que la barra de scroll no salte. */
 #apuntes-remotos .apunte-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 260px;
 }
 
-/* --- Ronda 13b: el logo de la top bar no aparece en móvil ---
-   En ≤768px la top bar apila logo, buscador y menú (header en columna), y el
-   "ITERA" come alto en pantallas chicas: se quita POR COMPLETO (display: none),
-   no solo su degradado. En escritorio el logo sigue con su degradado de
-   identidad (P1-8). Va al final del archivo para ganarle por orden a la
-   regla de .logo-title de la línea ~1734. */
+/* El logo de la top bar no aparece en móvil: en ≤768px la barra apila y el
+      "ITERA" come alto (display: none, no solo sin degradado). Va al final
+      para ganarle por orden a .logo-title. */
 @media (max-width: 768px) {
   .logo-title {
     display: none;

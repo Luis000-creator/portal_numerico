@@ -37,7 +37,7 @@ function mostrarEsqueletosApuntes(cont, n = 3) {
 async function cargarApuntesRemotos() {
     if (!window.supabaseClient) return;
     const cont = document.getElementById('apuntes-remotos');
-    // P2-7 v3: los esqueletos grises solo aparecen si la carga tarda más de
+    // Los esqueletos grises solo aparecen si la carga tarda más de
     // 300 ms; si Supabase responde rápido, la lista entra directa y no hay
     // parpadeo de skeletons.
     const tEsqueleto = setTimeout(() => mostrarEsqueletosApuntes(cont, 3), 300);
@@ -57,13 +57,8 @@ async function cargarApuntesRemotos() {
     const vacioMsg = document.getElementById('apuntes-vacio');
 
     // --- Deduplicar títulos repetidos ---
-    // En la BD hay filas duplicadas (EJERCICIO_7: ids 32 y 33; EJERCICIO_6_PF:
-    // ids 45 y 47): se subieron dos veces, casi siempre por reemplazar un
-    // archivo con una corrección. La política RLS no permite DELETE público,
-    // así que aquí se muestra UNA tarjeta por título conservando la fila más
-    // reciente (la versión corregida, subida después).
-    // El borrado definitivo de la fila vieja debe hacerse desde el panel de
-    // Supabase (SQL Editor): delete from public.apuntes where id in (32, 45);
+    // Filas duplicadas por título (subidas dos veces; la corrección va
+    // después) se muestran una sola vez, conservando la más reciente.
     const mejorPorTitulo = new Map();
     data.forEach(apunte => {
         const clave = String(apunte.titulo || '').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -92,11 +87,9 @@ async function cargarApuntesRemotos() {
             parrafo.textContent = apunte.contenido;
             // Renderizar KaTeX del contenido (no-op si aún no está cargado)
             renderizarMath(parrafo);
-            // v8 P1: KaTeX (~300KB) ya no se pide en el <head> de la página.
-            // Si este contenido trae fórmulas $...$ se descarga aquí, después
-            // del primer pintado de la lista, y solo se repinta este párrafo.
-            // Los apuntes de hoy son "(archivo adjunto: …)", sin fórmulas, así
-            // que quien solo abre la lista no descarga KaTeX.
+            // KaTeX (~300KB) no se pide en el <head>: si el contenido trae
+            // $...$ se descarga aquí, tras el primer pintado, y solo se
+            // repinta este párrafo.
             if (apunte.contenido && apunte.contenido.includes('$')
                 && window.Vendor && typeof window.Vendor.ensureKatex === 'function') {
                 window.Vendor.ensureKatex()
@@ -107,9 +100,9 @@ async function cargarApuntesRemotos() {
         // Si hay archivo adjunto, agregar visor integrado
         if (apunte.archivo_url) {
             const btnContainer = document.createElement('div');
-            // P2-3 v3: los estilos viven en CSS (.apunte-acciones) para poder
-            // apilarlos en móvil con un media query (el cssText en línea no lo
-            // permite: "Ver documento" y "Descargar original" se partían).
+            // Los estilos viven en CSS (.apunte-acciones): el cssText en
+            // línea no permite apilarlos en móvil con media query
+            // ("Ver documento" y "Descargar original" se partían).
             btnContainer.className = 'apunte-acciones';
 
             // Boton para visualizar en la pagina (glifo Font Awesome, no emoji)
@@ -130,10 +123,9 @@ async function cargarApuntesRemotos() {
 
             // Contenedor oscuro que servira como pantalla del visor
             const visor = document.createElement('div');
-            // v6 P1-4: los estilos viven en CSS (.visor-documento) para poder
-            // tipografiar el Markdown (1rem, interlineado 1.7, encabezados en
-            // cian) y ajustar el padding en móvil, algo que el cssText en
-            // línea no permite. Solo queda el display, que es el estado.
+            // Los estilos viven en CSS (.visor-documento): el cssText en
+            // línea no permite tipografiar Markdown ni ajustar el padding en
+            // móvil. Solo queda el display, que es el estado.
             visor.className = 'visor-documento';
             visor.style.display = 'none';
 
@@ -142,7 +134,7 @@ async function cargarApuntesRemotos() {
                 // Si esta abierto, cerrarlo
                 if (visor.style.display === 'block') {
                     visor.style.display = 'none';
-                    // v6 P1-4: la tarjeta vuelve a su columna
+                    // La tarjeta vuelve a su columna
                     card.classList.remove('visor-abierto');
                     // Se mantiene innerHTML: el icono y el texto cambian
                     // juntos (con textContent se borraría el glifo)
@@ -152,10 +144,9 @@ async function cargarApuntesRemotos() {
 
                 // Abrir visor con estado de carga
                 visor.style.display = 'block';
-                // v6 P1-4: con el visor abierto la tarjeta ocupa las 2
-                // columnas del grid: en media columna el documento quedaba
-                // apretado y el texto se veía diminuto. En móvil el contenedor
-                // no es grid y la clase no hace nada.
+                // Con el visor abierto la tarjeta ocupa las 2 columnas del
+                // grid (en media columna el texto queda diminuto; en móvil
+                // el contenedor no es grid y la clase no hace nada).
                 card.classList.add('visor-abierto');
                 card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 btnVer.innerHTML = '<i class="fa-regular fa-eye-slash" style="margin-right:6px;"></i> Ocultar documento';
@@ -188,10 +179,9 @@ async function cargarApuntesRemotos() {
                     visor.appendChild(objeto);
                 } else if (url.toLowerCase().endsWith('.md')) {
                     try {
-                        // v8 P1: marked (~40KB) + DOMPurify (~22KB) y KaTeX se
-                        // piden aquí, la primera vez que alguien abre un
-                        // Markdown, y no en el <head> de la página (antes se
-                        // bajaban aunque solo se fuera a ver la lista).
+                        // marked (~40KB) + DOMPurify (~22KB) y KaTeX se piden
+                        // aquí, la primera vez que se abre un Markdown, no en
+                        // el <head>.
                         if (window.Vendor && typeof window.Vendor.ensureMarkdown === 'function') {
                             await window.Vendor.ensureMarkdown();
                             await window.Vendor.ensureKatex();

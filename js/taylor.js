@@ -35,7 +35,7 @@ function taylorPartes(coefs, a) {
     for (let k = 0; k < coefs.length; k++) {
         const c = coefs[k];
         if (!Number.isFinite(c) || c === 0) continue;
-        // v5 P0-2: 6 cifras significativas SOLO en el polinomio. numTexto
+        // 6 cifras significativas SOLO en el polinomio. numTexto
         // usa toPrecision(12) y "0.166666666667·x³" no cabe ni a 0.8rem en
         // 390px (KaTeX no parte el \cdot): "0.166667" sí. numTexto sigue
         // mandando en el criterio, los intervalos y el resto de la página.
@@ -188,7 +188,7 @@ function calcularTaylor() {
     );
 
     // --- Gráfica: f(x) y el polinomio superpuestos ---
-    // P1-3 v3 (auto-zoom): el rango se acota alrededor del centro a y del
+    // Auto-zoom: el rango se acota alrededor del centro a y del
     // punto evaluado x. Antes era [a-span, a+span] con span ≥ 5, y en x=1 el
     // punto quedaba diminuto abajo (el gráfico abarcaba x −5..5, y −20..160).
     const x0 = Math.min(a, x) - 1;

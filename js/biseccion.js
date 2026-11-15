@@ -776,13 +776,10 @@ function mostrarResumen(x_raiz, fx_val, iteraciones, criterio, valorCriterio, ea
     const etiquetaFx = etiquetas.fx || 'f(x) Final';
     let textoCriterio = '';
     if (criterio === 'tolerancia') {
-        // v4 P0-3: salto antes de la "ó" para que en móvil no quede un
-        // "0.001" huérfano en la 2ª línea. En escritorio el <br> se oculta
-        // (ver .criterio-salto en css/styles.css) y sigue en una sola línea.
-        // v5 P1-5: el espacio va DESPUÉS del <br> y antes de la "ó". Con el
-        // espacio delante, al ocultarse el <br> desaparecía con él y el texto
-        // copiado/leído salía "0.001ó"; ahora textContent da "0.001 ó" y, en
-        // móvil, el <br> parte la línea sin dejar espacio inicial visible.
+        // Salto antes de la "ó" para que en móvil no quede "0.001" huérfano
+        // en la 2ª línea (en escritorio el <br> se oculta: ver .criterio-salto).
+        // El espacio va DESPUÉS del <br>: con el espacio delante, al
+        // ocultarse el <br> desaparecía con él y salía "0.001ó" copiado.
         textoCriterio = etiquetas.tolerancia ||
             `|f(x)| ≤ ${numTexto(valorCriterio)}<br class="criterio-salto"> ó |Δx| ≤ ${numTexto(valorCriterio)}`;
     } else if (criterio === 'error') {
@@ -1010,11 +1007,10 @@ document.addEventListener('DOMContentLoaded', () => {
     blindarInputsNumericos();
 });
 
-// --- v4 P1-3: la rueda/scroll no cambia los campos numéricos ---
-// type="number" incrementa/decrementa con el scroll mientras tiene el foco;
-// en móvil eso cambiaba el GRADO de Taylor al desplazar la página. El primer
-// scroll con foco se cancela y se suelta el foco, así el resto de la página
-// vuelve a desplazarse con normalidad.
+// --- La rueda/scroll no cambia los campos numéricos ---
+// type="number" incrementa con el scroll mientras tiene el foco; en móvil
+// eso cambiaba el GRADO al desplazar la página. El primer scroll con foco se
+// cancela y se suelta el foco.
 function blindarInputsNumericos() {
     document.querySelectorAll('input[type="number"]').forEach((el) => {
         el.addEventListener('wheel', (e) => {

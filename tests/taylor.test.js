@@ -87,7 +87,7 @@ test('Taylor: grafica f(x) con su polinomio superpuesto y 2 marcas', () => {
     assert.equal(opts.marcas.length, 2, 'marca f(x) y marca P_n(x)');
     // (campo a campo: el array viene de otro realm de JS)
     assert.equal(opts.rango.length, 2);
-    // P1-3 v3 (auto-zoom): x de min(a,x)−1 a max(a,x)+1, no [-5, 5]
+    // Auto-zoom: x de min(a,x)−1 a max(a,x)+1, no [-5, 5]
     assert.equal(opts.rango[0], -1);
     assert.equal(opts.rango[1], 2);
 });

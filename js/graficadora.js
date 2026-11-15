@@ -100,7 +100,7 @@ function graficarResultado(expr, opts = {}) {
     try {
         if (!expr || typeof evaluarFuncion !== 'function') { cont.style.display = 'none'; return; }
 
-        // --- Color del método activo (§3.3): --method del contenedor; si no
+        // --- Color del método activo: --method del contenedor; si no
         //     hay CSS utilizable se queda el cian de siempre ---
         let colorMetodo = '#00f0ff';
         const contMetodo = document.querySelector('.container');
@@ -166,13 +166,9 @@ function graficarResultado(expr, opts = {}) {
 
         // --- Lienzo (con DPR, tope 2) ---
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        // v5 P1-6: se MUESTRA antes de MEDIR. Con #resultado-container /
-        // #grafica-container ocultos (primer Calcular de la sesión, o tras un
-        // error que dejó el canvas en display:none) clientWidth vale 0 y el
-        // lienzo se dibujaba a 600px: el bitmap se estiraba al ancho real
-        // (~350px en un móvil de 390px) y todo salía a 0,58× — las etiquetas
-        // de 10px quedaban ilegibles y la pastilla de la raíz "x ≈ 2" no se
-        // distinguía. Midiendo ya visible se usa el ancho real del lienzo.
+        // Se MUESTRA antes de MEDIR: con #resultado-container oculto
+        // clientWidth vale 0 y el lienzo se dibujaba a 600px, estirándose al
+        // ancho real (~350px en móvil) con las etiquetas ilegibles.
         ocultarMsg();
         cont.style.display = 'block';
         canvas.style.display = 'block';
@@ -206,7 +202,7 @@ function graficarResultado(expr, opts = {}) {
         // --- Cuadrícula + etiquetas ---
         const pasoX = grafPasoBonito(xmax - xmin);
         const pasoY = grafPasoBonito(ymax - ymin);
-        // P0-3 v3: 12px y gris claro (antes 11px y gris lavado, poco contraste)
+        // 12px y gris claro (el gris lavado tenía poco contraste)
         ctx.font = '12px monospace';
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
@@ -224,12 +220,10 @@ function graficarResultado(expr, opts = {}) {
                 etiquetasEjeX.push({ txt, px });
             }
         }
-        // v7 P1-5: las etiquetas del eje Y se recogen aquí y se dibujan AL
-        // FINAL con pastilla y clamp (igual que las del eje X, más abajo):
-        // si se escriben con la cuadrícula, después las tapan las curvas y
-        // las guiones del intervalo [a, b]. Se iban en w - 10 sin sujete:
-        // la marca de ymax cae en py = 0 y "22" salía tocando la esquina
-        // superior derecha, sin aire por arriba.
+        // Las etiquetas del eje Y se recogen aquí y se dibujan AL FINAL con
+        // pastilla y clamp (igual que las del eje X): si se escriben con la
+        // cuadrícula las tapan después las curvas y los guiones del
+        // intervalo [a, b]; sin sujete, ymax quedaba pegado a la esquina.
         const etiquetasEjeY = [];
         for (let gy = Math.ceil(ymin / pasoY) * pasoY; gy <= ymax; gy += pasoY) {
             const py = Y(gy);
@@ -315,21 +309,21 @@ function graficarResultado(expr, opts = {}) {
         }
 
         // --- Intervalo [a, b] ---
-        // Cajas de todas las pastillas ya colocadas (v7 P1-5): las del eje
-        // Y se pintan al final y con este registro se saltan las que pisen
-        // las de a/b o las de las marcas del eje X.
+        // Cajas de todas las pastillas ya colocadas: las del eje Y se pintan
+        // al final y con este registro se saltan las que pisen las de a/b o
+        // las de las marcas del eje X.
         const pildoras = [];
         ctx.setLineDash([5, 4]);
         ctx.font = '10px monospace';
         ctx.textAlign = 'center';
         if (Number.isFinite(a) && Number.isFinite(b) && a < b) {
             ctx.strokeStyle = 'rgba(189, 0, 255, 0.8)';
-            // v4 P1-1: las punteadas se recortan 20px antes del borde inferior
-            // para que NUNCA lleguen a la banda de etiquetas del eje X.
+            // Las punteadas se recortan 20px antes del borde inferior para
+            // que NUNCA lleguen a la banda de etiquetas del eje X.
             ctx.beginPath(); ctx.moveTo(X(a), 0); ctx.lineTo(X(a), alto - 20); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto - 20); ctx.stroke();
-            // Chip visible y 'a'/'b' bajadas (ronda 9): el chip en y=6 y el
-            // texto en y=18 quedaban pegados al borde superior y se cortaban.
+            // Chips de 'a'/'b' bajados: en y=6/18 quedaban pegados al borde
+            // superior y se cortaban.
             pildoras.push({ x: X(a) - 6, y: 20, ancho: 12 });
             pildoras.push({ x: X(b) - 6, y: 20, ancho: 12 });
             grafChipEtiqueta(ctx, X(a) - 6, 20, 12);
@@ -345,16 +339,15 @@ function graficarResultado(expr, opts = {}) {
         //  horizontales y las punteadas del intervalo [a, b]: guiones sobre los dígitos)
         ctx.font = '12px monospace';
         ctx.textAlign = 'left';
-        // v5 P1-7: pastillas sujetas al ancho del lienzo y sin solaparse.
-        // Antes el chip podía asomar 1px por el borde ("0.5"/"3.5" recortadas)
-        // y en pantallas estrechas dos etiquetas seguidas llegaban a tocarse
-        // ("2 3" en Taylor): la que choca con una ya colocada se salta.
+        // Pastillas sujetas al ancho del lienzo y sin solaparse: la que
+        // choca con una ya colocada se salta ("0.5"/"3.5" recortadas en el
+        // borde, "2 3" juntas en pantallas estrechas).
         const chipsEjeX = [];
         for (const et of etiquetasEjeX) {
             const ancho = et.txt.length * 7 + 6;
             const cercaDerecha = et.px + 6 + et.txt.length * 7 > w;
-            // v4 P1-1: la etiqueta pegada al borde izquierdo (p. ej. "-0.5")
-            // se sujeta a un mínimo de 4px para que no salga cortada.
+            // La etiqueta pegada al borde izquierdo (p. ej. "-0.5") se sujeta
+            // a un mínimo de 4px para que no salga cortada.
             const tx = cercaDerecha ? w - 10 : Math.max(et.px + 3, 4);
             // Chip entero DENTRO del lienzo: 1px de margen a cada lado.
             const chipIzq = cercaDerecha ? w - 8 - ancho : Math.max(et.px + 1, 1);
@@ -364,8 +357,8 @@ function graficarResultado(expr, opts = {}) {
             chipsEjeX.push({ x: chipX, ancho });
             pildoras.push({ x: chipX, y: alto - 16, ancho });
             grafChipEtiqueta(ctx, chipX, alto - 16, ancho);
-            // Texto oscuro sobre la pastilla clara (ronda 9): el gris claro
-            // salía con poco contraste sobre el fondo translúcido.
+            // Texto oscuro sobre la pastilla clara (el gris salía con poco
+            // contraste sobre el fondo translúcido).
             ctx.fillStyle = '#06222b';
             if (cercaDerecha) {
                 ctx.textAlign = 'right';
@@ -377,13 +370,11 @@ function graficarResultado(expr, opts = {}) {
         }
 
         // --- Etiquetas del eje Y: misma pastilla + clamp que las del eje X ---
-        // v7 P1-5: la pastilla va entera dentro del lienzo (1px de margen) y
-        // el texto queda a 10px del borde derecho — el mismo aire que tenían
-        // antes, pero ahora sujetado y visible sobre la cuadrícula. En
-        // vertical se ancla 14px sobre su línea con tope de 6px por arriba
-        // (la marca de ymax) y sin pisar la banda de las etiquetas del eje X.
-        // La que chocaba con una pastilla ya colocada se salta, como en el
-        // eje X.
+        // Pastilla entera dentro del lienzo (1px de margen) y texto a 10px
+        // del borde derecho; en vertical se ancla 14px sobre su línea con
+        // tope de 6px por arriba (marca de ymax) y sin pisar la banda de las
+        // etiquetas del eje X. La que chocaba con una pastilla ya colocada
+        // se salta, como en el eje X.
         ctx.font = '12px monospace';
         ctx.textAlign = 'left';
         for (const et of etiquetasEjeY) {
@@ -396,16 +387,15 @@ function graficarResultado(expr, opts = {}) {
             if (solapa) continue;
             pildoras.push({ x: chipX, y: chipY, ancho });
             grafChipEtiqueta(ctx, chipX, chipY, ancho);
-            // Texto oscuro sobre la pastilla clara (ronda 9)
+            // Texto oscuro sobre la pastilla clara
             ctx.fillStyle = '#06222b';
             ctx.fillText(et.txt, chipX + 3, chipY + 11);
         }
 
-        // El "0" del origen: los bucles de la cuadrícula lo saltan
-        // (Math.abs(gx/gy) > 1e-12) y las X pueden arrancar en 0.5 —x=0
-        // queda fuera del lienzo izquierdo—, así que nunca salía. Ronda 9:
-        // se dibuja siempre que exista el eje horizontal (y=0) y, si x=0 no
-        // cabe, al inicio del propio eje.
+        // El "0" del origen: los bucles de la cuadrícula lo saltan y las X
+        // pueden arrancar en 0.5 (x=0 queda fuera del lienzo izquierdo), así
+        // que se dibuja siempre que exista el eje horizontal; si x=0 no cabe,
+        // al inicio del propio eje.
         if (ymin < 0 && ymax > 0) {
             const ox = (xmin < 0 && xmax > 0) ? X(0) : (xmin > 0 ? 0 : w);
             const cy = Math.min(Y0 + 4, Math.max(alto - 32, 4));
@@ -418,7 +408,7 @@ function graficarResultado(expr, opts = {}) {
         ctx.font = '10px monospace';
 
         // --- Puntos dispersos (datos conocidos) ---
-        // Chips escritos en esta pasada, para no pisarlos (v6 P0-2)
+        // Chips escritos en esta pasada, para no pisarlos
         const chipsDispersos = [];
         for (const pt of puntos) {
             if (!Number.isFinite(pt.x) || !Number.isFinite(pt.y)) continue;
@@ -431,17 +421,14 @@ function graficarResultado(expr, opts = {}) {
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'left';
                 const ancho = pt.etiqueta.length * 6 + 6;
-                // v6 P0-2: el chip se sujeta al lienzo igual que en
-                // grafMarcarPunto. Los puntos de Taylor caen en x=1, pegados
-                // al borde derecho del rango, y sin este Math.min la etiqueta
-                // (de ~100px) salía del gráfico: se cortaban los últimos
-                // dígitos y no se veía el borde derecho de la pastilla.
+                // El chip se sujeta al lienzo (igual que en grafMarcarPunto):
+                // puntos pegados al borde derecho (Taylor: x=1, rótulo de
+                // ~100px) salían del gráfico sin el Math.min.
                 const lx = Math.min(X(pt.x) + 7, Math.max(w - ancho - 3, 4));
                 let ly = Math.max(Y(pt.y) - 7, 12);
-                // v6 P0-2: si otra pastilla ocupa esa zona se baja la nueva
-                // hasta dejar 1px de hueco (Taylor: f(x)=2.718 y P3(x)=2.667
-                // comparten x y tienen y casi iguales: las dos se veían
-                // pegadas). El chip mide 13px de alto (grafChipEtiqueta).
+                // Si otra pastilla ocupa esa zona se baja la nueva hasta
+                // dejar 1px de hueco (rotulos de Taylor con y casi iguales).
+                // El chip mide 13px de alto (grafChipEtiqueta).
                 for (const c of chipsDispersos) {
                     const chocaX = lx < c.lx + c.ancho && c.lx < lx + ancho;
                     const chocaY = Math.abs(ly - c.ly) < 13;
@@ -465,8 +452,8 @@ function graficarResultado(expr, opts = {}) {
         const marcas = Array.isArray(opts.marcas)
             ? opts.marcas
             : (opts.marca ? [opts.marca] : []);
-        // P0-3 v3: si dos marcas caen en el mismo punto (Taylor: f(x) y
-        // P_n(x)), la segunda etiqueta se baja 14px en vez de superponerse.
+        // Si dos marcas caen en el mismo punto (Taylor: f(x) y P_n(x)), la
+        // segunda etiqueta se baja 14px en vez de superponerse.
         const etiquetasMarcas = [];
         for (const m of marcas) {
             if (!m || !Number.isFinite(m.x) || !Number.isFinite(m.y)) continue;
@@ -495,11 +482,9 @@ function graficarResultado(expr, opts = {}) {
     }
 }
 
-// Chip de fondo detrás de las etiquetas de la gráfica (ronda 9: pastilla
-// realmente VISIBLE — fondo claro translúcido con borde. El chip negro de la
-// v3 era invisible sobre el lienzo casi negro, y el gris 0.14 de la v4 seguía
-// leyéndose "gris oscuro sobre negro": ahora el fondo es claro y el texto que
-// va encima es #06222b, con alto contraste en todos los casos).
+// Chip de fondo detrás de las etiquetas: pastilla clara translúcida con
+// borde y texto #06222b (un chip oscuro era invisible sobre el lienzo casi
+// negro; el claro se lee con alto contraste en todos los casos).
 function grafChipEtiqueta(ctx, x, y, ancho, altoChip = 13) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.fillRect(x, y, ancho, altoChip);
@@ -508,8 +493,8 @@ function grafChipEtiqueta(ctx, x, y, ancho, altoChip = 13) {
     ctx.strokeRect(x + 0.5, y + 0.5, ancho, altoChip);
 }
 
-// Punto brillante con etiqueta (P0-3 v3: chip oscuro detrás para que la curva
-// o la cuadrícula no crucen el texto; desplazY baja la etiqueta cuando otra
+// Punto brillante con etiqueta (chip oscuro detrás para que la curva o la
+// cuadrícula no crucen el texto; desplazY baja la etiqueta cuando otra
 // marca ya escribió en el mismo punto)
 function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio = 4, desplazY = 0) {
     if (!enVista(py)) return;
@@ -521,23 +506,20 @@ function grafMarcarPunto(ctx, X, Y, enVista, px, py, color, etiqueta, w, radio =
     ctx.fill();
     ctx.shadowBlur = 0;
     if (etiqueta) {
-        // v5 P1-6: 11px en vez de 10px y 12px de aire sobre el punto. La
-        // raíz cae SOBRE el eje X (y = 0): con 10px y 8px la pastilla quedaba
-        // pegada a la línea del eje y a las etiquetas de la banda inferior, y
-        // en móvil se terminaba de perder.
+        // 11px y 12px de aire sobre el punto: la raíz cae SOBRE el eje X
+        // (y = 0) y con menos aire la pastilla quedaba pegada a la línea del
+        // eje, perdida en móvil.
         ctx.font = '11px monospace';
         ctx.textAlign = 'left';
-        // v6 P0-2: el sujete usaba un ancho FIJO de 96px, pero las pastillas
-        // de Taylor son más largas ("f(x) = 2.71828182846" → 148px): lx
-        // quedaba en 254px con el chip terminando en 388px, fuera del lienzo
-        // de 350px, y se cortaban los últimos dígitos sin borde derecho.
-        // Ahora el sujete usa el ancho real del chip (7px por carácter +
-        // 8 de relleno), dejando 3px de margen en el borde derecho.
+        // El sujete usa el ancho real del chip (7px por carácter + 8 de
+        // relleno), no un ancho FIJO de 96px: las pastillas de Taylor
+        // (~148px) salían del lienzo y se cortaban. 3px de margen a la
+        // derecha.
         const ancho = etiqueta.length * 7 + 8;
         const lx = Math.min(X(px) + 10, Math.max(w - ancho, 4));
         const ly = Math.max(Y(py) - 12 + desplazY, 14);
         grafChipEtiqueta(ctx, lx - 3, ly - 11, ancho);
-        // Texto oscuro sobre la pastilla clara (ronda 9)
+        // Texto oscuro sobre la pastilla clara
         ctx.fillStyle = '#06222b';
         ctx.fillText(etiqueta, lx, ly);
     }
@@ -589,11 +571,9 @@ async function graficarLibre() {
         return;
     }
 
-    // Este botón NO ejecuta el método ni borra lo que dejó un Calcular: solo
-    // dibuja la curva (limpiarTabla() vaciaba la tabla, ocultaba los
-    // resultados y, como la gráfica vive dentro de ese contenedor, la curva
-    // tampoco se veía). Solo se descarta un error anterior, que ya no aplica
-    // si esta gráfica sale bien.
+    // Este botón NO ejecuta el método ni borra lo que dejó un Calcular (sin
+    // llamar a limpiarTabla(), cuyo vaciado escondía también la gráfica);
+    // solo se descarta un error anterior, que ya no aplica si sale bien.
     const errBox = document.getElementById('error-box');
     if (errBox) errBox.style.display = 'none';
 
