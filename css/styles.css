@@ -2458,3 +2458,58 @@ body:has(.container--landing) .main-container {
     padding: 16px 15px;
   }
 }
+
+/* ==========================================================================
+   CORRECCIONES v8 (14-nov) — Rendimiento en móvil ("Ronda 13")
+   Base: "Ronda 12" (799ff98). El equipo midió lag al hacer scroll en un
+   celular de gama media: canvas de partículas repintando a ~30fps y, encima,
+   dos capas con backdrop-filter + un halo de 2000px recomponiéndose en cada
+   cuadro. Esta sección solo toca composición/pintado: no cambia maquetación.
+   ========================================================================== */
+
+/* --- P0-1: sin backdrop-filter en móvil (header y tarjeta principal) ---
+   Cada cuadro del canvas obliga al teléfono a recalcular el desenfoque de
+   15px del header y de 20px de .container sobre casi toda la pantalla; eso
+   es lo que trababa el scroll. La tarjeta ya tenía fondo 0.9 (casi opaco),
+   así que sin blur casi no se nota: sube a 0.97 y listo. El header pasa de
+   0.85+blur a negro 0.96, que se ve igual de sólido que antes. La línea
+   -webkit- es por Safari/iOS, que exige el prefijo. */
+@media (max-width: 768px) {
+  header {
+    background: rgba(0, 0, 0, 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .container {
+    background: rgba(11, 15, 25, 0.97) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* --- P0-2: el halo se achica en móvil (mismo brillo, menos área) ---
+   Sigue vigente lo de la v6: si la elipse mide lo que mide la pantalla
+   (100vw), su borde cae dentro del viewport y los laterales quedan en negro.
+   La condición para que el borde del halo llegue al borde de la pantalla con
+   la misma claridad de hoy es ancho ≥ 2,6 × el viewport (el degradado llega
+   a transparente al 80% de la diagonal). 260vw da ≈1014px a 390px y
+   ≈1997px a 768px: idéntico al aspect actual, pero en teléfonos el área
+   pintada de la capa fija baja de 2000×100vh a ~1014×100vh (≈ la mitad),
+   que es la que hay que recomponer en cada cuadro del canvas. */
+@media (max-width: 768px) {
+  .main-container::before {
+    width: max(260vw, 900px);
+  }
+}
+
+/* --- P1-4: las tarjetas de apuntes fuera de pantalla no se renderizan ---
+   content-visibility: auto salta estilo/layout/pintado de lo que no se ve
+   (la lista de Apuntes crece con cada apunte publicado). contain-intrinsic
+   size con "auto" recuerda la altura real de la última vez pintada, así la
+   barra de scroll no salta cuando una tarjeta entra en pantalla. Los
+   navegadores viejos lo ignoran y quedan como hoy. */
+#apuntes-remotos .apunte-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 260px;
+}

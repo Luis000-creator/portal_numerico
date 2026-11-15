@@ -256,13 +256,13 @@ test('§3.5: :root final con la paleta v2', () => {
 
 // --- Bump de versión -------------------------------------------------------
 
-test('Las 4 páginas piden styles.css?v=11 (ninguna sirve CSS viejo)', () => {
+test('Las 4 páginas piden styles.css?v=12 (ninguna sirve CSS viejo)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=11"/.test(html),
-            `${archivo} no tiene styles.css?v=11`);
-        assert.ok(!/href="[^"]*styles\.css(?!\?v=11)/.test(html),
-            `${archivo} sigue apuntando a styles.css sin ?v=11`);
+        assert.ok(/href="[^"]*styles\.css\?v=12"/.test(html),
+            `${archivo} no tiene styles.css?v=12`);
+        assert.ok(!/href="[^"]*styles\.css(?!\?v=12)/.test(html),
+            `${archivo} sigue apuntando a styles.css sin ?v=12`);
     }
 });

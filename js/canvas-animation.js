@@ -20,6 +20,13 @@ const IS_SMALL_SCREEN = window.matchMedia
     ? window.matchMedia('(max-width: 768px)').matches
     : window.innerWidth < 768;
 
+// v8 P0-3: en pantalla chica el fondo se pinta UNA sola vez, igual que con
+// reduced-motion. El requestAnimationFrame a ~30fps repintaba el canvas sin
+// parar y el teléfono tenía que recomponer encima el halo del header/tarjeta
+// (y antes los desenfoques): en gama media eso era el scroll trabado. La
+// densidad de partículas siguen mandándola IS_SMALL_SCREEN (menos puntos).
+const FONDO_ESTATICO = REDUCED_MOTION || IS_SMALL_SCREEN;
+
 window.addEventListener('mousemove', (e) => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;
@@ -175,15 +182,14 @@ class ParticleAnimation {
 
     init() {
         if (!this.canvas || this.initialized) return;
-        // Con reduced-motion: dibujar un frame estático y no animar
-        if (REDUCED_MOTION) {
-            this.resize();
-            this.drawStatic();
-            this.initialized = true;
-            return;
-        }
         this.resize();
         this.initialized = true;
+        // Sin animación (reduced-motion o pantalla chica): un solo frame
+        // estático y sin requestAnimationFrame.
+        if (FONDO_ESTATICO) {
+            this.drawStatic();
+            return;
+        }
         this.animate(0);
     }
 
@@ -191,7 +197,16 @@ class ParticleAnimation {
         if (!this.ctx || !this.canvas) return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.backgroundStars.forEach(s => s.draw(this.ctx));
-        this.symbolParticles.forEach(p => p.draw(this.ctx));
+        // Sin bucle nadie "asienta" las partículas con el muelle: cada
+        // símbolo se coloca directamente en su destino (base + rel) — la
+        // misma posición en la que quedaría el modo animado — y se pinta ahí.
+        // (De lo contrario se dibujarían en su arranque aleatorio, como
+        // puntos sueltos, que era lo que pasaba en reduced-motion.)
+        this.symbolParticles.forEach(p => {
+            p.x = p.baseX + p.relX;
+            p.y = p.baseY + p.relY;
+            p.draw(this.ctx);
+        });
     }
 
     resize() {
@@ -200,6 +215,11 @@ class ParticleAnimation {
         this.canvas.height = window.innerHeight;
         this.initBackgroundStars();
         this.initSymbolParticles();
+        // Asignar canvas.width borra el lienzo: en modo estático hay que
+        // volver a pintar el único frame (si no, rotar el teléfono o redimensionar
+        // una ventana estrecha dejaba el fondo en blanco; pasaba igual con
+        // reduced-motion antes de la v8).
+        if (FONDO_ESTATICO && this.initialized) this.drawStatic();
     }
 
     initBackgroundStars() {
@@ -294,6 +314,9 @@ class ParticleAnimation {
 
     regenerateSymbols() {
         this.initSymbolParticles();
+        // En modo estático no hay bucle que repinte: hay que pintarlo aquí
+        // (si no quedan los símbolos viejos dibujados encima).
+        if (FONDO_ESTATICO && this.initialized) this.drawStatic();
     }
 
     animate(timestamp) {

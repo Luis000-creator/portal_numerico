@@ -87,10 +87,23 @@ async function cargarApuntesRemotos() {
                        : '<i class="fa-solid fa-file" style="margin-right:6px; color:var(--text-muted);"></i>';
         card.innerHTML = `<h3>${fileIcon}<span></span></h3><p></p><small style="color:var(--text-muted);display:block;margin-top:8px"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>Publicado: ${fecha}</small>`;
         card.querySelector('h3 span').textContent = apunte.titulo;
-        card.querySelector('p').textContent = apunte.contenido;
-        // Renderizar KaTEX en el contenido del apunte
         const parrafo = card.querySelector('p');
-        if (parrafo) { renderizarMath(parrafo); }
+        if (parrafo) {
+            parrafo.textContent = apunte.contenido;
+            // Renderizar KaTeX del contenido (no-op si aún no está cargado)
+            renderizarMath(parrafo);
+            // v8 P1: KaTeX (~300KB) ya no se pide en el <head> de la página.
+            // Si este contenido trae fórmulas $...$ se descarga aquí, después
+            // del primer pintado de la lista, y solo se repinta este párrafo.
+            // Los apuntes de hoy son "(archivo adjunto: …)", sin fórmulas, así
+            // que quien solo abre la lista no descarga KaTeX.
+            if (apunte.contenido && apunte.contenido.includes('$')
+                && window.Vendor && typeof window.Vendor.ensureKatex === 'function') {
+                window.Vendor.ensureKatex()
+                    .then(() => renderizarMath(parrafo))
+                    .catch(() => { /* sin conexión se queda el texto plano */ });
+            }
+        }
         // Si hay archivo adjunto, agregar visor integrado
         if (apunte.archivo_url) {
             const btnContainer = document.createElement('div');
@@ -175,8 +188,16 @@ async function cargarApuntesRemotos() {
                     visor.appendChild(objeto);
                 } else if (url.toLowerCase().endsWith('.md')) {
                     try {
+                        // v8 P1: marked (~40KB) + DOMPurify (~22KB) y KaTeX se
+                        // piden aquí, la primera vez que alguien abre un
+                        // Markdown, y no en el <head> de la página (antes se
+                        // bajaban aunque solo se fuera a ver la lista).
+                        if (window.Vendor && typeof window.Vendor.ensureMarkdown === 'function') {
+                            await window.Vendor.ensureMarkdown();
+                            await window.Vendor.ensureKatex();
+                        }
                         if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
-                            visor.textContent = 'El visor Markdown aún se está cargando. Intenta de nuevo.';
+                            visor.textContent = 'No se pudieron cargar las librerías del visor Markdown. Revisa tu conexión e intenta de nuevo.';
                         } else {
                             const response = await fetch(url);
                             const text = await response.text();
