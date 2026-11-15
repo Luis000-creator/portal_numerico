@@ -72,6 +72,11 @@
             animation: fadeIn 1s ease forwards 2s;
         }
 
+        /* Glitch real: base quieta y, en tres ráfagas por ciclo (arranque,
+           mitad y final), el texto se parte en bandas cian/magenta que saltan
+           a posiciones nuevas SIN interpolación (steps(1)) — cortes secos,
+           no un temblor suave. Fuera de las ráfagas las capas quedan clipadas
+           al 100% y no se ven. */
         .glitch {
             position: relative;
             font-size: 8rem;
@@ -79,22 +84,29 @@
             color: white;
             line-height: 1;
             margin: 10px 0;
-            text-shadow: 0.05em 0 0 #00f0ff, -0.05em -0.025em 0 #ff007b;
-            animation: glitch-skew 3s infinite linear alternate-reverse;
+            text-shadow:
+                0.03em 0 0 rgba(0, 240, 255, 0.55),
+                -0.03em 0 0 rgba(255, 0, 123, 0.55);
+            animation: glitch-skew 5s infinite steps(1, end);
         }
 
         .glitch::before, .glitch::after {
             content: attr(data-text);
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; background: transparent;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent;
+            pointer-events: none;
+            clip-path: inset(0 0 100% 0);
         }
         .glitch::before {
-            left: 2px; text-shadow: -2px 0 #ff007b; clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
+            color: #00f0ff;
+            text-shadow: -2px 0 0 rgba(255, 0, 123, 0.85);
+            animation: glitch-tear-a 5s infinite steps(1, end);
         }
         .glitch::after {
-            left: -2px; text-shadow: -2px 0 #00f0ff; clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
+            color: #ff007b;
+            text-shadow: 2px 0 0 rgba(0, 240, 255, 0.85);
+            animation: glitch-tear-b 5s infinite steps(1, end);
         }
 
         .description {
@@ -162,22 +174,70 @@
         @keyframes blink { from, to { border-color: transparent; } 50% { border-color: #00f0ff; } }
         @keyframes fadeIn { to { opacity: 1; } }
 
-        @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 31px, 0); transform: skew(0.65deg); }
-            20% { clip: rect(85px, 9999px, 11px, 0); transform: skew(0.95deg); }
-            40% { clip: rect(25px, 9999px, 98px, 0); transform: skew(0.15deg); }
-            60% { clip: rect(62px, 9999px, 43px, 0); transform: skew(0.85deg); }
-            80% { clip: rect(4px, 9999px, 76px, 0); transform: skew(0.25deg); }
-            100% { clip: rect(33px, 9999px, 14px, 0); transform: skew(0.75deg); }
+        /* Bloque completo: skew + desplazamiento solo dentro de las ráfagas */
+        @keyframes glitch-skew {
+            0%, 0.5% { transform: skewX(0deg) translateX(0); }
+            0.7% { transform: skewX(-4deg) translateX(-5px); }
+            1.7% { transform: skewX(5deg) translateX(4px); }
+            3% { transform: skewX(-6deg) translateX(6px); }
+            5% { transform: skewX(0deg) translateX(0); }
+            34% { transform: skewX(0deg) translateX(0); }
+            35% { transform: skewX(6deg) translateX(-7px); }
+            37% { transform: skewX(-5deg) translateX(6px); }
+            39% { transform: skewX(4deg) translateX(-4px); }
+            41% { transform: skewX(0deg) translateX(0); }
+            66% { transform: skewX(0deg) translateX(0); }
+            67% { transform: skewX(-7deg) translateX(5px); }
+            69% { transform: skewX(5deg) translateX(-8px); }
+            71% { transform: skewX(-4deg) translateX(3px); }
+            74% { transform: skewX(0deg) translateX(0); }
+            100% { transform: skewX(0deg) translateX(0); }
         }
 
-        @keyframes glitch-anim2 {
-            0% { clip: rect(65px, 9999px, 100px, 0); transform: skew(0.15deg); }
-            20% { clip: rect(3px, 9999px, 5px, 0); transform: skew(0.85deg); }
-            40% { clip: rect(45px, 9999px, 83px, 0); transform: skew(0.25deg); }
-            60% { clip: rect(12px, 9999px, 24px, 0); transform: skew(0.75deg); }
-            80% { clip: rect(88px, 9999px, 56px, 0); transform: skew(0.35deg); }
-            100% { clip: rect(22px, 9999px, 34px, 0); transform: skew(0.95deg); }
+        /* Capa cian: bandas recortadas que saltan en horizontal */
+        @keyframes glitch-tear-a {
+            0%, 0.5% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            0.7% { clip-path: inset(24% 0 52% 0); transform: translateX(-9px); }
+            1.7% { clip-path: inset(62% 0 16% 0); transform: translateX(7px); }
+            3% { clip-path: inset(8% 0 76% 0); transform: translateX(-6px); }
+            5% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            34% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            35% { clip-path: inset(44% 0 38% 0); transform: translateX(10px); }
+            37% { clip-path: inset(74% 0 6% 0); transform: translateX(-8px); }
+            39% { clip-path: inset(16% 0 68% 0); transform: translateX(6px); }
+            41% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            66% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            67% { clip-path: inset(32% 0 50% 0); transform: translateX(-10px); }
+            69% { clip-path: inset(4% 0 82% 0); transform: translateX(8px); }
+            71% { clip-path: inset(56% 0 26% 0); transform: translateX(-7px); }
+            74% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+        }
+
+        /* Capa magenta: bandas distintas y saltos opuestos a los de la cian */
+        @keyframes glitch-tear-b {
+            0%, 0.5% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            0.9% { clip-path: inset(58% 0 22% 0); transform: translateX(8px); }
+            1.9% { clip-path: inset(14% 0 70% 0); transform: translateX(-7px); }
+            3.2% { clip-path: inset(46% 0 36% 0); transform: translateX(9px); }
+            5% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            34% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            35.2% { clip-path: inset(6% 0 78% 0); transform: translateX(-8px); }
+            37.2% { clip-path: inset(38% 0 44% 0); transform: translateX(9px); }
+            39.2% { clip-path: inset(70% 0 12% 0); transform: translateX(-6px); }
+            41% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            66% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            67.2% { clip-path: inset(50% 0 32% 0); transform: translateX(9px); }
+            69.2% { clip-path: inset(20% 0 64% 0); transform: translateX(-9px); }
+            71.2% { clip-path: inset(80% 0 2% 0); transform: translateX(6px); }
+            74% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+            100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+        }
+
+        /* Sin movimiento: el glitch se apaga (el texto queda legible) */
+        @media (prefers-reduced-motion: reduce) {
+            .glitch { animation: none; }
+            .glitch::before, .glitch::after { display: none; }
         }
 
         /* Responsividad */
