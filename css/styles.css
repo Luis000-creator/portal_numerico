@@ -2427,8 +2427,34 @@ body:has(.container--landing) .main-container {
   max-width: 75ch;
 }
 
+/* --- v7 P0-1: el tope de 75ch se levanta solo en el estado expandido ---
+   Ahora el visor ocupa las 2 columnas de la grilla (~1136px) y el texto
+   seguía cortado en 75ch (~680px), dejando 400px de negro a la derecha y
+   un H1 centrado sobre un ancho con el que no coincidía. Con el tope
+   fuera, párrafos, listas y el H1 comparten la caja completa del visor.
+   (75ch sigue vigente en las tarjetas colapsadas, donde la columna sí es
+   angosta.) La especificidad (0,3,1) gana a la de arriba (0,1,1) aunque
+   esté primero. */
+.apunte-card.visor-abierto .visor-documento p,
+.apunte-card.visor-abierto .visor-documento li {
+  max-width: none;
+}
+
+/* --- v7 P0-2: el panel del visor en móvil no va con doble margen ---
+   El panel estaba inset dos veces: 15px de padding de la tarjeta + 16px
+   de padding propio, así que el texto no arrancaba donde el título de la
+   tarjeta. Con margin-inline negativo el panel se extiende hasta el borde
+   interior de la tarjeta y su padding (igual al de la tarjeta) devuelve
+   el texto a la misma raya. Solo la parte horizontal: el fondo del panel
+   sigue a 15px del borde inferior (padding-bottom de la tarjeta), así que
+   sus esquinas redondeadas no se salen de las de la tarjeta. */
 @media (max-width: 768px) {
   .visor-documento {
     padding: 20px 16px;
+    margin-inline: -15px;
+  }
+
+  .apunte-card.visor-abierto .visor-documento {
+    padding: 16px 15px;
   }
 }

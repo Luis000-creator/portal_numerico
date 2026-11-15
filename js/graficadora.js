@@ -224,16 +224,18 @@ function graficarResultado(expr, opts = {}) {
                 etiquetasEjeX.push({ txt, px });
             }
         }
-        ctx.textAlign = 'right';
+        // v7 P1-5: las etiquetas del eje Y se recogen aquí y se dibujan AL
+        // FINAL con pastilla y clamp (igual que las del eje X, más abajo):
+        // si se escriben con la cuadrícula, después las tapan las curvas y
+        // las guiones del intervalo [a, b]. Se iban en w - 10 sin sujete:
+        // la marca de ymax cae en py = 0 y "22" salía tocando la esquina
+        // superior derecha, sin aire por arriba.
+        const etiquetasEjeY = [];
         for (let gy = Math.ceil(ymin / pasoY) * pasoY; gy <= ymax; gy += pasoY) {
             const py = Y(gy);
             ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
-            // Etiqueta del eje Y: margen derecho (antes en w - 4, cortada) y
-            // anclaje mínimo en y=12 para que no salga recortada por arriba
-            // (P0-3 v3: el "160" de Taylor salía partido por el borde).
             if (Math.abs(gy) > 1e-12) {
-                const ly = Math.max(py, 12);
-                ctx.fillText(Number(gy.toPrecision(4)), w - 10, ly - 3);
+                etiquetasEjeY.push({ txt: String(Number(gy.toPrecision(4))), py });
             }
         }
 
@@ -313,6 +315,10 @@ function graficarResultado(expr, opts = {}) {
         }
 
         // --- Intervalo [a, b] ---
+        // Cajas de todas las pastillas ya colocadas (v7 P1-5): las del eje
+        // Y se pintan al final y con este registro se saltan las que pisen
+        // las de a/b o las de las marcas del eje X.
+        const pildoras = [];
         ctx.setLineDash([5, 4]);
         ctx.font = '10px monospace';
         ctx.textAlign = 'center';
@@ -324,6 +330,8 @@ function graficarResultado(expr, opts = {}) {
             ctx.beginPath(); ctx.moveTo(X(b), 0); ctx.lineTo(X(b), alto - 20); ctx.stroke();
             // Chip visible y 'a'/'b' bajadas (ronda 9): el chip en y=6 y el
             // texto en y=18 quedaban pegados al borde superior y se cortaban.
+            pildoras.push({ x: X(a) - 6, y: 20, ancho: 12 });
+            pildoras.push({ x: X(b) - 6, y: 20, ancho: 12 });
             grafChipEtiqueta(ctx, X(a) - 6, 20, 12);
             grafChipEtiqueta(ctx, X(b) - 6, 20, 12);
             ctx.fillStyle = '#06222b';
@@ -354,6 +362,7 @@ function graficarResultado(expr, opts = {}) {
             const solapa = chipsEjeX.some(c => chipX < c.x + c.ancho + 2 && chipX + ancho + 2 > c.x);
             if (solapa) continue;
             chipsEjeX.push({ x: chipX, ancho });
+            pildoras.push({ x: chipX, y: alto - 16, ancho });
             grafChipEtiqueta(ctx, chipX, alto - 16, ancho);
             // Texto oscuro sobre la pastilla clara (ronda 9): el gris claro
             // salía con poco contraste sobre el fondo translúcido.
@@ -365,6 +374,31 @@ function graficarResultado(expr, opts = {}) {
             } else {
                 ctx.fillText(et.txt, tx, alto - 5);
             }
+        }
+
+        // --- Etiquetas del eje Y: misma pastilla + clamp que las del eje X ---
+        // v7 P1-5: la pastilla va entera dentro del lienzo (1px de margen) y
+        // el texto queda a 10px del borde derecho — el mismo aire que tenían
+        // antes, pero ahora sujetado y visible sobre la cuadrícula. En
+        // vertical se ancla 14px sobre su línea con tope de 6px por arriba
+        // (la marca de ymax) y sin pisar la banda de las etiquetas del eje X.
+        // La que chocaba con una pastilla ya colocada se salta, como en el
+        // eje X.
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'left';
+        for (const et of etiquetasEjeY) {
+            const ancho = et.txt.length * 7 + 6;
+            const chipX = Math.min(Math.max(w - 10 - ancho, 1), Math.max(w - 1 - ancho, 1));
+            const chipY = Math.min(Math.max(et.py - 14, 6), Math.max(alto - 14, 6));
+            const solapa = pildoras.some(p =>
+                chipX < p.x + p.ancho + 2 && chipX + ancho + 2 > p.x &&
+                chipY < p.y + 14 && p.y < chipY + 14);
+            if (solapa) continue;
+            pildoras.push({ x: chipX, y: chipY, ancho });
+            grafChipEtiqueta(ctx, chipX, chipY, ancho);
+            // Texto oscuro sobre la pastilla clara (ronda 9)
+            ctx.fillStyle = '#06222b';
+            ctx.fillText(et.txt, chipX + 3, chipY + 11);
         }
 
         // El "0" del origen: los bucles de la cuadrícula lo saltan

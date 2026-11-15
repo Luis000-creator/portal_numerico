@@ -151,9 +151,9 @@ test('7: la fórmula del criterio deja el espacio delante de la "ó"', () => {
 
 // --- 8) Bump ----------------------------------------------------------------
 
-test('8: las 4 páginas piden styles.css?v=10', () => {
+test('8: las 4 páginas piden styles.css?v=11', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
-        assert.ok(/href="[^"]*styles\.css\?v=10"/.test(leer(archivo)), `${archivo} no tiene ?v=10`);
+        assert.ok(/href="[^"]*styles\.css\?v=11"/.test(leer(archivo)), `${archivo} no tiene ?v=11`);
     }
 });

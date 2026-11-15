@@ -59,8 +59,13 @@ test('P0-3: etiquetas de la gráfica con contraste, sin recorte y con chip', () 
     assert.ok(js.includes('rgba(229, 231, 235, 0.95)'), 'falta el gris claro de los ejes');
     assert.ok(!js.includes('rgba(156, 163, 175, 0.9)'), 'quedó el gris lavado viejo');
 
-    // 2) La etiqueta Y nunca se dibuja pegada al borde superior
-    assert.ok(js.includes('const ly = Math.max(py, 12);'), 'falta el clamp de la etiqueta Y');
+    // 2) v7 P1-5: la etiqueta Y se recoge con la cuadrícula y se pinta al
+    //    final con pastilla + clamp (antes: Math.max(py, 12) directo en
+    //    w - 10 sin chip, y "22" tocaba la esquina superior derecha)
+    assert.ok(js.includes('const etiquetasEjeY = [];'), 'faltan las etiquetas del eje Y recogidas con la cuadrícula');
+    assert.ok(js.includes('const chipY = Math.min(Math.max(et.py - 14, 6), Math.max(alto - 14, 6));'), 'falta el clamp vertical de la etiqueta Y');
+    assert.ok(js.includes('const chipX = Math.min(Math.max(w - 10 - ancho, 1), Math.max(w - 1 - ancho, 1));'), 'falta el clamp horizontal de la etiqueta Y');
+    assert.ok(!js.includes('const ly = Math.max(py, 12);'), 'quedó el clamp viejo de la etiqueta Y');
 
     // 3) Chip detrás de X, a/b, puntos y marcas (ronda 9: pastilla CLARA
     //    translúcida con borde oscuro y texto #06222b encima)

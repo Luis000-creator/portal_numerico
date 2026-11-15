@@ -8,7 +8,7 @@
 //   P1-3 logo del header: sin cambio (se verifica en un teléfono real)
 //   P1-4 visor de Apuntes: la tarjeta se expande a las 2 columnas y la
 //       tipografía del Markdown vive en CSS (.visor-documento)
-//   Cierre: bump ?v=10 en las 4 páginas
+//   Cierre: bump ?v de las 4 páginas (hoy ?v=11)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -254,11 +254,11 @@ test('P1-4: la tipografía del visor vive en CSS (.visor-documento), no en líne
 
 // --- Cierre ----------------------------------------------------------------
 
-test('Cierre: las 4 páginas piden styles.css?v=10', () => {
+test('Cierre: las 4 páginas piden styles.css?v=11', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=10"/.test(html), `${archivo} no tiene ?v=10`);
-        assert.ok(!/styles\.css\?v=9/.test(html), `${archivo} sigue en ?v=9`);
+        assert.ok(/href="[^"]*styles\.css\?v=11"/.test(html), `${archivo} no tiene ?v=11`);
+        assert.ok(!/styles\.css\?v=10/.test(html), `${archivo} sigue en ?v=10`);
     }
 });
