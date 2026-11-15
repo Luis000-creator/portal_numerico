@@ -8,6 +8,7 @@
 //   P1-4 content-visibility en las tarjetas de apuntes fuera de pantalla
 //   P1-5 KaTeX/marked/DOMPurify fuera del <head> de Apuntes (bajo demanda)
 //   (P1-6 fondo de 316KB: se revisa al final de este archivo, no es de código)
+//   13b: logo de la top bar en móvil liso (sin degradado, blanco del título)
 //   Cierre: bump ?v de las 4 páginas (hoy ?v=12)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
@@ -321,6 +322,35 @@ test('P1-5: Vendor.ensureMarkdown pide marked y DOMPurify con sus hashes', async
     assert.equal(pedidos.length, 2, `se esperaban 2 scripts (hay ${pedidos.length})`);
     assert.ok(pedidos.some((p) => /marked\.min\.js/.test(p.src) && p.integrity));
     assert.ok(pedidos.some((p) => /purify\.min\.js/.test(p.src) && p.integrity));
+});
+
+// --- 13b -------------------------------------------------------------------
+
+test('13b: el logo de la top bar en móvil va liso, sin degradado', () => {
+    const css = leer('css', 'styles.css');
+    const reglasDe = (texto) => [...texto.matchAll(/\.logo-title \{[^}]*\}/g)].map((x) => x[0]);
+
+    // Escritorio: conserva el degradado de identidad (P1-8 / ronda 10)
+    const escritorio = reglasDe(css);
+    assert.ok(escritorio.some((r) =>
+        /linear-gradient\(135deg, #00f0ff, #bd00ff, #ff007b\)/.test(r)
+        && /background-clip: text/.test(r)),
+        'se perdió el degradado del logo en escritorio');
+
+    // Móvil: una regla que lo deja liso y respeta el texto blanco
+    const movil = reglasDe(cuerpoEn(css, 768));
+    const liso = movil.find((r) => /background: none;/.test(r));
+    assert.ok(liso, 'falta la regla que quita el degradado del logo en ≤768px');
+    assert.match(liso, /-webkit-text-fill-color: var\(--text-white\)/,
+        'sin resetear -webkit-text-fill-color el texto sigue transparente en iOS');
+    assert.match(liso, /color: var\(--text-white\)/, 'el texto debe volver al blanco de la regla base');
+    for (const r of movil) {
+        assert.ok(!/linear-gradient/.test(r), `en móvil sigue el degradado: ${r.replace(/\s+/g, ' ')}`);
+    }
+    // La regla lisa va después de la del degradado (gana por orden)
+    const conGrad = /\.logo-title \{[^}]*linear-gradient[^}]*\}/.exec(css);
+    assert.ok(conGrad && css.indexOf('background: none;') > conGrad.index,
+        'la regla móvil del logo debe ir después de la del degradado');
 });
 
 // --- Cierre ----------------------------------------------------------------

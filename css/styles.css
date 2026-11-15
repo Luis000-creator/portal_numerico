@@ -2513,3 +2513,19 @@ body:has(.container--landing) .main-container {
   content-visibility: auto;
   contain-intrinsic-size: auto 260px;
 }
+
+/* --- Ronda 13b: el logo de la top bar en móvil va liso ---
+   El degradado de identidad (#00F0FF → #BD00FF → #FF007B, P1-8) se queda en
+   escritorio; en ≤768px el "ITERA" del header vuelve al blanco del título.
+   Con background-clip: text basta con quitar el fondo, pero -webkit-text-fill-color
+   sigue transparente en Safari/iOS (y color: transparent también en la regla
+   base), así que hay que resetear las tres o el texto seguiría invisible /
+   con el degradado recortado. Va al final del archivo para ganarle por orden
+   a la regla de .logo-title de la línea ~1734. */
+@media (max-width: 768px) {
+  .logo-title {
+    background: none;
+    -webkit-text-fill-color: var(--text-white);
+    color: var(--text-white);
+  }
+}
