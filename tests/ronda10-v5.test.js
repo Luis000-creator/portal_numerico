@@ -13,7 +13,7 @@
 //   P1-7 etiquetas del eje X sujetas al lienzo y sin solaparse
 //   P1-8 logo del header con el mismo degradado que el landing
 //   P1-9 borde continuo en degradado en las tarjetas del landing
-//   Cierre: bump ?v de las 4 páginas (hoy ?v=12; v6 lo subió a ?v=10)
+//   Cierre: bump ?v de las 4 páginas (hoy ?v=13; v6 lo subió a ?v=10)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -354,11 +354,11 @@ test('P1-9: el borde en degradado del landing solo se ve a la izquierda y arriba
 
 // --- Cierre ----------------------------------------------------------------
 
-test('Cierre: las 4 páginas piden styles.css?v=12 (ninguna queda en ?v=10)', () => {
+test('Cierre: las 4 páginas piden styles.css?v=13 (ninguna queda en ?v=10)', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=12"/.test(html), `${archivo} no tiene ?v=12`);
+        assert.ok(/href="[^"]*styles\.css\?v=13"/.test(html), `${archivo} no tiene ?v=13`);
         assert.ok(!/styles\.css\?v=10/.test(html), `${archivo} sigue en ?v=10`);
     }
 });

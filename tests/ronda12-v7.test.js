@@ -12,7 +12,7 @@
 //       (antes "22" tocaba la esquina superior derecha, con la caja del
 //       texto saliéndose por arriba)
 //   P1-6 "midad"→"mitad": sin cambio de código (el .md vive en Supabase)
-//   Cierre: bump ?v de las 4 páginas (hoy ?v=12)
+//   Cierre: bump ?v de las 4 páginas (hoy ?v=13)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -238,12 +238,12 @@ test('P1-5: con el lienzo a 350px, "22" ya no toca la esquina y toda la etiqueta
 
 // --- Cierre ----------------------------------------------------------------
 
-test('Cierre: las 4 páginas piden styles.css?v=12', () => {
+test('Cierre: las 4 páginas piden styles.css?v=13', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=12"/.test(html), `${archivo} no tiene ?v=12`);
-        assert.ok(!/styles\.css\?v=(?!12)\d/.test(html), `${archivo} sigue en una versión vieja`);
+        assert.ok(/href="[^"]*styles\.css\?v=13"/.test(html), `${archivo} no tiene ?v=13`);
+        assert.ok(!/styles\.css\?v=(?!13)\d/.test(html), `${archivo} sigue en una versión vieja`);
     }
 });
 

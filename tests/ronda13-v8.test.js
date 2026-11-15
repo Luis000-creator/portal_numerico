@@ -9,7 +9,7 @@
 //   P1-5 KaTeX/marked/DOMPurify fuera del <head> de Apuntes (bajo demanda)
 //   (P1-6 fondo de 316KB: se revisa al final de este archivo, no es de código)
 //   13b: el logo de la top bar desaparece en móvil (display: none)
-//   Cierre: bump ?v de las 4 páginas (hoy ?v=12)
+//   Cierre: bump ?v de las 4 páginas (hoy ?v=13)
 // Ejecutar con:  node --test tests/*.test.js
 // ============================================================================
 
@@ -351,12 +351,12 @@ test('13b: el logo de la top bar no aparece en móvil (display: none)', () => {
 
 // --- Cierre ----------------------------------------------------------------
 
-test('Cierre: las 4 páginas piden styles.css?v=12', () => {
+test('Cierre: las 4 páginas piden styles.css?v=13', () => {
     const paginas = ['index.html', 'pages/calculadora.html', 'pages/apuntes.html', 'pages/social.html'];
     for (const archivo of paginas) {
         const html = leer(archivo);
-        assert.ok(/href="[^"]*styles\.css\?v=12"/.test(html), `${archivo} no tiene ?v=12`);
-        assert.ok(!/styles\.css\?v=(?!12)\d/.test(html), `${archivo} sigue en una versión vieja`);
+        assert.ok(/href="[^"]*styles\.css\?v=13"/.test(html), `${archivo} no tiene ?v=13`);
+        assert.ok(!/styles\.css\?v=(?!13)\d/.test(html), `${archivo} sigue en una versión vieja`);
     }
 });
 
