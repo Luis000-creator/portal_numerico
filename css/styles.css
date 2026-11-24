@@ -976,6 +976,12 @@ button.btn-chip:hover {
   padding-bottom: 20px;
 }
 
+/* Subida de apuntes deshabilitada: el form queda en el HTML pero oculto.
+   Regla explícita para que ningún reset lo vuelva a mostrar. */
+.form-apunte[hidden] {
+  display: none !important;
+}
+
 .form-apunte h2.form-apunte-title,
 .form-apunte h4 {
   margin-bottom: 10px;

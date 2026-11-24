@@ -400,7 +400,9 @@ window.filtrarContenido = filtrarContenido;
 // Cargar apuntes en cuanto el DOM este listo
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-apunte');
-    if (form) {
+    // El formulario de subida está oculto (sin atributo hidden no hay nada
+    // que enviar); si se vuelve a mostrar, el listener se ata igual.
+    if (form && !form.hidden) {
         form.addEventListener('submit', publicarApunte);
     }
     if (document.getElementById('apuntes-remotos')) {
